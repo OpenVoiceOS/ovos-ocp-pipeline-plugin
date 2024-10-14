@@ -55,6 +55,7 @@ setup(
     entry_points={'opm.pipeline': PLUGIN_ENTRY_POINT},
     url="https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin",
     packages=["ocp_pipeline"],
+    include_package_data=True,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
