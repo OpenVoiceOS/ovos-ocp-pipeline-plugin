@@ -4,7 +4,7 @@ on:
     branches:
       - dev
     paths-ignore:
-      - 'ovos_bus_client/version.py'
+      - 'ocp_pipeline/version.py'
       - 'examples/**'
       - '.github/**'
       - '.gitignore'
@@ -17,7 +17,7 @@ on:
     branches:
       - master
     paths-ignore:
-      - 'ovos_bus_client/version.py'
+      - 'ocp_pipeline/version.py'
       - 'requirements/**'
       - 'examples/**'
       - '.github/**'
@@ -52,13 +52,10 @@ jobs:
           pip install -e .
       - name: Install test dependencies
         run: |
-          pip install -r test/requirements.txt
+          pip install -r tests/requirements.txt
       - name: Run unittests
         run: |
-          pytest --cov=ovos_adapt --cov-report=xml test/unittests
-          # NOTE: additional pytest invocations should also add the --cov-append flag
-          #       or they will overwrite previous invocations' coverage reports
-          #       (for an example, see OVOS Skill Manager's workflow)
+          pytest --cov=ocp_pipeline --cov-report=xml ./tests
       - name: Upload coverage
         if: "${{ matrix.python-version == '3.9' }}"
         uses: codecov/codecov-action@v3
