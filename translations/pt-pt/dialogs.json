@@ -6,6 +6,11 @@
   "play.what.dialog": [
     "O que devo (reproduzir|tocar) a seguir?"
   ],
+  "no.media.skills.dialog": [
+    "Desculpe, não tenho nenhuma habilidade de mídia instalada",
+    "Preciso instalar algumas habilidades de mídia antes de poder reproduzir algo",
+    "Não consigo reproduzir nada até que algumas habilidades de mídia sejam instaladas"
+  ],
   "just.one.moment.dialog": [
     "Dê-me um momento",
     "Só um segundo",

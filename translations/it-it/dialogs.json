@@ -6,6 +6,11 @@
   "play.what.dialog": [
     "Cosa vuoi ascoltare dopo?"
   ],
+  "no.media.skills.dialog": [
+    "Scusa ma non ho nessuna competenza installata per questa azione",
+    "Scusa, ma per compiere questa azione devi installare delle competenze media",
+    "Non posso riprodurre nessun flusso fino a che non installi delle competenze media"
+  ],
   "just.one.moment.dialog": [
     "Aspetta",
     "Un momentino",
