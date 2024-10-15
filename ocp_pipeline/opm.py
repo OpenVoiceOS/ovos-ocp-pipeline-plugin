@@ -12,6 +12,7 @@ from ovos_bus_client.message import Message, dig_for_message
 from ovos_bus_client.session import SessionManager
 from ovos_plugin_manager.ocp import available_extractors
 from ovos_plugin_manager.templates.pipeline import IntentMatch, PipelinePlugin
+from ovos_utils.lang import standardize_lang_tag
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import FakeBus
 from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
@@ -102,6 +103,7 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
     def load_resource_files(self):
         intents = {}
         for lang in self.native_langs:
+            lang = str(standardize_lang_tag(lang))
             intents[lang] = {}
             locale_folder = join(dirname(__file__), "locale", lang)
             for f in os.listdir(locale_folder):
@@ -138,6 +140,7 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
         intent_files = self.load_resource_files()
 
         for lang, intent_data in intent_files.items():
+            lang = standardize_lang_tag(lang)
             self.intent_matchers[lang] = IntentContainer()
             for intent_name in self.intents:
                 samples = intent_data.get(intent_name)
@@ -286,6 +289,8 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
     def match_high(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentMatch]:
         """ exact matches only, handles playback control
         recommended after high confidence intents pipeline stage """
+        lang = standardize_lang_tag(lang)
+        # TODO - allow close langs, match dialects
         if lang not in self.intent_matchers:
             return None
 
@@ -327,6 +332,8 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
     def match_medium(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentMatch]:
         """ match a utterance via classifiers,
         recommended before common_qa pipeline stage"""
+        lang = standardize_lang_tag(lang)
+
         utterance = utterances[0].lower()
         # is this a OCP query ?
         is_ocp, bconf = self.is_ocp_query(utterance, lang)
@@ -368,6 +375,8 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
         if not ents:
             return None
 
+        lang = standardize_lang_tag(lang)
+
         # classify the query media type
         media_type, confidence = self.classify_media(utterance, lang)
 
@@ -388,7 +397,7 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
 
     def _process_play_query(self, utterance: str, lang: str, match: dict = None,
                             message: Optional[Message] = None) -> Optional[IntentMatch]:
-
+        lang = standardize_lang_tag(lang)
         match = match or {}
         player = self.get_player(message)
         # if media is currently paused, empty string means "resume playback"
@@ -455,6 +464,7 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
         if num:
             phrase += " " + num
 
+        lang = standardize_lang_tag(lang)
         # classify the query media type
         media_type, prob = self.classify_media(utterance, lang)
         # search common play skills
@@ -503,6 +513,7 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
         skills = message.data.get("skills", [])
 
         # search common play skills
+        lang = standardize_lang_tag(lang)
         results = self._search(query, media_type, lang,
                                skills=skills, message=message)
 
@@ -613,6 +624,7 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
 
     # NLP
     def voc_match_media(self, query: str, lang: str) -> Tuple[MediaType, float]:
+        lang = standardize_lang_tag(lang)
         # simplistic approach via voc_match, works anywhere
         # and it's easy to localize, but isn't very accurate
         if self.voc_match(query, "MusicKeyword", lang=lang):
@@ -674,6 +686,7 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
 
     def classify_media(self, query: str, lang: str) -> Tuple[MediaType, float]:
         """ determine what media type is being requested """
+        lang = standardize_lang_tag(lang)
         # using a trained classifier (Experimental)
         if self.config.get("experimental_media_classifier", False):
             from ovos_classifiers.skovos.classifier import SklearnOVOSClassifier
@@ -701,6 +714,7 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
 
     def is_ocp_query(self, query: str, lang: str) -> Tuple[bool, float]:
         """ determine if a playback question is being asked"""
+        lang = standardize_lang_tag(lang)
         if self.config.get("experimental_binary_classifier", False):
             from ovos_classifiers.skovos.classifier import SklearnOVOSClassifier
             try:
@@ -731,6 +745,7 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
         @param phrase: Extracted playback phrase
         @return: True if player should resume, False if this is a new request
         """
+        lang = standardize_lang_tag(lang)
         player = self.get_player(message)
         if player.player_state == PlayerState.PAUSED:
             if not phrase.strip() or \
@@ -782,6 +797,7 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
     def filter_results(self, results: list, phrase: str, lang: str,
                        media_type: MediaType = MediaType.GENERIC,
                        message: Optional[Message] = None) -> list:
+        lang = standardize_lang_tag(lang)
         # ignore very low score matches
         l1 = len(results)
         results = [r for r in results
@@ -1031,19 +1047,22 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
 
         utterance = utterances[0].lower()
 
-        match = self.intent_matchers[lang].calc_intent(utterance)
+        lang = standardize_lang_tag(lang)
+        # TODO - allow close langs, match dialects
+        if lang in self.intent_matchers:
+            match = self.intent_matchers[lang].calc_intent(utterance)
 
-        if match["name"] is None:
-            return None
-        if match["name"] == "play":
-            LOG.info(f"Legacy Mycroft CommonPlay match: {match}")
-            utterance = match["entities"].pop("query")
-            return IntentMatch(intent_service="OCP_media",
-                               intent_type="ocp:legacy_cps",
-                               intent_data={"query": utterance,
-                                            "conf": 0.7},
-                               skill_id=OCP_ID,
-                               utterance=utterance)
+            if match["name"] is None:
+                return None
+            if match["name"] == "play":
+                LOG.info(f"Legacy Mycroft CommonPlay match: {match}")
+                utterance = match["entities"].pop("query")
+                return IntentMatch(intent_service="OCP_media",
+                                   intent_type="ocp:legacy_cps",
+                                   intent_data={"query": utterance,
+                                                "conf": 0.7},
+                                   skill_id=OCP_ID,
+                                   utterance=utterance)
 
     def handle_legacy_cps(self, message: Message):
         """intent handler for legacy CPS matches"""
