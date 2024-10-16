@@ -1,4 +1,4 @@
 ovos-workshop>=0.1.7,<2.0.0
 ovos-classifiers
-ovos-utils>=0.3.4,<1.0.0
+ovos-utils>=0.3.5,<1.0.0
 langcodes
