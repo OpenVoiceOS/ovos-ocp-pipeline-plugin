@@ -41,7 +41,8 @@ def required(requirements_file):
                 if pkg.strip() and not pkg.startswith("#")]
 
 
-PLUGIN_ENTRY_POINT = 'ovos-ocp-pipeline-plugin=ocp_pipeline.opm:OCPPipelineMatcher'
+PLUGIN_ENTRY_POINT = ('ovos-ocp-pipeline-plugin=ocp_pipeline.opm:OCPPipelineMatcher',
+                      'ovos-ocp-pipeline-plugin-legacy=ocp_pipeline.opm:MycroftCPSLegacyPipeline')
 
 setup(
     name="ovos-ocp-pipeline-plugin",
