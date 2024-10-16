@@ -1053,14 +1053,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     # deprecated
     @property
     def mycroft_cps(self) -> LegacyCommonPlay:
-        log_deprecation("self.mycroft_cps is deprecated, use MycroftCPSLegacyPipeline instead", "1.0.0")
+        log_deprecation("self.mycroft_cps is deprecated, use MycroftCPSLegacyPipeline instead", "2.0.0")
         return LegacyCommonPlay(self.bus)
 
-    @deprecated("match_fallback has been renamed match_low", "1.0.0")
+    @deprecated("match_fallback has been renamed match_low", "2.0.0")
     def match_fallback(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
         return self.match_low(utterances, lang, message)
 
-    @deprecated("match_legacy is deprecated! use MycroftCPSLegacyPipeline class directly instead", "1.0.0")
+    @deprecated("match_legacy is deprecated! use MycroftCPSLegacyPipeline class directly instead", "2.0.0")
     def match_legacy(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
         """ match legacy mycroft common play skills  (must import from deprecated mycroft module)
         not recommended, legacy support only
