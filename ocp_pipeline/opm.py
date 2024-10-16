@@ -103,7 +103,7 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
     def load_resource_files(self):
         intents = {}
         for lang in self.native_langs:
-            lang = str(standardize_lang_tag(lang))
+            lang = standardize_lang_tag(lang)
             intents[lang] = {}
             locale_folder = join(dirname(__file__), "locale", lang)
             for f in os.listdir(locale_folder):
