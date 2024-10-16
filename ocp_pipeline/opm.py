@@ -17,7 +17,7 @@ from ovos_plugin_manager.ocp import available_extractors
 from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline, PipelineStageMatcher, \
     PipelineMatch
 from ovos_utils.lang import standardize_lang_tag, get_language_dir
-from ovos_utils.log import LOG, deprecated
+from ovos_utils.log import LOG, deprecated, log_deprecation
 from ovos_utils.messagebus import FakeBus
 from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
     MediaEntry, Playlist, MediaState, TrackState, dict2entry, PluginStream
@@ -1051,6 +1051,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         self.default_shutdown()  # remove events registered via self.add_event
 
     # deprecated
+    @property
+    def mycroft_cps(self) -> LegacyCommonPlay:
+        log_deprecation("self.mycroft_cps is deprecated, use MycroftCPSLegacyPipeline instead", "1.0.0")
+        return LegacyCommonPlay(self.bus)
+
     @deprecated("match_fallback has been renamed match_low", "1.0.0")
     def match_fallback(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
         return self.match_low(utterances, lang, message)
