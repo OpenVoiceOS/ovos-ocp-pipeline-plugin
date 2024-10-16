@@ -72,13 +72,13 @@ class TestOCPPipelineNoClassifierMatcher(unittest.TestCase):
         self.assertIsNone(result)
 
     def test_match_fallback(self):
-        result = self.ocp.match_fallback(["i want music"], "en-us")
+        result = self.ocp.match_low(["i want music"], "en-us")
         self.assertIsNotNone(result)
         self.assertEqual(result.intent_service, 'OCP_fallback')
         self.assertEqual(result.intent_type, 'ocp:play')
 
     def test_match_fallback_with_invalid_input(self):
-        result = self.ocp.match_fallback(["do the thing"], "en-us")
+        result = self.ocp.match_low(["do the thing"], "en-us")
         self.assertIsNone(result)
 
     def test_predict(self):
@@ -139,14 +139,14 @@ class TestOCPPipelineMatcher(unittest.TestCase):
         self.assertIsNone(result)
 
     def test_match_fallback(self):
-        result = self.ocp.match_fallback(["i wanna hear metallica"], "en-us")
+        result = self.ocp.match_low(["i wanna hear metallica"], "en-us")
         print(result)
         self.assertIsNotNone(result)
         self.assertEqual(result.intent_service, 'OCP_fallback')
         self.assertEqual(result.intent_type, 'ocp:play')
 
     def test_match_fallback_with_invalid_input(self):
-        result = self.ocp.match_fallback(["do the thing"], "en-us")
+        result = self.ocp.match_low(["do the thing"], "en-us")
         self.assertIsNone(result)
 
     def test_predict(self):

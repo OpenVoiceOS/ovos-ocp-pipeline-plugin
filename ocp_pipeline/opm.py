@@ -4,14 +4,16 @@ import threading
 from dataclasses import dataclass
 from os.path import join, dirname
 from threading import RLock
-from typing import List, Tuple, Optional, Union
+from typing import Tuple, Optional, Dict, List, Union
 
+from langcodes import closest_match
 from ovos_bus_client.apis.ocp import ClassicAudioServiceInterface
 from ovos_bus_client.apis.ocp import OCPInterface, OCPQuery
+from ovos_bus_client.client import MessageBusClient
 from ovos_bus_client.message import Message, dig_for_message
 from ovos_bus_client.session import SessionManager
 from ovos_plugin_manager.ocp import available_extractors
-from ovos_plugin_manager.templates.pipeline import IntentMatch, PipelinePlugin
+from ovos_plugin_manager.templates.pipeline import IntentMatch, ConfidenceMatcherPipeline
 from ovos_utils.lang import standardize_lang_tag, get_language_dir
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import FakeBus
@@ -19,7 +21,7 @@ from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, O
     MediaEntry, Playlist, MediaState, TrackState, dict2entry, PluginStream
 from ovos_workshop.app import OVOSAbstractApplication
 from padacioso import IntentContainer
-from langcodes import closest_match
+
 from ocp_pipeline.feats import OCPFeaturizer
 from ocp_pipeline.legacy import LegacyCommonPlay
 
@@ -35,15 +37,16 @@ class OCPPlayerProxy:
     media_type: MediaType = MediaType.GENERIC
 
 
-class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
+class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     intents = ["play.intent", "open.intent", "media_stop.intent",
                "next.intent", "prev.intent", "pause.intent", "play_favorites.intent",
                "resume.intent", "like_song.intent"]
 
-    def __init__(self, bus=None, config=None):
+    def __init__(self, bus: Optional[Union[MessageBusClient, FakeBus]] = None,
+                 config: Optional[Dict] = None):
         OVOSAbstractApplication.__init__(
             self, bus=bus or FakeBus(), skill_id=OCP_ID, resources_dir=f"{dirname(__file__)}")
-        PipelinePlugin.__init__(self, config)
+        ConfidenceMatcherPipeline.__init__(self, bus, config)
 
         self.ocp_api = OCPInterface(self.bus)
         self.legacy_api = ClassicAudioServiceInterface(self.bus)
@@ -323,9 +326,8 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
             else:
                 return None
 
-        return IntentMatch(intent_service="OCP_intents",
-                           intent_type=f'ocp:{match["name"]}',
-                           intent_data=match,
+        return IntentMatch(match_type=f'ocp:{match["name"]}',
+                           match_data=match,
                            skill_id=OCP_ID,
                            utterance=utterance)
 
@@ -353,9 +355,8 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
         # extract the query string
         query = self.remove_voc(utterance, "Play", lang).strip()
 
-        return IntentMatch(intent_service="OCP_media",
-                           intent_type="ocp:play",
-                           intent_data={"media_type": media_type,
+        return IntentMatch(match_type="ocp:play",
+                           match_data={"media_type": media_type,
                                         "entities": ents,
                                         "query": query,
                                         "is_ocp_conf": bconf,
@@ -363,7 +364,7 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
                            skill_id=OCP_ID,
                            utterance=utterance)
 
-    def match_fallback(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentMatch]:
+    def match_low(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentMatch]:
         """ match an utterance via presence of known OCP keywords,
         recommended before fallback_low pipeline stage"""
         utterance = utterances[0].lower()
@@ -386,9 +387,8 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
         # extract the query string
         query = self.remove_voc(utterance, "Play", lang).strip()
 
-        return IntentMatch(intent_service="OCP_fallback",
-                           intent_type="ocp:play",
-                           intent_data={"media_type": media_type,
+        return IntentMatch(match_type="ocp:play",
+                           match_data={"media_type": media_type,
                                         "entities": ents,
                                         "query": query,
                                         "conf": float(confidence)},
@@ -403,9 +403,8 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
         # if media is currently paused, empty string means "resume playback"
         if player.player_state == PlayerState.PAUSED and \
                 self._should_resume(utterance, lang, message=message):
-            return IntentMatch(intent_service="OCP_intents",
-                               intent_type="ocp:resume",
-                               intent_data=match,
+            return IntentMatch(match_type="ocp:resume",
+                               match_data=match,
                                skill_id=OCP_ID,
                                utterance=utterance)
 
@@ -414,9 +413,8 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
             phrase = self.get_response("play.what", num_retries=2)
             if not phrase:
                 # let the error intent handler take action
-                return IntentMatch(intent_service="OCP_intents",
-                                   intent_type="ocp:search_error",
-                                   intent_data=match,
+                return IntentMatch(match_type="ocp:search_error",
+                                   match_data=match,
                                    skill_id=OCP_ID,
                                    utterance=utterance)
 
@@ -441,9 +439,8 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
         else:
             ents = OCPFeaturizer.extract_entities(utterance)
 
-        return IntentMatch(intent_service="OCP_intents",
-                           intent_type="ocp:play",
-                           intent_data={"media_type": media_type,
+        return IntentMatch(match_type="ocp:play",
+                           match_data={"media_type": media_type,
                                         "query": query,
                                         "entities": ents,
                                         "skills": valid_skills,
@@ -1058,9 +1055,8 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
         if match["name"] == "play":
             LOG.info(f"Legacy Mycroft CommonPlay match: {match}")
             utterance = match["entities"].pop("query")
-            return IntentMatch(intent_service="OCP_media",
-                               intent_type="ocp:legacy_cps",
-                               intent_data={"query": utterance,
+            return IntentMatch(match_type="ocp:legacy_cps",
+                               match_data={"query": utterance,
                                             "conf": 0.7},
                                skill_id=OCP_ID,
                                utterance=utterance)
