@@ -19,7 +19,7 @@ from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, O
     MediaEntry, Playlist, MediaState, TrackState, dict2entry, PluginStream
 from ovos_workshop.app import OVOSAbstractApplication
 from padacioso import IntentContainer
-
+from langcodes import closest_match
 from ocp_pipeline.feats import OCPFeaturizer
 from ocp_pipeline.legacy import LegacyCommonPlay
 
@@ -289,9 +289,8 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
     def match_high(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentMatch]:
         """ exact matches only, handles playback control
         recommended after high confidence intents pipeline stage """
-        lang = standardize_lang_tag(lang)
-        # TODO - allow close langs, match dialects
-        if lang not in self.intent_matchers:
+        lang = self._get_closest_lang(lang)
+        if lang is None:  # no intents registered for this lang
             return None
 
         self.bus.emit(Message("ovos.common_play.status"))  # sync
@@ -1047,22 +1046,35 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
 
         utterance = utterances[0].lower()
 
-        lang = standardize_lang_tag(lang)
-        # TODO - allow close langs, match dialects
-        if lang in self.intent_matchers:
-            match = self.intent_matchers[lang].calc_intent(utterance)
+        lang = self._get_closest_lang(lang)
+        if lang is None:  # no intents registered for this lang
+            return None
 
-            if match["name"] is None:
-                return None
-            if match["name"] == "play":
-                LOG.info(f"Legacy Mycroft CommonPlay match: {match}")
-                utterance = match["entities"].pop("query")
-                return IntentMatch(intent_service="OCP_media",
-                                   intent_type="ocp:legacy_cps",
-                                   intent_data={"query": utterance,
-                                                "conf": 0.7},
-                                   skill_id=OCP_ID,
-                                   utterance=utterance)
+        match = self.intent_matchers[lang].calc_intent(utterance)
+
+        if match["name"] is None:
+            return None
+        if match["name"] == "play":
+            LOG.info(f"Legacy Mycroft CommonPlay match: {match}")
+            utterance = match["entities"].pop("query")
+            return IntentMatch(intent_service="OCP_media",
+                               intent_type="ocp:legacy_cps",
+                               intent_data={"query": utterance,
+                                            "conf": 0.7},
+                               skill_id=OCP_ID,
+                               utterance=utterance)
+
+    def _get_closest_lang(self, lang: str) -> Optional[str]:
+        if self.intent_matchers:
+            lang = standardize_lang_tag(lang)
+            closest, score = closest_match(lang, list(self.intent_matchers.keys()))
+            # https://langcodes-hickford.readthedocs.io/en/sphinx/index.html#distance-values
+            # 0 -> These codes represent the same language, possibly after filling in values and normalizing.
+            # 1- 3 -> These codes indicate a minor regional difference.
+            # 4 - 10 -> These codes indicate a significant but unproblematic regional difference.
+            if score < 10:
+                return closest
+        return None
 
     def handle_legacy_cps(self, message: Message):
         """intent handler for legacy CPS matches"""
