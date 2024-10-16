@@ -1076,7 +1076,7 @@ class MycroftCPSLegacyPipeline(PipelineStageMatcher):
         super().__init__(bus, config)
         self.mycroft_cps = LegacyCommonPlay(self.bus)
         OCPPipelineMatcher.load_intent_files()
-        self.add_event("ocp:legacy_cps", self.handle_legacy_cps, is_intent=True)
+        self.bus.on("ocp:legacy_cps", self.handle_legacy_cps)
 
     ############
     # Legacy Mycroft CommonPlay skills
