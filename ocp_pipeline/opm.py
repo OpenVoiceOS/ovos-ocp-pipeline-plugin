@@ -13,7 +13,7 @@ from ovos_bus_client.client import MessageBusClient
 from ovos_bus_client.message import Message, dig_for_message
 from ovos_bus_client.session import SessionManager
 from ovos_plugin_manager.ocp import available_extractors
-from ovos_plugin_manager.templates.pipeline import IntentMatch, ConfidenceMatcherPipeline
+from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline
 from ovos_utils.lang import standardize_lang_tag, get_language_dir
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import FakeBus
@@ -290,7 +290,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         self.update_player_proxy(player)
 
     # pipeline
-    def match_high(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentMatch]:
+    def match_high(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
         """ exact matches only, handles playback control
         recommended after high confidence intents pipeline stage """
         lang = self._get_closest_lang(lang)
@@ -326,12 +326,12 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             else:
                 return None
 
-        return IntentMatch(match_type=f'ocp:{match["name"]}',
+        return IntentHandlerMatch(match_type=f'ocp:{match["name"]}',
                            match_data=match,
                            skill_id=OCP_ID,
                            utterance=utterance)
 
-    def match_medium(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentMatch]:
+    def match_medium(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
         """ match a utterance via classifiers,
         recommended before common_qa pipeline stage"""
         lang = standardize_lang_tag(lang)
@@ -355,7 +355,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         # extract the query string
         query = self.remove_voc(utterance, "Play", lang).strip()
 
-        return IntentMatch(match_type="ocp:play",
+        return IntentHandlerMatch(match_type="ocp:play",
                            match_data={"media_type": media_type,
                                         "entities": ents,
                                         "query": query,
@@ -364,7 +364,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                            skill_id=OCP_ID,
                            utterance=utterance)
 
-    def match_low(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentMatch]:
+    def match_low(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
         """ match an utterance via presence of known OCP keywords,
         recommended before fallback_low pipeline stage"""
         utterance = utterances[0].lower()
@@ -387,7 +387,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         # extract the query string
         query = self.remove_voc(utterance, "Play", lang).strip()
 
-        return IntentMatch(match_type="ocp:play",
+        return IntentHandlerMatch(match_type="ocp:play",
                            match_data={"media_type": media_type,
                                         "entities": ents,
                                         "query": query,
@@ -396,14 +396,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                            utterance=utterance)
 
     def _process_play_query(self, utterance: str, lang: str, match: dict = None,
-                            message: Optional[Message] = None) -> Optional[IntentMatch]:
+                            message: Optional[Message] = None) -> Optional[IntentHandlerMatch]:
         lang = standardize_lang_tag(lang)
         match = match or {}
         player = self.get_player(message)
         # if media is currently paused, empty string means "resume playback"
         if player.player_state == PlayerState.PAUSED and \
                 self._should_resume(utterance, lang, message=message):
-            return IntentMatch(match_type="ocp:resume",
+            return IntentHandlerMatch(match_type="ocp:resume",
                                match_data=match,
                                skill_id=OCP_ID,
                                utterance=utterance)
@@ -413,7 +413,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             phrase = self.get_response("play.what", num_retries=2)
             if not phrase:
                 # let the error intent handler take action
-                return IntentMatch(match_type="ocp:search_error",
+                return IntentHandlerMatch(match_type="ocp:search_error",
                                    match_data=match,
                                    skill_id=OCP_ID,
                                    utterance=utterance)
@@ -439,7 +439,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         else:
             ents = OCPFeaturizer.extract_entities(utterance)
 
-        return IntentMatch(match_type="ocp:play",
+        return IntentHandlerMatch(match_type="ocp:play",
                            match_data={"media_type": media_type,
                                         "query": query,
                                         "entities": ents,
@@ -1032,7 +1032,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     ############
     # Legacy Mycroft CommonPlay skills
 
-    def match_legacy(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentMatch]:
+    def match_legacy(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
         """ match legacy mycroft common play skills  (must import from deprecated mycroft module)
         not recommended, legacy support only
 
@@ -1055,7 +1055,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if match["name"] == "play":
             LOG.info(f"Legacy Mycroft CommonPlay match: {match}")
             utterance = match["entities"].pop("query")
-            return IntentMatch(match_type="ocp:legacy_cps",
+            return IntentHandlerMatch(match_type="ocp:legacy_cps",
                                match_data={"query": utterance,
                                             "conf": 0.7},
                                skill_id=OCP_ID,
