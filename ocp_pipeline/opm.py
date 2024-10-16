@@ -12,7 +12,7 @@ from ovos_bus_client.message import Message, dig_for_message
 from ovos_bus_client.session import SessionManager
 from ovos_plugin_manager.ocp import available_extractors
 from ovos_plugin_manager.templates.pipeline import IntentMatch, PipelinePlugin
-from ovos_utils.lang import standardize_lang_tag
+from ovos_utils.lang import standardize_lang_tag, get_language_dir
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import FakeBus
 from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
@@ -105,15 +105,16 @@ class OCPPipelineMatcher(PipelinePlugin, OVOSAbstractApplication):
         for lang in self.native_langs:
             lang = standardize_lang_tag(lang)
             intents[lang] = {}
-            locale_folder = join(dirname(__file__), "locale", lang)
-            for f in os.listdir(locale_folder):
-                path = join(locale_folder, f)
-                if f in self.intents:
-                    with open(path) as intent:
-                        samples = intent.read().split("\n")
-                        for idx, s in enumerate(samples):
-                            samples[idx] = s.replace("{{", "{").replace("}}", "}")
-                        intents[lang][f] = samples
+            locale_folder = get_language_dir(join(dirname(__file__), "locale"), lang)
+            if locale_folder is not None:
+                for f in os.listdir(locale_folder):
+                    path = join(locale_folder, f)
+                    if f in self.intents:
+                        with open(path) as intent:
+                            samples = intent.read().split("\n")
+                            for idx, s in enumerate(samples):
+                                samples[idx] = s.replace("{{", "{").replace("}}", "}")
+                            intents[lang][f] = samples
         return intents
 
     def register_ocp_api_events(self):
