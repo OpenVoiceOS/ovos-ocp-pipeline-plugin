@@ -1061,7 +1061,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         return self.match_low(utterances, lang, message)
 
     @deprecated("match_legacy is deprecated! use MycroftCPSLegacyPipeline class directly instead", "2.0.0")
-    def match_legacy(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
+    def match_legacy(self, utterances: List[str], lang: str, message: Message = None) -> Optional[PipelineMatch]:
         """ match legacy mycroft common play skills  (must import from deprecated mycroft module)
         not recommended, legacy support only
 
