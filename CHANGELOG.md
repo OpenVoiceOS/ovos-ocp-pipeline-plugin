@@ -1,12 +1,12 @@
 # Changelog
 
-## [1.0.0a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.0a1) (2024-10-16)
+## [1.0.1a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.1a1) (2024-10-18)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/0.1.3...1.0.0a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.0...1.0.1a1)
 
-**Breaking changes:**
+**Merged pull requests:**
 
-- feat:pipeline plugin factory [\#14](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/14) ([JarbasAl](https://github.com/JarbasAl))
+- fix:method name [\#16](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/16) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
