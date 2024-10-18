@@ -1067,7 +1067,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
         legacy base class at mycroft/skills/common_play_skill.py marked for removal in ovos-core 0.1.0
         """
-        return MycroftCPSLegacyPipeline(self.bus, self.config).match_high(utterances, lang, message)
+        return MycroftCPSLegacyPipeline(self.bus, self.config).match(utterances, lang, message)
 
 
 class MycroftCPSLegacyPipeline(PipelineStageMatcher):
