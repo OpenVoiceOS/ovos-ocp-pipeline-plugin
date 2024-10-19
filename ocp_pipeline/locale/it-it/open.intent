@@ -1,4 +1,4 @@
-[UNUSED]
-[UNUSED]
-apri il lettore
-lancia il lettore
+(apri|avvia|mostra) (il|la|) (riproduttore|catalogo|lettore|menù|competenza|) (dei|della|) (media|musica|video)
+apri (il lettore|) (di|) (OCP|O C P|common|ovos|open voice os|ovos media player|open voice os player|)
+apri (il|la) (schermata principale|home|menù) (di|del lettore di|) (OCP|O C P|common|ovos|open voice os|ovos media player|open voice os player|)
+apri il lettore (OCP|O C P|common|ovos|open voice os|)

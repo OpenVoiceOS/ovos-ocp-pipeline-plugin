@@ -1,5 +1,5 @@
-[UNUSED]
-[UNUSED]
-metti quella prima
-quella prima
-torna indietro
+(precedente|) (canzone|musica|suono|concerto|brano|traccia|video|media) (precedente|prima)
+(precedente|prima|indietro)
+(riproduci|metti|) (il|la|) (precedente|) (canzone|musica|suono|concerto|brano|traccia|video|media|quello|quella|) (precedente|prima|)
+(riproduci|metti|torna a|torna|) (il|la|quello|quella|) (precedente|prima|indietro)
+(riproduci|metti|torna indietro|) (il|la|) (precedente|) (canzone|musica|suono|concerto|brano|traccia|video|media|quello|quella|) (precedente|prima|)

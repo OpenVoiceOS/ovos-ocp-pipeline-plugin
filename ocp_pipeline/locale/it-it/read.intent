@@ -1,3 +1,3 @@
+(leggi|racconta)(mi|) (il|la|l'|) (libro|audiolibro|storia|racconto|poesia|) (di|del|dello|della|dell'|dei|degli|delle|su|sul|sullo|sulla|sull'|sui|sugli|sulle|) (il|lo|la|l'|i|gli|le|) {query}
+(leggi|racconta)(mi|) (il|la|l'|) (libro|audiolibro|storia|racconto|poesia|) {query}
 (leggi|racconta)(mi|) {query}
-[UNUSED]
-leggi(mi|) (il libro|l'audiolibro|la storia) (di|su|) {query}
