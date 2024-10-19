@@ -64,9 +64,9 @@
   ],
   "SeriesKeyword.voc": [
     "serie",
-    "serie",
+    "serie TV",
     "episodio",
-    "puntata"
+    "episodi"
   ],
   "BWKeyword.voc": [
     "bianco e nero",
@@ -74,12 +74,12 @@
   ],
   "AdultKeyword.voc": [
     "porno",
-    "pornografia",
-    "[UNUSED]"
+    "vietato ai minori",
+    "pornografia"
   ],
   "RadioKeyword.voc": [
     "radio",
-    "internet radio"
+    "web radio"
   ],
   "AudioDramaKeyword.voc": [
     "dramma",
@@ -91,7 +91,7 @@
   ],
   "ComicBookKeyword.voc": [
     "fumetto",
-    "giornalino",
+    "fumetto",
     "[UNUSED]"
   ],
   "TVKeyword.voc": [
@@ -105,7 +105,7 @@
   "MusicKeyword.voc": [
     "musica",
     "canzone",
-    "traccia audio",
+    "colonna sonora",
     "[UNUSED]"
   ],
   "AudioBookKeyword.voc": [
