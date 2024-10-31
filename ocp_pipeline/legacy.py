@@ -1,7 +1,7 @@
 import time
 from typing import Tuple, Optional
 
-from ovos_bus_client.message import Message
+from ovos_bus_client.message import Message, dig_for_message
 from ovos_bus_client.util import wait_for_reply
 from ovos_utils.ocp import MediaType, PlaybackType, MediaEntry
 
@@ -67,19 +67,19 @@ class LegacyCommonPlay:
             # Collect all replies until the timeout
             self.query_replies[message.data["phrase"]].append(message.data)
 
-    def send_query(self, phrase):
+    def send_query(self, phrase, message: Optional[Message] = None):
         self.query_replies[phrase] = []
         self.query_extensions[phrase] = []
-        self.bus.emit(Message('play:query',
-                              {"phrase": phrase}))
+        message = message or dig_for_message() or Message("")
+        self.bus.emit(message.forward('play:query',{"phrase": phrase}))
 
     def get_results(self, phrase):
         if self.query_replies.get(phrase):
             return [self.cps2media(r) for r in self.query_replies[phrase]]
         return []
 
-    def search(self, phrase, timeout=5):
-        self.send_query(phrase)
+    def search(self, phrase, timeout=5, message: Optional[Message] = None):
+        self.send_query(phrase, message)
         self.waiting = True
         start_ts = time.time()
         while self.waiting and time.time() - start_ts <= timeout:
