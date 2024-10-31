@@ -1,12 +1,12 @@
 # Changelog
 
-## [1.0.3a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.3a1) (2024-10-31)
+## [1.0.4a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.4a1) (2024-10-31)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.2...1.0.3a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.3...1.0.4a1)
 
 **Merged pull requests:**
 
-- fix:legacy cps session [\#22](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/22) ([JarbasAl](https://github.com/JarbasAl))
+- fix:workshop2\_compat [\#24](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/24) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
