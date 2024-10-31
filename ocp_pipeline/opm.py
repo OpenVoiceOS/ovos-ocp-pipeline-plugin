@@ -939,7 +939,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         LOG.debug(f'Returning {len(results)} search results')
         return results
 
-    def select_best(self, results: list, message: Message) -> Union[MediaEntry, Playlist, PluginStream]:
+    @staticmethod
+    def select_best(results: list, message: Message) -> Union[MediaEntry, Playlist, PluginStream]:
 
         sess = SessionManager.get(message)
 
@@ -1122,7 +1123,7 @@ class MycroftCPSLegacyPipeline(PipelineStageMatcher):
         utt = message.data["query"]
         res = self.mycroft_cps.search(utt)
         if res:
-            best = self.select_best([r[0] for r in res], message)
+            best = OCPPipelineMatcher.select_best([r[0] for r in res], message)
             if best:
                 callback = [r[1] for r in res if r[0].uri == best.uri][0]
                 self.mycroft_cps.skill_play(skill_id=best.skill_id,
