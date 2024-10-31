@@ -1,12 +1,22 @@
 # Changelog
 
-## [1.0.1a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.1a1) (2024-10-18)
+## [1.0.2a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.2a1) (2024-10-31)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.0...1.0.1a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.2a1...1.0.2a1)
 
 **Merged pull requests:**
 
-- fix:method name [\#16](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/16) ([JarbasAl](https://github.com/JarbasAl))
+- fix:legacy\_cps [\#21](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/21) ([JarbasAl](https://github.com/JarbasAl))
+- de-de/translate [\#20](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/20) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
+
+## [1.0.2a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.2a1) (2024-10-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.1...1.0.2a1)
+
+**Merged pull requests:**
+
+- fixed italian translation [\#19](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/19) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
+- fixed italian translation [\#18](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/18) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
 
 
 
