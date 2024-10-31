@@ -14,8 +14,7 @@ from ovos_bus_client.message import Message, dig_for_message
 from ovos_bus_client.session import SessionManager
 from ovos_config import Configuration
 from ovos_plugin_manager.ocp import available_extractors
-from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline, PipelineStageMatcher, \
-    PipelineMatch
+from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline
 from ovos_utils.lang import standardize_lang_tag, get_language_dir
 from ovos_utils.log import LOG, deprecated, log_deprecation
 from ovos_utils.messagebus import FakeBus
@@ -1062,7 +1061,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         return self.match_low(utterances, lang, message)
 
     @deprecated("match_legacy is deprecated! use MycroftCPSLegacyPipeline class directly instead", "2.0.0")
-    def match_legacy(self, utterances: List[str], lang: str, message: Message = None) -> Optional[PipelineMatch]:
+    def match_legacy(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
         """ match legacy mycroft common play skills  (must import from deprecated mycroft module)
         not recommended, legacy support only
 
@@ -1071,17 +1070,19 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         return MycroftCPSLegacyPipeline(self.bus, self.config).match(utterances, lang, message)
 
 
-class MycroftCPSLegacyPipeline(PipelineStageMatcher):
+class MycroftCPSLegacyPipeline(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     def __init__(self, bus: Optional[Union[MessageBusClient, FakeBus]] = None,
                  config: Optional[Dict] = None):
-        super().__init__(bus, config)
+        OVOSAbstractApplication.__init__(self, bus=bus or FakeBus(),
+                                         skill_id=OCP_ID, resources_dir=f"{dirname(__file__)}")
+        ConfidenceMatcherPipeline.__init__(self, bus, config)
         self.mycroft_cps = LegacyCommonPlay(self.bus)
         OCPPipelineMatcher.load_intent_files()
-        self.bus.on("ocp:legacy_cps", self.handle_legacy_cps)
+        self.add_event("ocp:legacy_cps", self.handle_legacy_cps, is_intent=True)
 
     ############
     # Legacy Mycroft CommonPlay skills
-    def match(self, utterances: List[str], lang: str, message: Message = None) -> Optional[PipelineMatch]:
+    def match(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
         """ match legacy mycroft common play skills  (must import from deprecated mycroft module)
         not recommended, legacy support only
 
@@ -1104,13 +1105,11 @@ class MycroftCPSLegacyPipeline(PipelineStageMatcher):
         if match["name"] == "play":
             LOG.info(f"Legacy Mycroft CommonPlay match: {match}")
             utterance = match["entities"].pop("query")
-            self.bus.emit(Message("ocp:legacy_cps",
-                                  {"query": utterance, "conf": 0.7}))
-            return PipelineMatch(handled=True,
-                                 match_data={"query": utterance,
-                                             "conf": 0.7},
-                                 skill_id=OCP_ID,
-                                 utterance=utterance)
+            return IntentHandlerMatch(match_type="ocp:legacy_cps",
+                                      match_data={"query": utterance,
+                                                  "conf": 0.7},
+                                      skill_id=OCP_ID,
+                                      utterance=utterance)
 
     def match_medium(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
         return None
@@ -1121,7 +1120,7 @@ class MycroftCPSLegacyPipeline(PipelineStageMatcher):
     def handle_legacy_cps(self, message: Message):
         """intent handler for legacy CPS matches"""
         utt = message.data["query"]
-        res = self.mycroft_cps.search(utt)
+        res = self.mycroft_cps.search(utt, message=message)
         if res:
             best = OCPPipelineMatcher.select_best([r[0] for r in res], message)
             if best:
