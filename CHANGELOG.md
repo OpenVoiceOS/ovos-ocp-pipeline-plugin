@@ -1,12 +1,12 @@
 # Changelog
 
-## [1.0.4a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.4a1) (2024-10-31)
+## [1.0.5a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.5a1) (2024-11-02)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.3...1.0.4a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.4...1.0.5a1)
 
 **Merged pull requests:**
 
-- fix:workshop2\_compat [\#24](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/24) ([JarbasAl](https://github.com/JarbasAl))
+- fix: correct pipeline parent class [\#26](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/26) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
