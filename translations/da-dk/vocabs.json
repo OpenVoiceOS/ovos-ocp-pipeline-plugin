@@ -8,7 +8,7 @@
   ],
   "AudioKeyword.voc": [
     "lyd",
-    null
+    "lyd"
   ],
   "HentaiKeyword.voc": [
     "hentai"
@@ -18,7 +18,7 @@
     "podcasts"
   ],
   "Play.voc": [
-    null,
+    "søge",
     "læse",
     "spil",
     "starte"
