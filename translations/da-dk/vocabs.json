@@ -1,0 +1,125 @@
+{
+  "video_only.voc": [
+    "cast ikke til lyd",
+    "cast ikke til lyd",
+    "ingen lydafspiller",
+    "kun video",
+    "kun video"
+  ],
+  "AudioKeyword.voc": [
+    "lyd",
+    "lyd"
+  ],
+  "HentaiKeyword.voc": [
+    "hentai"
+  ],
+  "PodcastKeyword.voc": [
+    "podcast",
+    "podcasts"
+  ],
+  "Play.voc": [
+    "søge",
+    "læse",
+    "spil",
+    "starte"
+  ],
+  "audio_only.voc": [
+    "kun lyd",
+    "ingen video",
+    "kun lyd",
+    "kun lyd",
+    "kun lyd"
+  ],
+  "NewsKeyword.voc": [
+    "nyheder"
+  ],
+  "GameKeyword.voc": [
+    "spil"
+  ],
+  "ADKeyword.voc": [
+    "lydbeskrivelse",
+    "filmbeskrivelse"
+  ],
+  "TrailerKeyword.voc": [
+    "anhænger"
+  ],
+  "MovieKeyword.voc": [
+    "film",
+    "film"
+  ],
+  "CartoonKeyword.voc": [
+    "tegneserie",
+    "tegnefilm"
+  ],
+  "VideoKeyword.voc": [
+    "video"
+  ],
+  "ASMRKeyword.voc": [
+    "ASMR",
+    "autonom sensorisk meridianrespons"
+  ],
+  "DocumentaryKeyword.voc": [
+    "dokumentar",
+    "dokumentarfilm"
+  ],
+  "SeriesKeyword.voc": [
+    "serie",
+    "tv-show",
+    "episode",
+    "episoder"
+  ],
+  "BWKeyword.voc": [
+    "sort og hvid",
+    "monokrom"
+  ],
+  "AdultKeyword.voc": [
+    "porno",
+    "18 plus",
+    "pornografi"
+  ],
+  "RadioKeyword.voc": [
+    "radio",
+    "internet radio"
+  ],
+  "AudioDramaKeyword.voc": [
+    "drama",
+    "teater"
+  ],
+  "Resume.voc": [
+    "genoptage",
+    "pause"
+  ],
+  "ComicBookKeyword.voc": [
+    "animeret tegneserie",
+    "tegneserie",
+    "visuel historie"
+  ],
+  "TVKeyword.voc": [
+    "TV",
+    "television",
+    "kanal"
+  ],
+  "AnimeKeyword.voc": [
+    "anime"
+  ],
+  "MusicKeyword.voc": [
+    "musik",
+    "sang",
+    "lydspor",
+    "lydspor"
+  ],
+  "AudioBookKeyword.voc": [
+    "bog",
+    "bøger",
+    "læse",
+    "lydbog",
+    "lydbøger",
+    "fortælle"
+  ],
+  "SilentKeyword.voc": [
+    "stille"
+  ],
+  "ShortKeyword.voc": [
+    "kort"
+  ]
+}

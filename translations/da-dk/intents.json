@@ -1,0 +1,63 @@
+{
+  "play.intent": [
+    "(afspil|start|spil) {query}",
+    "søg (common play|ocp|ovos common play|O C P) efter {query}",
+    "søg (ovos|open voice os) medie efter {query}",
+    "søg {query} (i|på) (almindelig afspilning|ocp|ovos almindeligt spil|O C P)",
+    "søg {query} (i|på) (ovos|åben stemmestyring) medier"
+  ],
+  "like_song.intent": [
+    "jeg kan lide (at|dette|det)",
+    "jeg kan lide (det|dette|den|denne)(sang|musik|spor|jam|lyd)",
+    "(god|god|fantastisk|fantastisk|fedt) (sang|musik|nummer|jam|lyd)",
+    "(at|dette|det|den|denne) er en (god|god|fantastisk|fantastisk|fed) (sang|musik|spor|jam|lyd)"
+  ],
+  "next.intent": [
+    "(næste|spring over)",
+    "(næste|spring over) (musik|sang|spor|video|medier)",
+    "(afspil|gå til) næste (musik|sang|spor|video|medier)",
+    "spil næste",
+    "næste",
+    "næste (sang|spor|musik|film|video|melodi)"
+  ],
+  "resume.intent": [
+    "(genoptag|genoptag)",
+    "(genoptag|genoptag|fortsæt|genstart) (musik|sang|spor|video|medier|afspilning)",
+    "spil"
+  ],
+  "read.intent": [
+    "læs (bog|lydbog|lydbog) {query}",
+    "læs {query}",
+    "læs {query} (bog|lydbog|lydbog)"
+  ],
+  "prev.intent": [
+    "(afspil forrige|gå tilbage en) (musik|sang|spor|video|medie)",
+    "(afspil forrige|forrige) (musik|sang|spor|video|medier)",
+    "(afspil forrige|forrige|gå tilbage)",
+    "tidligere",
+    "forrige (sang|spor|musik|film|video|melodi)"
+  ],
+  "pause.intent": [
+    "pause",
+    "pause (musik|sang|spor|video|medier|afspilning)"
+  ],
+  "open.intent": [
+    "åben (OCP|O C P|common|ovos|open voice os) (afspiller|medieafspiller)",
+    "åben (OCP|O C P|ovos almindelig afspilning|fælles afspilning|ovos medieafspiller|åben voice os-afspiller) (hjemmeskærm|hjemmeside|hjemmeskærm|hjemmeside|menu)",
+    "åben (OCP|O C P|ovos almindeligt spil|åben stemme os almindeligt spil|fælles spil)",
+    "åben (medie|musik|gui|video) (afspiller|katalog|færdigheder|menu|afspilning)"
+  ],
+  "featured.intent": [
+    "(åben|vis|visning) (udvalgt|) {media} (katalog|samling|afspilningsliste)",
+    "(åben|vis|display) fremhævede {media}"
+  ],
+  "play_favorites.intent": [
+    "(afspil|start) mit (favorit|synes godt om) (numre|sang|sange|musik|jam|jams)",
+    "(afspil|start) (favorit|synes godt om) (numre|sang|sange|musik|jam|jams)"
+  ],
+  "media_stop.intent": [
+    "stop",
+    "stop (afspilning|medie|medieafspilning|musik|film|film|støj)",
+    "stop alt"
+  ]
+}
