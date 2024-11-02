@@ -14,7 +14,7 @@ from ovos_bus_client.message import Message, dig_for_message
 from ovos_bus_client.session import SessionManager
 from ovos_config import Configuration
 from ovos_plugin_manager.ocp import available_extractors
-from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline
+from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline, PipelineStageMatcher
 from ovos_utils.lang import standardize_lang_tag, get_language_dir
 from ovos_utils.log import LOG, deprecated, log_deprecation
 from ovos_utils.messagebus import FakeBus
@@ -1070,12 +1070,12 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         return MycroftCPSLegacyPipeline(self.bus, self.config).match(utterances, lang, message)
 
 
-class MycroftCPSLegacyPipeline(ConfidenceMatcherPipeline, OVOSAbstractApplication):
+class MycroftCPSLegacyPipeline(PipelineStageMatcher, OVOSAbstractApplication):
     def __init__(self, bus: Optional[Union[MessageBusClient, FakeBus]] = None,
                  config: Optional[Dict] = None):
         OVOSAbstractApplication.__init__(self, bus=bus or FakeBus(),
                                          skill_id=OCP_ID, resources_dir=f"{dirname(__file__)}")
-        ConfidenceMatcherPipeline.__init__(self, bus, config)
+        PipelineStageMatcher.__init__(self, bus, config)
         self.mycroft_cps = LegacyCommonPlay(self.bus)
         OCPPipelineMatcher.load_intent_files()
         self.add_event("ocp:legacy_cps", self.handle_legacy_cps, is_intent=True)
@@ -1110,12 +1110,6 @@ class MycroftCPSLegacyPipeline(ConfidenceMatcherPipeline, OVOSAbstractApplicatio
                                                   "conf": 0.7},
                                       skill_id=OCP_ID,
                                       utterance=utterance)
-
-    def match_medium(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
-        return None
-
-    def match_low(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
-        return None
 
     def handle_legacy_cps(self, message: Message):
         """intent handler for legacy CPS matches"""
