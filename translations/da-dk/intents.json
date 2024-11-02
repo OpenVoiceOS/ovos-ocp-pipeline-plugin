@@ -1,0 +1,63 @@
+{
+  "play.intent": [
+    "(afspil|start|spil) {query}",
+    null,
+    null,
+    null,
+    null
+  ],
+  "like_song.intent": [
+    null,
+    "jeg kan lide (det|dette|den|denne)(sang|musik|spor|jam|lyd)",
+    null,
+    "(at|dette|det|den|denne) er en (god|god|fantastisk|fantastisk|fed) (sang|musik|spor|jam|lyd)"
+  ],
+  "next.intent": [
+    null,
+    null,
+    null,
+    "spil næste",
+    null,
+    null
+  ],
+  "resume.intent": [
+    null,
+    null,
+    null
+  ],
+  "read.intent": [
+    null,
+    null,
+    null
+  ],
+  "prev.intent": [
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "pause.intent": [
+    null,
+    null
+  ],
+  "open.intent": [
+    null,
+    null,
+    null,
+    null
+  ],
+  "featured.intent": [
+    null,
+    null
+  ],
+  "play_favorites.intent": [
+    null,
+    null
+  ],
+  "media_stop.intent": [
+    null,
+    null,
+    "stop alt"
+  ]
+}
