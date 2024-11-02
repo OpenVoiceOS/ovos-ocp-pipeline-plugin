@@ -1,0 +1,19 @@
+{
+  "cant.play.dialog": [
+    "Jeg ved ikke, hvordan jeg spiller {phrase}",
+    "Beklager, jeg ved ikke, hvordan jeg spiller {phrase}"
+  ],
+  "play.what.dialog": [
+    "Hvad skal jeg spille næste gang?"
+  ],
+  "no.media.skills.dialog": [
+    "Jeg beklager, jeg har ingen mediefærdigheder installeret",
+    "Jeg skal installere nogle mediefærdigheder, før jeg kan afspille medier",
+    "Jeg kan ikke afspille medier, før nogle mediefærdigheder er installeret"
+  ],
+  "just.one.moment.dialog": [
+    "Giv mig et øjeblik",
+    "Bare et sekund",
+    "Bare et øjeblik, mens jeg leder efter det"
+  ]
+}
