@@ -1,12 +1,21 @@
 # Changelog
 
-## [1.0.5a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.5a1) (2024-11-02)
+## [1.0.6a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.6a2) (2024-11-17)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.4...1.0.5a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.6a1...1.0.6a2)
 
 **Merged pull requests:**
 
-- fix: correct pipeline parent class [\#26](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/26) ([JarbasAl](https://github.com/JarbasAl))
+- fix/search\_from\_GUI [\#30](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/30) ([JarbasAl](https://github.com/JarbasAl))
+- nl-nl/translate [\#29](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/29) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
+
+## [1.0.6a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.6a1) (2024-11-02)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.5...1.0.6a1)
+
+**Merged pull requests:**
+
+- da-dk/translate [\#28](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/28) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
 
 
 
