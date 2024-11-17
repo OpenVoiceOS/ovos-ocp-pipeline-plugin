@@ -1,11 +1,12 @@
 # Changelog
 
-## [1.0.6a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.6a1) (2024-11-02)
+## [1.0.6a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.6a2) (2024-11-17)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.6a1...1.0.6a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.6a1...1.0.6a2)
 
 **Merged pull requests:**
 
+- fix/search\_from\_GUI [\#30](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/30) ([JarbasAl](https://github.com/JarbasAl))
 - nl-nl/translate [\#29](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/29) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
 
 ## [1.0.6a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.6a1) (2024-11-02)
