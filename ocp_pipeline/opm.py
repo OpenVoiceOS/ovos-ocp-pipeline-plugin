@@ -483,7 +483,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         LOG.info("searching and playing best OCP result")
         utterance = message.data["utterance"].lower()
         match = self._process_play_query(utterance, self.lang, {"conf": 1.0})
-        self.bus.emit(message.forward(match.intent_type, match.intent_data))
+        self.bus.emit(message.forward(match.match_type, match.match_data))
 
     def handle_play_favorites_intent(self, message: Message):
         LOG.info("playing favorite tracks")
