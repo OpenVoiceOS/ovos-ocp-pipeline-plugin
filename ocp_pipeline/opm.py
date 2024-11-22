@@ -771,6 +771,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 if s.session_id == player.session_id:
                     player.available_extractors = m.data["SEI"]
                     player.ocp_available = True
+                    self.update_player_proxy(player)
                     ev.set()
                     LOG.info(f"Session: {player.session_id} Available stream extractor plugins: {m.data['SEI']}")
 
@@ -780,7 +781,6 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             ev.wait(timeout)
             self.bus.remove("ovos.common_play.SEI.get.response", handle_m)
 
-        self.update_player_proxy(player)
         return player
 
     def get_player(self, message: Optional[Message] = None, timeout=1) -> OCPPlayerProxy:
