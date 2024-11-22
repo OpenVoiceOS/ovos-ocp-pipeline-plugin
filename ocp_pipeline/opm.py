@@ -781,8 +781,10 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             ev.wait(timeout)
             self.bus.remove("ovos.common_play.SEI.get.response", handle_m)
 
-        return player
+            if not ev.is_set():
+                LOG.warning(f"Player synchronization timed out after {timeout} seconds")
 
+        return player
     def get_player(self, message: Optional[Message] = None, timeout=1) -> OCPPlayerProxy:
         """get a PlayerProxy object, containing info such as player state and the available stream extractors from OCP
         this is tracked per Session, if needed requests the info from the client"""
