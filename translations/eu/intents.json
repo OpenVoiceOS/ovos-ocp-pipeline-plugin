@@ -1,0 +1,63 @@
+{
+    "play.intent": [
+        "(erreproduzitu|hasi) {query}",
+        "bilatu (common play|ocp|ovos common play|O C P) honetarako: {query}",
+        "bilatu (ovos|open voice os) ikus-entzunezkoa honetarako: {query}",
+        "bilatu {query} hemen: (common play|ocp|ovos common play|O C P)",
+        "bilatu {query} hemen: (ovos|open voice os) ikus-entzunezkoa"
+    ],
+    "like_song.intent": [
+        "(abesti|musika|pista|saio|soinu) (ona|ederra|bikaina|zoragarria|harrigarria|aparta)",
+        "(hau|hori) bai (abesti|musika|pista|saio|soinu) (ona|ederra|bikaina|zoragarria|harrigarria|aparta)",
+        "gustuko dut (abesti|musika|pista|saio|soinu) (hau|hori)",
+        "gustuko dut (hau|hori)"
+    ],
+    "next.intent": [
+        "(hurrengoa|jauzi)",
+        "(hurrengo|saltatu) (musika|abestia|pista|bideoa|ikus-entzunezkoa)",
+        "(erreproduzitu|jarri) hurrengo (musika|abestia|pista|bideoa|ikus-entzunezkoa)",
+        "hurrengoa",
+        "hurrengo (abestia|pista|musika|filma|bideoa|doinua)",
+        "erreproduzitu hurrengoa"
+    ],
+    "resume.intent": [
+        "(berrabiarazi|jarraitu)",
+        "(berrabiarazi|jarraitu|segi|berriz hasi) (musika|abestia|pista|bideoa|ikus-entzunezkoa|play-backa)",
+        "erreproduzitu"
+    ],
+    "read.intent": [
+        "irakurri (liburua|audio-liburua|audio liburua) {query}",
+        "irakurri {query}",
+        "irakurri {query} (liburua|audio-liburua|audio liburua)"
+    ],
+    "prev.intent": [
+        "(erreproduzitu aurreko|jarri lehengo) (musika|abestia|pista|bideoa|ikus-entzunezkoa)",
+        "(erreproduzitu aurreko|aurreko) (musika|abestia|pista|bideoa|ikus-entzunezkoa)",
+        "(erreproduzitu aurrekoa|aurrekoa|jarri lehengoa)",
+        "aurrekoa",
+        "aurreko (abestia|pista|musika|filma|bideoa|doinua)"
+    ],
+    "pause.intent": [
+        "gelditu",
+        "gelditu (musika|abestia|pista|bideoa|ikus-entzunezkoa|play-backa)"
+    ],
+    "open.intent": [
+        "ireki (OCP|O C P|common|ovos|open voice os) (erreproduzigailua|ikus-entzunezko erreproduzigailua)",
+        "ireki (OCP|O C P|ovos common play|common play|ovos media player|open voice os player) (hasierako pantaila|hasierako orria|menua)",
+        "ireki (OCP|O C P|ovos common play|open voice os common play|common play)",
+        "ireki (ikus-entzunezko|musika|gui|bideo) (erreproduzigailua|katalogoa|tresnak|menua|play-backa)"
+    ],
+    "featured.intent": [
+        "(ireki|erakutsi|bistaratu) (nabarmenduta|) {media} (katalogoa|bilduma|erreprodukzio-zerrenda)",
+        "(ireki|erakutsi|bistaratu) nabarmenduta {media}"
+    ],
+    "play_favorites.intent": [
+        "(erreproduzitu|hasi) (pista|abesti|musika|saio) (gustukoa|gustukoak|gogokoena|gogokoenak)",
+        "(erreproduzitu|hasi) nire (pista|abesti|musika|saio) (gustukoa|gustukoak|gogokoena|gogokoenak)"
+    ],
+    "media_stop.intent": [
+        "gelditu",
+        "gelditu (play-backa|ikus-entzunezkoa|ikus-entzunezko play-backa|musika|filma|filmak|zarata)",
+        "gelditu gauza guztiak"
+    ]
+}

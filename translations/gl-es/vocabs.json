@@ -1,0 +1,50 @@
+{
+    "video_only.voc": [
+        "non transmitir para audio",
+        "non transmitir para audio",
+        "ningún reprodutor de audio",
+        "só vídeo",
+        "vídeo só"
+    ],
+    "AudioKeyword.voc": [],
+    "HentaiKeyword.voc": [],
+    "PodcastKeyword.voc": [],
+    "Play.voc": [
+        "reproducir",
+        "ler",
+        "procurar",
+        "iniciar"
+    ],
+    "audio_only.voc": [
+        "só audio",
+        "sen vídeo",
+        "audio só",
+        "só son",
+        "son só"
+    ],
+    "NewsKeyword.voc": [],
+    "GameKeyword.voc": [],
+    "ADKeyword.voc": [],
+    "TrailerKeyword.voc": [],
+    "MovieKeyword.voc": [],
+    "CartoonKeyword.voc": [],
+    "VideoKeyword.voc": [],
+    "ASMRKeyword.voc": [],
+    "DocumentaryKeyword.voc": [],
+    "SeriesKeyword.voc": [],
+    "BWKeyword.voc": [],
+    "AdultKeyword.voc": [],
+    "RadioKeyword.voc": [],
+    "AudioDramaKeyword.voc": [],
+    "Resume.voc": [
+        "retomar",
+        "reanudar"
+    ],
+    "ComicBookKeyword.voc": [],
+    "TVKeyword.voc": [],
+    "AnimeKeyword.voc": [],
+    "MusicKeyword.voc": [],
+    "AudioBookKeyword.voc": [],
+    "SilentKeyword.voc": [],
+    "ShortKeyword.voc": []
+}

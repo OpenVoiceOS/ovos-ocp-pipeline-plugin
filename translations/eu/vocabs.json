@@ -1,0 +1,68 @@
+{
+    "video_only.voc": [
+        "ez bidali audiora",
+        "ez bidali audiora",
+        "audio-erreproduzigailurik ez",
+        "soilik bideoa",
+        "bideoa soilik"
+    ],
+    "AudioKeyword.voc": [
+        "audio"
+    ],
+    "HentaiKeyword.voc": [],
+    "PodcastKeyword.voc": [
+        "podcast"
+    ],
+    "Play.voc": [
+        "erreproduzitu",
+        "irakurri",
+        "bilatu",
+        "hasi"
+    ],
+    "audio_only.voc": [
+        "audioa soilik",
+        "bideorik ez",
+        "soilik audioa",
+        "soilik soinua",
+        "soinua soilik"
+    ],
+    "NewsKeyword.voc": [
+        "berriak"
+    ],
+    "GameKeyword.voc": [],
+    "ADKeyword.voc": [],
+    "TrailerKeyword.voc": [],
+    "MovieKeyword.voc": [],
+    "CartoonKeyword.voc": [],
+    "VideoKeyword.voc": [
+        "bideo"
+    ],
+    "ASMRKeyword.voc": [],
+    "DocumentaryKeyword.voc": [],
+    "SeriesKeyword.voc": [],
+    "BWKeyword.voc": [],
+    "AdultKeyword.voc": [],
+    "RadioKeyword.voc": [
+        "irrati",
+        "internet irrati"
+    ],
+    "AudioDramaKeyword.voc": [],
+    "Resume.voc": [
+        "jarraitu",
+        "berrabiarazi"
+    ],
+    "ComicBookKeyword.voc": [],
+    "TVKeyword.voc": [],
+    "AnimeKeyword.voc": [],
+    "MusicKeyword.voc": [
+        "musika"
+    ],
+    "AudioBookKeyword.voc": [
+        "irakurri",
+        "audio-liburua"
+    ],
+    "SilentKeyword.voc": [],
+    "ShortKeyword.voc": [
+        "laburtu"
+    ]
+}
