@@ -1,0 +1,15 @@
+{
+    "cant.play.dialog": [
+        "Non sei moi ben como poñer {phrase}",
+        "Síntocho. Non sei como poñer {phrase}"
+    ],
+    "play.what.dialog": [
+        "Que reproduzo agora?"
+    ],
+    "no.media.skills.dialog": [],
+    "just.one.moment.dialog": [
+        "Un momentiño",
+        "Un segundo máis nada",
+        "Vouno buscar, un momentiño"
+    ]
+}

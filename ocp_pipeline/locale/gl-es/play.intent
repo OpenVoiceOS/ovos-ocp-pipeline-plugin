@@ -1,0 +1,5 @@
+(reproducir|iniciar) {query}
+buscar en (common play|ocp|ovos common play|O C P) {query}
+buscar en (ovos|open voice os) multimedia {query}
+buscar {query} (en) (common play|ocp|ovos common play|O C P)
+buscar {query} (en) multimedia (ovos|open voice os)

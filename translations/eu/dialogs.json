@@ -1,0 +1,15 @@
+{
+    "cant.play.dialog": [
+        "Ez dakit ziur nola erreproduzitu {phrase}",
+        "Barkatu. Ez dakit nola erreproduzitu {phrase}"
+    ],
+    "play.what.dialog": [
+        "Zer erreproduzitu beharko nuke hurrena?"
+    ],
+    "no.media.skills.dialog": [],
+    "just.one.moment.dialog": [
+        "Unetxo bat, mesedez",
+        "Segundo bat baino ez",
+        "Unetxo bat, bilatzen dudan bitartean"
+    ]
+}

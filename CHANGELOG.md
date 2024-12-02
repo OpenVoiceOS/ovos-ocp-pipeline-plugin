@@ -1,16 +1,12 @@
 # Changelog
 
-## [1.0.8a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.8a1) (2024-11-22)
+## [1.0.9a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.9a1) (2024-12-02)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.7...1.0.8a1)
-
-**Fixed bugs:**
-
-- Potential hanging during URI extraction in  function [\#35](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/issues/35)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.8...1.0.9a1)
 
 **Merged pull requests:**
 
-- improve OCP detection + speed up legacy playback start [\#34](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/34) ([JarbasAl](https://github.com/JarbasAl))
+- import galician + basque translations [\#38](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/38) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
