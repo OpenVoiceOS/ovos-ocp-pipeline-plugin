@@ -785,6 +785,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 LOG.warning(f"Player synchronization timed out after {timeout} seconds")
 
         return player
+
     def get_player(self, message: Optional[Message] = None, timeout=1) -> OCPPlayerProxy:
         """get a PlayerProxy object, containing info such as player state and the available stream extractors from OCP
         this is tracked per Session, if needed requests the info from the client"""
@@ -793,6 +794,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             player = OCPPlayerProxy(available_extractors=available_extractors(),
                                     ocp_available=False,
                                     session_id=sess.session_id)
+            self.update_player_proxy(player)
         else:
             player = self.ocp_sessions[sess.session_id]
         if not player.ocp_available and not self.config.get("legacy"):
@@ -1025,7 +1027,6 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 self.update_player_proxy(player)
             else:
                 self.legacy_api.queue(real_uri, source_message=message)
-
 
     def _handle_legacy_audio_stop(self, message: Message):
         player = self.get_player(message)
