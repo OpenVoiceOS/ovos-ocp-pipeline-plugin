@@ -1,12 +1,12 @@
 # Changelog
 
-## [1.0.9a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.9a1) (2024-12-02)
+## [1.0.10a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.10a1) (2024-12-06)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.8...1.0.9a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.9...1.0.10a1)
 
 **Merged pull requests:**
 
-- import galician + basque translations [\#38](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/38) ([JarbasAl](https://github.com/JarbasAl))
+- fix:player proxy update [\#40](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/40) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
