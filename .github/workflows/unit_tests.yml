@@ -46,13 +46,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt install python3-dev swig
-          python -m pip install build wheel
+          python -m pip install build wheel uv
       - name: Install repo
         run: |
-          pip install -e .
+          uv pip install --system -e .
       - name: Install test dependencies
         run: |
-          pip install -r tests/requirements.txt
+          uv pip install --system -r tests/requirements.txt
       - name: Run unittests
         run: |
           pytest --cov=ocp_pipeline --cov-report=xml ./tests
