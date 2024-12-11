@@ -1,12 +1,12 @@
 # Changelog
 
-## [1.0.10a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.10a1) (2024-12-06)
+## [1.0.11a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.11a1) (2024-12-11)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.9...1.0.10a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.10...1.0.11a1)
 
 **Merged pull requests:**
 
-- fix:player proxy update [\#40](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/40) ([JarbasAl](https://github.com/JarbasAl))
+- performance: support padatious [\#42](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/42) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
