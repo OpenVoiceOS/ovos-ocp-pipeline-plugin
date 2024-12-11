@@ -156,7 +156,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         try:
             from ovos_padatious import IntentContainer
             is_padatious = True
-        except:
+        except ImportError:
             from padacioso import IntentContainer
             is_padatious = False
             LOG.warning("Padatious not available, using padacioso. intent matching will be orders of magnitude slower!")
