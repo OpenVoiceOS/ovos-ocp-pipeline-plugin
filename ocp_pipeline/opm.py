@@ -21,7 +21,8 @@ from ovos_utils.messagebus import FakeBus
 from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
     MediaEntry, Playlist, MediaState, TrackState, dict2entry, PluginStream
 from ovos_workshop.app import OVOSAbstractApplication
-from padacioso import IntentContainer
+from ovos_utils.xdg_utils import xdg_data_home
+from ovos_config.meta import get_xdg_base
 
 from ocp_pipeline.feats import OCPFeaturizer
 from ocp_pipeline.legacy import LegacyCommonPlay
@@ -48,6 +49,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                "next.intent", "prev.intent", "pause.intent", "play_favorites.intent",
                "resume.intent", "like_song.intent"]
     intent_matchers = {}
+    intent_cache = f"{xdg_data_home()}/{get_xdg_base()}/intent_cache"
 
     def __init__(self, bus: Optional[Union[MessageBusClient, FakeBus]] = None,
                  config: Optional[Dict] = None):
@@ -150,9 +152,22 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     @classmethod
     def load_intent_files(cls):
         intent_files = cls.load_resource_files()
+
+        try:
+            from ovos_padatious import IntentContainer
+            is_padatious = True
+        except:
+            from padacioso import IntentContainer
+            is_padatious = False
+            LOG.warning("Padatious not available, using padacioso. intent matching will be orders of magnitude slower!")
+
         for lang, intent_data in intent_files.items():
             lang = standardize_lang_tag(lang)
-            cls.intent_matchers[lang] = IntentContainer()
+            if is_padatious:
+                cache = f"{cls.intent_cache}/{lang}"
+                cls.intent_matchers[lang] = IntentContainer(cache)
+            else:
+                cls.intent_matchers[lang] = IntentContainer()
             for intent_name in cls.intents:
                 samples = intent_data.get(intent_name)
                 if samples:
@@ -301,6 +316,10 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     def match_high(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
         """ exact matches only, handles playback control
         recommended after high confidence intents pipeline stage """
+
+        if not len(self.skill_aliases):  # skill_id registered when skills load
+            return None  # dont waste compute cycles, no media skills -> no match
+
         lang = self._get_closest_lang(lang)
         if lang is None:  # no intents registered for this lang
             return None
@@ -310,9 +329,21 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         utterance = utterances[0].lower()
         match = self.intent_matchers[lang].calc_intent(utterance)
 
+        if hasattr(match, "name"):  # padatious
+            match = {
+                "name": match.name,
+                "conf": match.conf,
+                "entities": match.matches
+            }
+
         if match["name"] is None:
             return None
-        LOG.info(f"OCP exact match: {match}")
+
+        if match.get("conf", 1.0) < 0.7:
+            LOG.debug(f"Ignoring low confidence OCP match: {match}")
+            return None
+
+        LOG.info(f"OCP match: {match}")
 
         player = self.get_player(message)
 
@@ -1128,6 +1159,12 @@ class MycroftCPSLegacyPipeline(PipelineStageMatcher, OVOSAbstractApplication):
             return None
 
         match = OCPPipelineMatcher.intent_matchers[lang].calc_intent(utterance)
+        if hasattr(match, "name"):  # padatious
+            match = {
+                "name": match.name,
+                "conf": match.conf,
+                "entities": match.matches
+            }
 
         if match["name"] is None:
             return None
