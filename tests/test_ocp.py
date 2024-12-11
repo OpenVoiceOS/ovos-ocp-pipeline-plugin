@@ -50,6 +50,7 @@ class TestOCPPipelineNoClassifierMatcher(unittest.TestCase):
                 os.path.dirname(ocp_pipeline.opm.__file__) + "/models/ocp_entities_v0.csv"
             ]}
         self.ocp = OCPPipelineMatcher(config=config)
+        self.ocp.skill_aliases["test"] = ["Test Skill"]  # pretend a skill is loaded or matching is skipped
 
     def test_match_high(self):
         result = self.ocp.match_high(["play metallica"], "en-US")
@@ -114,6 +115,7 @@ class TestOCPPipelineMatcher(unittest.TestCase):
                 os.path.dirname(ocp_pipeline.opm.__file__) + "/models/ocp_entities_v0.csv"
             ]}
         self.ocp = OCPPipelineMatcher(config=config)
+        self.ocp.skill_aliases["test"] = ["Test Skill"]  # pretend a skill is loaded or matching is skipped
 
     def test_match_high(self):
         result = self.ocp.match_high(["play metallica"], "en-US")
