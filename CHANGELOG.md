@@ -1,12 +1,12 @@
 # Changelog
 
-## [1.0.11a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.0.11a1) (2024-12-11)
+## [1.1.0a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.0a1) (2024-12-18)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.10...1.0.11a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.11...1.1.0a1)
 
 **Merged pull requests:**
 
-- performance: support padatious [\#42](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/42) ([JarbasAl](https://github.com/JarbasAl))
+- feat: save/load game intent [\#44](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/44) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
