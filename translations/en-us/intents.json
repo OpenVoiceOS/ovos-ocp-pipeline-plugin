@@ -23,7 +23,7 @@
     ],
     "resume.intent": [
         "(unpause|resume)",
-        "(unpause|resume|continue|restart) [ŧhe] (music|song|track|video|media|playback|game)",
+"(unpause|resume|continue|restart) [the] (music|song|track|video|media|playback|game)",
         "play"
     ],
     "read.intent": [
