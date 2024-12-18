@@ -23,7 +23,7 @@
     ],
     "resume.intent": [
         "(unpause|resume)",
-        "(unpause|resume|continue|restart) (music|song|track|video|media|playback|game)",
+        "(unpause|resume|continue|restart) [ŧhe] (music|song|track|video|media|playback|game)",
         "play"
     ],
     "read.intent": [
@@ -47,7 +47,7 @@
         "open (OCP|O C P|common|ovos|open voice os) (player|media player)",
         "open (OCP|O C P|ovos common play|common play|ovos media player|open voice os player) (home screen|home page|homescreen|homepage|menu)",
         "open (OCP|O C P|ovos common play|open voice os common play|common play)",
-        "open (media|music|gui|video) (player|catalog|skills|menu|playback)"
+        "open [the] (media|music|gui|video) (player|catalog|skills|menu|playback)"
     ],
     "featured.intent": [
         "(open|show|display) (featured|) {media} (catalog|collection|playlist)",
