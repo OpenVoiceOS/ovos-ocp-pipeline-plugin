@@ -37,6 +37,7 @@ class OCPPlayerProxy:
     player_state: PlayerState = PlayerState.STOPPED
     media_state: MediaState = MediaState.UNKNOWN
     media_type: MediaType = MediaType.GENERIC
+    skill_id: Optional[str] = None
 
 
 # for easier typing
@@ -47,7 +48,7 @@ NormalizedResultsList = List[Union[MediaEntry, Playlist, PluginStream]]
 class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     intents = ["play.intent", "open.intent", "media_stop.intent",
                "next.intent", "prev.intent", "pause.intent", "play_favorites.intent",
-               "resume.intent", "like_song.intent"]
+               "resume.intent", "like_song.intent", "save_game.intent", "load_game.intent"]
     intent_matchers = {}
     intent_cache = f"{xdg_data_home()}/{get_xdg_base()}/intent_cache"
 
@@ -187,6 +188,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         self.add_event("ocp:media_stop", self.handle_stop_intent, is_intent=True)
         self.add_event("ocp:search_error", self.handle_search_error_intent, is_intent=True)
         self.add_event("ocp:like_song", self.handle_like_intent, is_intent=True)
+        self.add_event("ocp:save_game", self.handle_save_intent, is_intent=True)
+        self.add_event("ocp:load_game", self.handle_load_intent, is_intent=True)
 
     def update_player_proxy(self, player: OCPPlayerProxy):
         """remember OCP session state"""
@@ -289,6 +292,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                           TrackState.PLAYING_MPRIS]:
             player = self.get_player(message)
             player.player_state = PlayerState.PLAYING
+            player = self._update_player_skill_id(player, message)
             LOG.info(f"Session: {player.session_id} OCP PlayerState: PlayerState.PLAYING")
             self.update_player_proxy(player)
 
@@ -310,6 +314,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if mtype is not None:
             player.media_type = MediaType(pstate)
             LOG.debug(f"Session: {player.session_id} MediaType: {player.media_type}")
+        player = self._update_player_skill_id(player, message)
         self.update_player_proxy(player)
 
     # pipeline
@@ -346,6 +351,21 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         LOG.info(f"OCP match: {match}")
 
         player = self.get_player(message)
+
+        if player.media_type == MediaType.GAME:
+            # if the user is currently playing a game
+            # disable: next/prev/shuffle/... intents
+            # enable: load/save intents
+            game_blacklist = ["next", "prev", "open", "like_song", "play_favorites"]
+            if match["name"] in game_blacklist:
+                LOG.info(f'Ignoring OCP intent match {match["name"]}, playing MediaType.GAME')
+                return None
+        else:
+            # if no game is being played, disable game specific intents
+            game_only = ["save_game"]
+            if match["name"] in game_only:
+                LOG.info(f'Ignoring OCP intent match {match["name"]}, not playing MediaType.GAME')
+                return None
 
         if match["name"] == "play":
             utterance = match["entities"].pop("query")
@@ -535,6 +555,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 return e
         raise ValueError(f"{m} is not a valid media type")
 
+    def handle_save_intent(self, message: Message):
+        skill_id = self.get_player(message).skill_id
+        self.bus.emit(message.forward(f"ovos.common_play.{skill_id}.save"))
+
+    def handle_load_intent(self, message: Message):
+        skill_id = self.get_player(message).skill_id
+        self.bus.emit(message.forward(f"ovos.common_play.{skill_id}.load"))
+
     def handle_play_intent(self, message: Message):
 
         if not len(self.skill_aliases):  # skill_id registered when skills load
@@ -574,6 +602,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
             # ovos-PHAL-plugin-mk1 will display music icon in response to play message
             player = self.get_player(message)
+            player.skill_id = best.skill_id
+            self.update_player_proxy(player)
             if not player.ocp_available:
                 self.legacy_play(results, query, message=message)
             else:
@@ -603,6 +633,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             self.ocp_api.stop(source_message=message)
         player = self.get_player(message)
         player.player_state = PlayerState.STOPPED
+        player.skill_id = None
         self.update_player_proxy(player)
 
     def handle_next_intent(self, message: Message):
@@ -633,6 +664,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             self.ocp_api.pause(source_message=message)
         player = self.get_player(message)
         player.player_state = PlayerState.PAUSED
+        player = self._update_player_skill_id(player, message)
         self.update_player_proxy(player)
 
     def handle_resume_intent(self, message: Message):
@@ -645,6 +677,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             self.ocp_api.resume(source_message=message)
         player = self.get_player(message)
         player.player_state = PlayerState.PLAYING
+        player = self._update_player_skill_id(player, message)
         self.update_player_proxy(player)
 
     def handle_search_error_intent(self, message: Message):
@@ -831,6 +864,13 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not player.ocp_available and not self.config.get("legacy"):
             # OCP might have loaded meanwhile
             player = self._player_sync(player, message, timeout)
+        return player
+
+    @staticmethod
+    def _update_player_skill_id(player, message):
+        skill_id = message.data.get("skill_id") or message.context.get("skill_id")
+        if skill_id and skill_id != OCP_ID:
+            player.skill_id = skill_id
         return player
 
     @staticmethod
@@ -1055,6 +1095,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 playing = True
                 self.legacy_api.play(real_uri, utterance=phrase, source_message=message)
                 player.player_state = PlayerState.PLAYING
+                player.skill_id = r.skill_id
                 self.update_player_proxy(player)
             else:
                 self.legacy_api.queue(real_uri, source_message=message)
@@ -1064,6 +1105,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not player.ocp_available:
             player.player_state = PlayerState.STOPPED
             player.media_state = MediaState.NO_MEDIA
+            player.skill_id = None
             self.update_player_proxy(player)
 
     def _handle_legacy_audio_pause(self, message: Message):
@@ -1071,6 +1113,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not player.ocp_available and player.player_state == PlayerState.PLAYING:
             player.player_state = PlayerState.PAUSED
             player.media_state = MediaState.LOADED_MEDIA
+            player = self._update_player_skill_id(player, message)
             self.update_player_proxy(player)
 
     def _handle_legacy_audio_resume(self, message: Message):
@@ -1078,6 +1121,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not player.ocp_available and player.player_state == PlayerState.PAUSED:
             player.player_state = PlayerState.PLAYING
             player.media_state = MediaState.LOADED_MEDIA
+            player = self._update_player_skill_id(player, message)
             self.update_player_proxy(player)
 
     def _handle_legacy_audio_start(self, message: Message):
@@ -1085,6 +1129,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not player.ocp_available:
             player.player_state = PlayerState.PLAYING
             player.media_state = MediaState.LOADED_MEDIA
+            player = self._update_player_skill_id(player, message)
             self.update_player_proxy(player)
 
     def _handle_legacy_audio_end(self, message: Message):
@@ -1092,6 +1137,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not player.ocp_available:
             player.player_state = PlayerState.STOPPED
             player.media_state = MediaState.END_OF_MEDIA
+            player.skill_id = None
             self.update_player_proxy(player)
 
     @classmethod
