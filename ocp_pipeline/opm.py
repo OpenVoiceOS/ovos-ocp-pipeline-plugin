@@ -581,6 +581,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         query = message.data["query"]
         media_type = message.data["media_type"]
         skills = message.data.get("skills", [])
+        sess = SessionManager.get(message)
 
         # search common play skills
         lang = standardize_lang_tag(lang)
@@ -610,6 +611,9 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             player = self.get_player(message)
             player.skill_id = best.skill_id
             self.update_player_proxy(player)
+            # add active skill to session
+            sess.activate_skill(best.skill_id)
+            message.context["session"] = sess.serialize()
             if not player.ocp_available:
                 self.legacy_play(results, query, message=message)
             else:
