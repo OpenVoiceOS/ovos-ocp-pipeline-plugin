@@ -362,7 +362,9 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 return None
         else:
             # if no game is being played, disable game specific intents
-            game_only = ["save_game"]
+            game_only = ["save_game", "load_game"]
+            # TODO - allow load_game without being in game already
+            #  this can only be done if we match skill_id
             if match["name"] in game_only:
                 LOG.info(f'Ignoring OCP intent match {match["name"]}, not playing MediaType.GAME')
                 return None
