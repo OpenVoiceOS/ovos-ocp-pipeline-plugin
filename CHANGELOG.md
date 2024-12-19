@@ -1,28 +1,12 @@
 # Changelog
 
-## [1.1.2a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.2a1) (2024-12-19)
+## [1.1.3a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.3a1) (2024-12-19)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.1a1...1.1.2a1)
-
-**Merged pull requests:**
-
-- fix:dont\_allow\_load\_game [\#48](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/48) ([JarbasAl](https://github.com/JarbasAl))
-
-## [1.1.1a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.1a1) (2024-12-19)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.0a1...1.1.1a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.2...1.1.3a1)
 
 **Merged pull requests:**
 
-- fix:improve\_media\_clf [\#46](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/46) ([JarbasAl](https://github.com/JarbasAl))
-
-## [1.1.0a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.0a1) (2024-12-18)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.0.11...1.1.0a1)
-
-**Merged pull requests:**
-
-- feat: save/load game intent [\#44](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/44) ([JarbasAl](https://github.com/JarbasAl))
+- fix: active skills in session [\#50](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/50) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
