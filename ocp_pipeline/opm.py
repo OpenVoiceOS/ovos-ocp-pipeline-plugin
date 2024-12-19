@@ -37,6 +37,7 @@ class OCPPlayerProxy:
     player_state: PlayerState = PlayerState.STOPPED
     media_state: MediaState = MediaState.UNKNOWN
     media_type: MediaType = MediaType.GENERIC
+    skill_id: Optional[str] = None
 
 
 # for easier typing
@@ -47,7 +48,7 @@ NormalizedResultsList = List[Union[MediaEntry, Playlist, PluginStream]]
 class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     intents = ["play.intent", "open.intent", "media_stop.intent",
                "next.intent", "prev.intent", "pause.intent", "play_favorites.intent",
-               "resume.intent", "like_song.intent"]
+               "resume.intent", "like_song.intent", "save_game.intent", "load_game.intent"]
     intent_matchers = {}
     intent_cache = f"{xdg_data_home()}/{get_xdg_base()}/intent_cache"
 
@@ -187,6 +188,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         self.add_event("ocp:media_stop", self.handle_stop_intent, is_intent=True)
         self.add_event("ocp:search_error", self.handle_search_error_intent, is_intent=True)
         self.add_event("ocp:like_song", self.handle_like_intent, is_intent=True)
+        self.add_event("ocp:save_game", self.handle_save_intent, is_intent=True)
+        self.add_event("ocp:load_game", self.handle_load_intent, is_intent=True)
 
     def update_player_proxy(self, player: OCPPlayerProxy):
         """remember OCP session state"""
@@ -289,6 +292,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                           TrackState.PLAYING_MPRIS]:
             player = self.get_player(message)
             player.player_state = PlayerState.PLAYING
+            player = self._update_player_skill_id(player, message)
             LOG.info(f"Session: {player.session_id} OCP PlayerState: PlayerState.PLAYING")
             self.update_player_proxy(player)
 
@@ -310,6 +314,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if mtype is not None:
             player.media_type = MediaType(pstate)
             LOG.debug(f"Session: {player.session_id} MediaType: {player.media_type}")
+        player = self._update_player_skill_id(player, message)
         self.update_player_proxy(player)
 
     # pipeline
@@ -346,6 +351,23 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         LOG.info(f"OCP match: {match}")
 
         player = self.get_player(message)
+
+        if player.media_type == MediaType.GAME:
+            # if the user is currently playing a game
+            # disable: next/prev/shuffle/... intents
+            # enable: load/save intents
+            game_blacklist = ["next", "prev", "open", "like_song", "play_favorites"]
+            if match["name"] in game_blacklist:
+                LOG.info(f'Ignoring OCP intent match {match["name"]}, playing MediaType.GAME')
+                return None
+        else:
+            # if no game is being played, disable game specific intents
+            game_only = ["save_game", "load_game"]
+            # TODO - allow load_game without being in game already
+            #  this can only be done if we match skill_id
+            if match["name"] in game_only:
+                LOG.info(f'Ignoring OCP intent match {match["name"]}, not playing MediaType.GAME')
+                return None
 
         if match["name"] == "play":
             utterance = match["entities"].pop("query")
@@ -464,11 +486,15 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             if skill_id not in sess.blacklisted_skills and
                any(s.lower() in utterance for s in samples)
         ]
+        valid_labels = []
         if valid_skills:
             LOG.info(f"OCP specific skill names matched: {valid_skills}")
+            for mtype, skills in self.media2skill.items():
+                if any([s in skills for s in valid_skills]):
+                    valid_labels.append(mtype)
 
         # classify the query media type
-        media_type, conf = self.classify_media(utterance, lang)
+        media_type, conf = self.classify_media(utterance, lang, valid_labels=valid_labels)
 
         # extract the query string
         query = self.remove_voc(utterance, "Play", lang).strip()
@@ -535,6 +561,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 return e
         raise ValueError(f"{m} is not a valid media type")
 
+    def handle_save_intent(self, message: Message):
+        skill_id = self.get_player(message).skill_id
+        self.bus.emit(message.forward(f"ovos.common_play.{skill_id}.save"))
+
+    def handle_load_intent(self, message: Message):
+        skill_id = self.get_player(message).skill_id
+        self.bus.emit(message.forward(f"ovos.common_play.{skill_id}.load"))
+
     def handle_play_intent(self, message: Message):
 
         if not len(self.skill_aliases):  # skill_id registered when skills load
@@ -574,6 +608,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
             # ovos-PHAL-plugin-mk1 will display music icon in response to play message
             player = self.get_player(message)
+            player.skill_id = best.skill_id
+            self.update_player_proxy(player)
             if not player.ocp_available:
                 self.legacy_play(results, query, message=message)
             else:
@@ -603,6 +639,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             self.ocp_api.stop(source_message=message)
         player = self.get_player(message)
         player.player_state = PlayerState.STOPPED
+        player.skill_id = None
         self.update_player_proxy(player)
 
     def handle_next_intent(self, message: Message):
@@ -633,6 +670,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             self.ocp_api.pause(source_message=message)
         player = self.get_player(message)
         player.player_state = PlayerState.PAUSED
+        player = self._update_player_skill_id(player, message)
         self.update_player_proxy(player)
 
     def handle_resume_intent(self, message: Message):
@@ -645,6 +683,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             self.ocp_api.resume(source_message=message)
         player = self.get_player(message)
         player.player_state = PlayerState.PLAYING
+        player = self._update_player_skill_id(player, message)
         self.update_player_proxy(player)
 
     def handle_search_error_intent(self, message: Message):
@@ -659,70 +698,77 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             self.ocp_api.stop(source_message=message)
 
     # NLP
-    def voc_match_media(self, query: str, lang: str) -> Tuple[MediaType, float]:
+    def voc_match_media(self, query: str, lang: str, valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
         lang = standardize_lang_tag(lang)
+        valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
         # simplistic approach via voc_match, works anywhere
         # and it's easy to localize, but isn't very accurate
-        if self.voc_match(query, "MusicKeyword", lang=lang):
+        if MediaType.MUSIC in valid_labels and self.voc_match(query, "MusicKeyword", lang=lang):
             # NOTE - before movie to handle "{movie_name} soundtrack"
             return MediaType.MUSIC, 0.6
-        elif self.voc_match(query, "MovieKeyword", lang=lang):
-            if self.voc_match(query, "ShortKeyword", lang=lang):
+        elif any([s in valid_labels for s in [MediaType.MOVIE, MediaType.SHORT_FILM, MediaType.SILENT_MOVIE, MediaType.BLACK_WHITE_MOVIE]]) and \
+                self.voc_match(query, "MovieKeyword", lang=lang):
+            if MediaType.SHORT_FILM in valid_labels and self.voc_match(query, "ShortKeyword", lang=lang):
                 return MediaType.SHORT_FILM, 0.7
-            elif self.voc_match(query, "SilentKeyword", lang=lang):
+            elif MediaType.SILENT_MOVIE in valid_labels and self.voc_match(query, "SilentKeyword", lang=lang):
                 return MediaType.SILENT_MOVIE, 0.7
-            elif self.voc_match(query, "BWKeyword", lang=lang):
+            elif MediaType.BLACK_WHITE_MOVIE in valid_labels and self.voc_match(query, "BWKeyword", lang=lang):
                 return MediaType.BLACK_WHITE_MOVIE, 0.7
             return MediaType.MOVIE, 0.6
-        elif self.voc_match(query, "DocumentaryKeyword", lang=lang):
+        elif MediaType.DOCUMENTARY in valid_labels and self.voc_match(query, "DocumentaryKeyword", lang=lang):
             return MediaType.DOCUMENTARY, 0.6
-        elif self.voc_match(query, "AudioBookKeyword", lang=lang):
+        elif MediaType.AUDIOBOOK in valid_labels and self.voc_match(query, "AudioBookKeyword", lang=lang):
             return MediaType.AUDIOBOOK, 0.6
-        elif self.voc_match(query, "NewsKeyword", lang=lang):
+        elif MediaType.NEWS in valid_labels and self.voc_match(query, "NewsKeyword", lang=lang):
             return MediaType.NEWS, 0.6
-        elif self.voc_match(query, "AnimeKeyword", lang=lang):
+        elif MediaType.ANIME in valid_labels and  self.voc_match(query, "AnimeKeyword", lang=lang):
             return MediaType.ANIME, 0.6
-        elif self.voc_match(query, "CartoonKeyword", lang=lang):
+        elif MediaType.CARTOON in valid_labels and self.voc_match(query, "CartoonKeyword", lang=lang):
             return MediaType.CARTOON, 0.6
-        elif self.voc_match(query, "PodcastKeyword", lang=lang):
+        elif MediaType.PODCAST in valid_labels and self.voc_match(query, "PodcastKeyword", lang=lang):
             return MediaType.PODCAST, 0.6
-        elif self.voc_match(query, "TVKeyword", lang=lang):
+        elif MediaType.TV in valid_labels and self.voc_match(query, "TVKeyword", lang=lang):
             return MediaType.TV, 0.6
-        elif self.voc_match(query, "SeriesKeyword", lang=lang):
+        elif MediaType.VIDEO_EPISODES in valid_labels and self.voc_match(query, "SeriesKeyword", lang=lang):
             return MediaType.VIDEO_EPISODES, 0.6
-        elif self.voc_match(query, "AudioDramaKeyword", lang=lang):
+        elif MediaType.RADIO_THEATRE in valid_labels and self.voc_match(query, "AudioDramaKeyword", lang=lang):
             # NOTE - before "radio" to allow "radio theatre"
             return MediaType.RADIO_THEATRE, 0.6
-        elif self.voc_match(query, "RadioKeyword", lang=lang):
+        elif MediaType.RADIO in valid_labels and self.voc_match(query, "RadioKeyword", lang=lang):
             return MediaType.RADIO, 0.6
-        elif self.voc_match(query, "ComicBookKeyword", lang=lang):
+        elif MediaType.VISUAL_STORY in valid_labels and self.voc_match(query, "ComicBookKeyword", lang=lang):
             return MediaType.VISUAL_STORY, 0.4
-        elif self.voc_match(query, "GameKeyword", lang=lang):
+        elif MediaType.GAME in valid_labels and self.voc_match(query, "GameKeyword", lang=lang):
             return MediaType.GAME, 0.4
-        elif self.voc_match(query, "ADKeyword", lang=lang):
+        elif MediaType.AUDIO_DESCRIPTION in valid_labels and self.voc_match(query, "ADKeyword", lang=lang):
             return MediaType.AUDIO_DESCRIPTION, 0.4
-        elif self.voc_match(query, "ASMRKeyword", lang=lang):
+        elif MediaType.ASMR in valid_labels and self.voc_match(query, "ASMRKeyword", lang=lang):
             return MediaType.ASMR, 0.4
-        elif self.voc_match(query, "AdultKeyword", lang=lang):
-            if self.voc_match(query, "CartoonKeyword", lang=lang) or \
+        elif any([s in valid_labels for s in [MediaType.ADULT, MediaType.HENTAI, MediaType.ADULT_AUDIO]]) and self.voc_match(query, "AdultKeyword", lang=lang):
+            if MediaType.HENTAI in valid_labels and self.voc_match(query, "CartoonKeyword", lang=lang) or \
                     self.voc_match(query, "AnimeKeyword", lang=lang) or \
                     self.voc_match(query, "HentaiKeyword", lang=lang):
                 return MediaType.HENTAI, 0.4
-            elif self.voc_match(query, "AudioKeyword", lang=lang) or \
+            elif MediaType.ADULT_AUDIO in valid_labels and  self.voc_match(query, "AudioKeyword", lang=lang) or \
                     self.voc_match(query, "ASMRKeyword", lang=lang):
                 return MediaType.ADULT_AUDIO, 0.4
             return MediaType.ADULT, 0.4
-        elif self.voc_match(query, "HentaiKeyword", lang=lang):
+        elif MediaType.HENTAI in valid_labels and self.voc_match(query, "HentaiKeyword", lang=lang):
             return MediaType.HENTAI, 0.4
-        elif self.voc_match(query, "VideoKeyword", lang=lang):
+        elif MediaType.VIDEO in valid_labels and self.voc_match(query, "VideoKeyword", lang=lang):
             return MediaType.VIDEO, 0.4
-        elif self.voc_match(query, "AudioKeyword", lang=lang):
+        elif MediaType.AUDIO in valid_labels and self.voc_match(query, "AudioKeyword", lang=lang):
             return MediaType.AUDIO, 0.4
         return MediaType.GENERIC, 0.0
 
-    def classify_media(self, query: str, lang: str) -> Tuple[MediaType, float]:
+    def classify_media(self, query: str, lang: str, valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
         """ determine what media type is being requested """
         lang = standardize_lang_tag(lang)
+        valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
+        LOG.debug(f"valid media types: {valid_labels}")
+        if len(valid_labels) == 1:
+            return valid_labels[0], 1.0
+
         # using a trained classifier (Experimental)
         if self.config.get("experimental_media_classifier", False):
             from ovos_classifiers.skovos.classifier import SklearnOVOSClassifier
@@ -735,6 +781,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                     featurizer: OCPFeaturizer = self._media_clf[1]
                 X = featurizer.transform([query])
                 preds = clf.predict_labels(X)[0]
+                preds = {k: v for k, v in preds.items()
+                         if OCPFeaturizer.label2media(k) in valid_labels}
                 label = max(preds, key=preds.get)
                 prob = float(round(preds[label], 3))
                 LOG.info(f"OVOSCommonPlay MediaType prediction: {label} confidence: {prob}")
@@ -746,7 +794,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                     return OCPFeaturizer.label2media(label), prob
             except:
                 LOG.exception(f"OCP classifier exception: {query}")
-        return self.voc_match_media(query, lang)
+        return self.voc_match_media(query, lang, valid_labels)
 
     def is_ocp_query(self, query: str, lang: str) -> Tuple[bool, float]:
         """ determine if a playback question is being asked"""
@@ -831,6 +879,13 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not player.ocp_available and not self.config.get("legacy"):
             # OCP might have loaded meanwhile
             player = self._player_sync(player, message, timeout)
+        return player
+
+    @staticmethod
+    def _update_player_skill_id(player, message):
+        skill_id = message.data.get("skill_id") or message.context.get("skill_id")
+        if skill_id and skill_id != OCP_ID:
+            player.skill_id = skill_id
         return player
 
     @staticmethod
@@ -1055,6 +1110,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 playing = True
                 self.legacy_api.play(real_uri, utterance=phrase, source_message=message)
                 player.player_state = PlayerState.PLAYING
+                player.skill_id = r.skill_id
                 self.update_player_proxy(player)
             else:
                 self.legacy_api.queue(real_uri, source_message=message)
@@ -1064,6 +1120,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not player.ocp_available:
             player.player_state = PlayerState.STOPPED
             player.media_state = MediaState.NO_MEDIA
+            player.skill_id = None
             self.update_player_proxy(player)
 
     def _handle_legacy_audio_pause(self, message: Message):
@@ -1071,6 +1128,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not player.ocp_available and player.player_state == PlayerState.PLAYING:
             player.player_state = PlayerState.PAUSED
             player.media_state = MediaState.LOADED_MEDIA
+            player = self._update_player_skill_id(player, message)
             self.update_player_proxy(player)
 
     def _handle_legacy_audio_resume(self, message: Message):
@@ -1078,6 +1136,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not player.ocp_available and player.player_state == PlayerState.PAUSED:
             player.player_state = PlayerState.PLAYING
             player.media_state = MediaState.LOADED_MEDIA
+            player = self._update_player_skill_id(player, message)
             self.update_player_proxy(player)
 
     def _handle_legacy_audio_start(self, message: Message):
@@ -1085,6 +1144,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not player.ocp_available:
             player.player_state = PlayerState.PLAYING
             player.media_state = MediaState.LOADED_MEDIA
+            player = self._update_player_skill_id(player, message)
             self.update_player_proxy(player)
 
     def _handle_legacy_audio_end(self, message: Message):
@@ -1092,6 +1152,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not player.ocp_available:
             player.player_state = PlayerState.STOPPED
             player.media_state = MediaState.END_OF_MEDIA
+            player.skill_id = None
             self.update_player_proxy(player)
 
     @classmethod
