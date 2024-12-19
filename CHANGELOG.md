@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.2a1) (2024-12-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.1a1...1.1.2a1)
+
+**Merged pull requests:**
+
+- fix:dont\_allow\_load\_game [\#48](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/48) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.1a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.1a1) (2024-12-19)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.0a1...1.1.1a1)
