@@ -1,12 +1,12 @@
 # Changelog
 
-## [1.1.3a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.3a1) (2024-12-19)
+## [1.1.4a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.4a1) (2024-12-29)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.2...1.1.3a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.3...1.1.4a1)
 
 **Merged pull requests:**
 
-- fix: active skills in session [\#50](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/50) ([JarbasAl](https://github.com/JarbasAl))
+- Add Catalans strings [\#52](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/52) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
 
 
 
