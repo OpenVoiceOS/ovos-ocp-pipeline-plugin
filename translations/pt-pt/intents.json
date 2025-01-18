@@ -36,7 +36,7 @@
     "(volta a pôr a anterior|põe a anterior|volta atrás) (canção|música|faixa|som|melodia)",
     "(volta a pôr a anterior|põe a anterior|volta atrás)",
     "(reproduzir | ir para) [o] (música | faixa | música | filme | vídeo | música) anterior",
-    null,
+    "anterior",
     "(música | faixa | música | filme | vídeo | música) anterior"
   ],
   "pause.intent": [
@@ -68,7 +68,7 @@
   ],
   "load_game.intent": [
     "(carregar|carrega)",
-    null,
-    null
+    "carregar [o] jogo",
+    "carregar [o] (último|anterior) jogo [salvo]"
   ]
 }
