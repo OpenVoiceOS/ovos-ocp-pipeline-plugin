@@ -1,6 +1,6 @@
 (play previous|go back one) (music|song|track|video|media)
 (play previous|previous) (music|song|track|video|media)
 (play previous|previous|go back)
+(play|go to) [the] previous (song|track|music|movie|video|tune)
 previous
 previous (song|track|music|movie|video|tune)
-(play|go to) [the] previous (song|track|music|movie|video|tune)
