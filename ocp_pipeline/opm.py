@@ -175,6 +175,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                     LOG.debug(f"registering OCP intent: {intent_name}")
                     cls.intent_matchers[lang].add_intent(
                         intent_name.replace(".intent", ""), samples)
+            if is_padatious:
+                cls.intent_matchers[lang].train()
 
     def register_ocp_intents(self):
         self.load_intent_files()
