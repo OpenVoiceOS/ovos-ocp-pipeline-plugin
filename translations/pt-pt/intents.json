@@ -1,6 +1,7 @@
 {
   "play.intent": [
-    "(Toca|reproduz|põe a dar) {query}"
+    "(Toca|reproduz|põe a dar) {query}",
+    "(Procura|pesquisa) {query} multimédia"
   ],
   "like_song.intent": [
     "Eu gosto (disto|deste|desta|disso)",
@@ -14,15 +15,16 @@
     "(toca|reproduz|põe a dar|vai para) (a próxima|o próximo| seguinte| a seguir) (canção|música|faixa|som|melodia)",
     "(toca|passa) a próxima",
     "(Seguinte|próximo)",
-    "(Seguinte|próximo|próxima)  (canção|música|faixa|som|melodia|vídeo)"
+    "(Seguinte|próximo|próxima)  (canção|música|faixa|som|melodia|vídeo)",
+    "(reproduzir | ir para) [a] (música | faixa | canção | filme | vídeo | música) (seguinte |a seguir)"
   ],
   "resume.intent": [
     "(volta a pôr|resume|continua)",
-    "(volta a pôr|resume|continua)(canção|música|faixa|som|melodia)",
+    "(retomar | continuar | reiniciar) [o] (música | música | faixa | vídeo | media | reprodução | jogo)",
     "(toca|reproduz|põe a dar)"
   ],
   "read.intent": [
-    "(lê|lê-me) (um|uma|o|a) (livro|audiobook|história) {query}",
+    "ler [o] (livro | audiolivro | audiolivro) {query}",
     "(lê|lê-me) {query}",
     "(lê|lê-me) {query} (livro|audiobook|história)"
   ],
@@ -30,18 +32,19 @@
     "(volta a pôr a anterior|põe a anterior|volta atrás) (canção|música|faixa|som|melodia)",
     "(volta a pôr a anterior|põe a anterior|volta atrás) (canção|música|faixa|som|melodia)",
     "(volta a pôr a anterior|põe a anterior|volta atrás)",
-    "(anterior|antes dessa)",
-    "(canção|música|faixa|som|melodia) (anterior|antes dessa)"
+    "(reproduzir | ir para) [o] (música | faixa | música | filme | vídeo | música) anterior",
+    "anterior",
+    "(música | faixa | música | filme | vídeo | música) anterior"
   ],
   "pause.intent": [
     "pausa",
-    "(pausa|pausar) (canção|música|faixa|som|melodia)"
+    "pausa[r] (o|a|) (música | música | faixa | vídeo | media | reprodução | jogo)"
   ],
   "open.intent": [
     "(Abre|abrir) (OCP|O C P|common|ovos|open voice os) (reprodutor|programa)",
     "(abre|abrir) (OCP|O C P|ovos common play|common play|ovos media player|open voice os player) (ecrã principal|página inicial|menu)",
     "Abrir (OCP|O C P|ovos common play|open voice os common play|common play)",
-    "(abre|abrir) (reprodutor|catálogo|aplicação|menu) (multimédia|música|gui|vídeo) "
+    "(abra|abrir) [o] (player|catálogo|menu|reprodução) [de] (media|música|vídeo)"
   ],
   "featured.intent": [
     "(abre|mostra|ver) (recomendado|) (catálogo|coleção|lista de){media} ",
@@ -55,5 +58,14 @@
     "(Pára|parar)",
     "(Pára|parar) (o|a) (música|faixa|canção|som|concertos|filme)",
     "(pára|parar) tudo"
+  ],
+  "save_game.intent": [
+    "gravar",
+    "(salvar|guardar) [o] jogo"
+  ],
+  "load_game.intent": [
+    "(carregar|carrega)",
+    "carregar [o] jogo",
+    "carregar [o] (último|anterior) jogo [salvo]"
   ]
 }

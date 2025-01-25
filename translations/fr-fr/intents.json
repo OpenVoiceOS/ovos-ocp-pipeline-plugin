@@ -14,15 +14,16 @@
     "(lis | va à) (le|la) (musique | chanson | piste | vidéo | média) (suivant|suivante)",
     "joue la suite",
     "suivant",
-    "(chanson | piste | musique | film | vidéo | mélodie) (suivant|suivante)"
+    "(chanson | piste | musique | film | vidéo | mélodie) (suivant|suivante)",
+    "(jouer|aller à) [la] prochaine (chanson|morceau|musique|film|vidéo|air)"
   ],
   "resume.intent": [
     "reprend",
-    "(reprend | continue) (le|la) (musique | chanson | piste | vidéo | média | lecture)",
+    "(reprendre|continuer|redémarrer) [la] (musique|chanson|piste|vidéo|média|lecture|jeu)",
     "joue"
   ],
   "read.intent": [
-    "lis (le|) (livre|livre audio|) {query}",
+    "lire [le] (livre|livre audio|livre audio) {query}",
     "lis {query}",
     "lis {query} (le|) (livre|livre audio)"
   ],
@@ -30,18 +31,19 @@
     "(musique | chanson | piste | vidéo | média) (précédente|précédent)",
     "lis (le|la) (musique|chanson|piste|vidéo|média) (précédent|précédente) ",
     "(reviens en arrière|lis le précédent|lis la précédente)",
+    "(jouer|aller à) [la] (chanson|piste|musique|film|vidéo|air) précédente",
     "précédent",
-    "précédent (song|track|music|movie|video|tune)"
+    "précédent (chanson|piste|musique|film|vidéo|air)"
   ],
   "pause.intent": [
     "pause",
-    "pause (le|la) (musique | chanson | piste | vidéo | média | lecture)"
+    "mettre en pause [la] (musique|chanson|piste|vidéo|média|lecture|jeu)"
   ],
   "open.intent": [
     "ouvre le (lecteur|lecteur multimédia) (OCP|O C P|common|ovos|open voice os)",
     "(ouvre|affiche) (le|la||l') (OCP | O C P | ovos common play | common play | ovos media player | open voice os player) (écran d'accueil | page d'accueil | menu)",
     "ouvre (OCP|O C P|ovos common play|open voice os common play|common play)",
-    "ouvre (le|la|l') (lecteur|catalogue|compétences|menu)(média|musique|interface|vidéo) "
+    "ouvrir [le] (média|musique|gui|vidéo) (lecteur|catalogue|compétences|menu|lecture)"
   ],
   "featured.intent": [
     "(ouvre|affiche|montre) (le|la) (catalogue|collection|playlist)  {media}  (en vedette)",
@@ -55,5 +57,14 @@
     "arrête",
     "arrête (playback|media|media playback|music|movie|movies|noise)",
     "arrête tout"
+  ],
+  "save_game.intent": [
+    "sauvegarder",
+    "sauvegarder [la] partie"
+  ],
+  "load_game.intent": [
+    "charger",
+    "charger [le] jeu",
+    "charger [la] (dernière|précédente) partie [sauvegardée]"
   ]
 }

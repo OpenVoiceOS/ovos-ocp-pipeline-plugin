@@ -1,5 +1,6 @@
-(anterior|antes dessa)
-(canção|música|faixa|som|melodia) (anterior|antes dessa)
+(música | faixa | música | filme | vídeo | música) anterior
+(reproduzir | ir para) [o] (música | faixa | música | filme | vídeo | música) anterior
 (volta a pôr a anterior|põe a anterior|volta atrás)
 (volta a pôr a anterior|põe a anterior|volta atrás) (canção|música|faixa|som|melodia)
 (volta a pôr a anterior|põe a anterior|volta atrás) (canção|música|faixa|som|melodia)
+anterior
