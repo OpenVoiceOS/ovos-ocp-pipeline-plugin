@@ -17,7 +17,7 @@ from ovos_plugin_manager.ocp import available_extractors
 from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline, PipelineStageMatcher
 from ovos_utils.lang import standardize_lang_tag, get_language_dir
 from ovos_utils.log import LOG, deprecated, log_deprecation
-from ovos_utils.messagebus import FakeBus
+from ovos_utils.fakebus import FakeBus
 from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
     MediaEntry, Playlist, MediaState, TrackState, dict2entry, PluginStream
 from ovos_workshop.app import OVOSAbstractApplication
@@ -610,6 +610,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             # ovos-PHAL-plugin-mk1 will display music icon in response to play message
             player = self.get_player(message)
             player.skill_id = best.skill_id
+            player.player_state = PlayerState.PLAYING
+            player.media_type = best.media_type
             self.update_player_proxy(player)
             # add active skill to session
             sess.activate_skill(best.skill_id)
@@ -856,7 +858,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                     player.ocp_available = True
                     self.update_player_proxy(player)
                     ev.set()
-                    LOG.info(f"Session: {player.session_id} Available stream extractor plugins: {m.data['SEI']}")
+                    LOG.debug(f"Session: {player.session_id} Available stream extractor plugins: {m.data['SEI']}")
 
             self.bus.on("ovos.common_play.SEI.get.response", handle_m)
             message = message or dig_for_message() or Message("")  # get message.context to forward

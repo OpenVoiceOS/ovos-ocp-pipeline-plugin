@@ -1,10 +1,6 @@
 {
   "play.intent": [
-    "(speel|start|begin) {query}",
-    "zoek met (common play|ocp|ovos common play|O C P) naar {query}",
-    "zoek met (ovos|open voice os) media naar {query}",
-    "zoek {query} (in|met) (common play|ocp|ovos common play|O C P)",
-    "zoek {query} (in|met) (ovos|open voice os) media"
+    "(speel|start|begin) {query}"
   ],
   "like_song.intent": [
     "ik vind (dit|het) leuk",
