@@ -1,22 +1,12 @@
 # Changelog
 
-## [1.1.5a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.5a1) (2025-01-25)
+## [1.1.6a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.6a1) (2025-01-25)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.5a1...1.1.5a1)
-
-**Merged pull requests:**
-
-- rm "OCP" from intent, noone says that [\#57](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/57) ([JarbasAl](https://github.com/JarbasAl))
-- Missing translation [\#56](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/56) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
-- Missing translation [\#55](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/55) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
-
-## [1.1.5a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.5a1) (2025-01-18)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.4...1.1.5a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.5...1.1.6a1)
 
 **Merged pull requests:**
 
-- pt-pt/translate [\#54](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/54) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
+- fix:training [\#58](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/58) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
