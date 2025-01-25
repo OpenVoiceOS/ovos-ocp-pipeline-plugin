@@ -2,9 +2,7 @@
   "play.intent": [
     "(riproduci|metti|racconta)(mi|) {query}",
     "fammi (vedere|sentire|ascoltare) {query}",
-    "cerca media {query}",
-    "cerca {query} in ovos",
-    "[UNUSED]"
+    "cerca media {query}"
   ],
   "like_song.intent": [
     "mi piace",

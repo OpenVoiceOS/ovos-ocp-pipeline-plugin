@@ -1,9 +1,6 @@
 {
   "play.intent": [
     "(Toca|reproduz|põe a dar) {query}",
-    null,
-    null,
-    null,
     "(Procura|pesquisa) {query} multimédia"
   ],
   "like_song.intent": [

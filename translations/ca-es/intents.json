@@ -1,10 +1,6 @@
 {
   "play.intent": [
-    "(reprodueix|inicia|comença) {query}",
-    "(cerca|busca) (una|la|) (reproducció habitual|reproducció comú|O C P|o ce pe) (ovos|) (per a|per) {query}",
-    "(cerca|busca) (un|el|es) (mèdia|multimèdia|mitjà) (ovos|open voice os) (per|per a) {query}",
-    "(cerca|busca) {query} (en|a|en la|a la) (reproducció habitual|reproducció comú|ocp|ovos|O C P)",
-    "(cerca|busca) {query} (en|a|en el| al) (mèdia|contingut multimèdia|multimèdia) (ovos|open voice os)"
+    "(reprodueix|inicia|comença) {query}"
   ],
   "like_song.intent": [
     "m'agrada (això|açò|)",
