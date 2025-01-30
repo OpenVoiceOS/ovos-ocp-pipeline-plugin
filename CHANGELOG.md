@@ -1,12 +1,12 @@
 # Changelog
 
-## [1.1.7a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.7a1) (2025-01-25)
+## [1.1.8a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.8a1) (2025-01-30)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.6...1.1.7a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.7...1.1.8a1)
 
 **Merged pull requests:**
 
-- fix: syntax error in catalan [\#60](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/60) ([JarbasAl](https://github.com/JarbasAl))
+- fix:locale\_matching [\#62](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/62) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
