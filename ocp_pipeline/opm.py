@@ -711,19 +711,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
         # simplistic approach via voc_match, works anywhere
         # and it's easy to localize, but isn't very accurate
-        if MediaType.MUSIC in valid_labels and self.voc_match(query, "MusicKeyword", lang=lang):
-            # NOTE - before movie to handle "{movie_name} soundtrack"
-            return MediaType.MUSIC, 0.6
-        elif any([s in valid_labels for s in [MediaType.MOVIE, MediaType.SHORT_FILM, MediaType.SILENT_MOVIE, MediaType.BLACK_WHITE_MOVIE]]) and \
-                self.voc_match(query, "MovieKeyword", lang=lang):
-            if MediaType.SHORT_FILM in valid_labels and self.voc_match(query, "ShortKeyword", lang=lang):
-                return MediaType.SHORT_FILM, 0.7
-            elif MediaType.SILENT_MOVIE in valid_labels and self.voc_match(query, "SilentKeyword", lang=lang):
-                return MediaType.SILENT_MOVIE, 0.7
-            elif MediaType.BLACK_WHITE_MOVIE in valid_labels and self.voc_match(query, "BWKeyword", lang=lang):
-                return MediaType.BLACK_WHITE_MOVIE, 0.7
-            return MediaType.MOVIE, 0.6
-        elif MediaType.DOCUMENTARY in valid_labels and self.voc_match(query, "DocumentaryKeyword", lang=lang):
+        if MediaType.DOCUMENTARY in valid_labels and self.voc_match(query, "DocumentaryKeyword", lang=lang):
             return MediaType.DOCUMENTARY, 0.6
         elif MediaType.AUDIOBOOK in valid_labels and self.voc_match(query, "AudioBookKeyword", lang=lang):
             return MediaType.AUDIOBOOK, 0.6
@@ -735,15 +723,27 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             return MediaType.CARTOON, 0.6
         elif MediaType.PODCAST in valid_labels and self.voc_match(query, "PodcastKeyword", lang=lang):
             return MediaType.PODCAST, 0.6
-        elif MediaType.TV in valid_labels and self.voc_match(query, "TVKeyword", lang=lang):
-            return MediaType.TV, 0.6
-        elif MediaType.VIDEO_EPISODES in valid_labels and self.voc_match(query, "SeriesKeyword", lang=lang):
-            return MediaType.VIDEO_EPISODES, 0.6
         elif MediaType.RADIO_THEATRE in valid_labels and self.voc_match(query, "AudioDramaKeyword", lang=lang):
             # NOTE - before "radio" to allow "radio theatre"
             return MediaType.RADIO_THEATRE, 0.6
         elif MediaType.RADIO in valid_labels and self.voc_match(query, "RadioKeyword", lang=lang):
             return MediaType.RADIO, 0.6
+        elif MediaType.MUSIC in valid_labels and self.voc_match(query, "MusicKeyword", lang=lang):
+            # NOTE - before movie to handle "{movie_name} soundtrack"
+            return MediaType.MUSIC, 0.6
+        elif MediaType.TV in valid_labels and self.voc_match(query, "TVKeyword", lang=lang):
+            return MediaType.TV, 0.6
+        elif MediaType.VIDEO_EPISODES in valid_labels and self.voc_match(query, "SeriesKeyword", lang=lang):
+            return MediaType.VIDEO_EPISODES, 0.6
+        elif any([s in valid_labels for s in [MediaType.MOVIE, MediaType.SHORT_FILM, MediaType.SILENT_MOVIE, MediaType.BLACK_WHITE_MOVIE]]) and \
+                self.voc_match(query, "MovieKeyword", lang=lang):
+            if MediaType.SHORT_FILM in valid_labels and self.voc_match(query, "ShortKeyword", lang=lang):
+                return MediaType.SHORT_FILM, 0.7
+            elif MediaType.SILENT_MOVIE in valid_labels and self.voc_match(query, "SilentKeyword", lang=lang):
+                return MediaType.SILENT_MOVIE, 0.7
+            elif MediaType.BLACK_WHITE_MOVIE in valid_labels and self.voc_match(query, "BWKeyword", lang=lang):
+                return MediaType.BLACK_WHITE_MOVIE, 0.7
+            return MediaType.MOVIE, 0.6
         elif MediaType.VISUAL_STORY in valid_labels and self.voc_match(query, "ComicBookKeyword", lang=lang):
             return MediaType.VISUAL_STORY, 0.4
         elif MediaType.GAME in valid_labels and self.voc_match(query, "GameKeyword", lang=lang):
