@@ -1,7 +1,7 @@
 {
   "play.intent": [
-    "(Toca|reproduz|põe a dar) {query}",
-    "(Procura|pesquisa) {query} multimédia"
+    "(Toca[r]|reproduz[ir]|(põe|pôr) [a dar]) {query}",
+    "(Procura[r]|pesquisa[r]) {query} multimédia"
   ],
   "like_song.intent": [
     "Eu gosto (disto|deste|desta|disso)",

@@ -21,7 +21,7 @@ for lang in os.listdir(tx):
             data = json.load(f)
         for fid, samples in data.items():
             if samples:
-                samples = [s for s in samples if s]  # s may be None
+                samples = [s for s in samples if s and s != "[UNUSED]"]  # s may be None
                 with open(f"{locale}/{lang.lower()}/{fid}", "w") as f:
                     f.write("\n".join(sorted(samples)))
 
@@ -30,7 +30,7 @@ for lang in os.listdir(tx):
             data = json.load(f)
         for fid, samples in data.items():
             if samples:
-                samples = [s for s in samples if s]  # s may be None
+                samples = [s for s in samples if s and s != "[UNUSED]"]  # s may be None
                 with open(f"{locale}/{lang.lower()}/{fid}", "w") as f:
                     f.write("\n".join(sorted(samples)))
 
@@ -39,7 +39,7 @@ for lang in os.listdir(tx):
             data = json.load(f)
         for fid, samples in data.items():
             if samples:
-                samples = [s for s in samples if s]  # s may be None
+                samples = [s for s in samples if s and s != "[UNUSED]"]  # s may be None
                 with open(f"{locale}/{lang.lower()}/{fid}", "w") as f:
                     f.write("\n".join(sorted(samples)))
 
@@ -48,7 +48,7 @@ for lang in os.listdir(tx):
             data = json.load(f)
         for fid, samples in data.items():
             if samples:
-                samples = [s for s in samples if s]  # s may be None
+                samples = [s for s in samples if s and s != "[UNUSED]"]  # s may be None
                 with open(f"{locale}/{lang.lower()}/{fid}", "w") as f:
                     f.write("\n".join(sorted(samples)))
 

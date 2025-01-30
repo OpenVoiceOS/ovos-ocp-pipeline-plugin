@@ -31,7 +31,9 @@
     "(apenas|só) som"
   ],
   "NewsKeyword.voc": [
-    "noticias"
+    "notícias",
+    "noticiário",
+    "telejornal"
   ],
   "GameKeyword.voc": [
     "jogo"
