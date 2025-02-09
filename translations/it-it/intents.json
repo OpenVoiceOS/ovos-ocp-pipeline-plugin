@@ -1,8 +1,6 @@
 {
   "play.intent": [
-    "(riproduci|metti|racconta)(mi|) {query}",
-    "fammi (vedere|sentire|ascoltare) {query}",
-    "cerca media {query}"
+    "(riproduci|metti|racconta)(mi|) {query}"
   ],
   "like_song.intent": [
     "mi piace",
@@ -16,7 +14,8 @@
     "(riproduci|metti|) (il|la|) (prossimo|prossima|successivo|successiva|) (canzone|musica|suono|concerto|brano|traccia|video|media|quello|quella) (prossimo|prossima|successivo|successiva|dopo|)",
     "(riproduci|metti|) (il|la|quello|quella|) (salta|passa|dopo|prossimo|prossima|successivo|successiva)",
     "(dopo|prossimo|prossima|successivo|successiva)",
-    "(prossimo|prossima|successivo|successiva) (canzone|musica|suono|concerto|brano|traccia|video|media)"
+    "(prossimo|prossima|successivo|successiva) (canzone|musica|suono|concerto|brano|traccia|video|media)",
+    null
   ],
   "resume.intent": [
     "(riprendi|vai|continua)",
@@ -33,7 +32,8 @@
     "(riproduci|metti|) (il|la|) (precedente|) (canzone|musica|suono|concerto|brano|traccia|video|media|quello|quella|) (precedente|prima|)",
     "(riproduci|metti|torna a|torna|) (il|la|quello|quella|) (precedente|prima|indietro)",
     "(precedente|prima|indietro)",
-    "(precedente|) (canzone|musica|suono|concerto|brano|traccia|video|media) (precedente|prima)"
+    "(precedente|) (canzone|musica|suono|concerto|brano|traccia|video|media) (precedente|prima)",
+    "precedente (canzone|musica|film|brano|traccia|video|media)"
   ],
   "pause.intent": [
     "pausa",
@@ -57,5 +57,14 @@
     "(stop|basta|ferma|spegni)",
     "(stop|stop con|ferma|spegni|chiudi) (il|la|) (canzone|musica|suono|concerto|brano|traccia|video|media|rumore)",
     "(ferma|spegni|chiudi) tutto"
+  ],
+  "save_game.intent": [
+    "salva",
+    "salva [il] gioco"
+  ],
+  "load_game.intent": [
+    "carica",
+    "carica [il] gioco",
+    "carica [il|l'ultimo] gioco salvato"
   ]
 }
