@@ -372,8 +372,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 return None
 
         if match["name"] == "play":
-            utterance = match["entities"].pop("query")
-            return self._process_play_query(utterance, lang, match)
+            query = match["entities"].pop("query")
+            return self._process_play_query(query, utterance, lang, match)
 
         if match["name"] == "like_song" and player.media_type != MediaType.MUSIC:
             LOG.debug("Ignoring like_song intent, current media is not MediaType.MUSIC")
@@ -458,20 +458,20 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                                   skill_id=OCP_ID,
                                   utterance=utterance)
 
-    def _process_play_query(self, utterance: str, lang: str, match: dict = None,
+    def _process_play_query(self, query:str, utterance: str, lang: str, match: dict = None,
                             message: Optional[Message] = None) -> Optional[IntentHandlerMatch]:
         lang = standardize_lang_tag(lang)
         match = match or {}
         player = self.get_player(message)
         # if media is currently paused, empty string means "resume playback"
         if player.player_state == PlayerState.PAUSED and \
-                self._should_resume(utterance, lang, message=message):
+                self._should_resume(query, lang, message=message):
             return IntentHandlerMatch(match_type="ocp:resume",
                                       match_data=match,
                                       skill_id=OCP_ID,
                                       utterance=utterance)
 
-        if not utterance:
+        if not query:
             # user just said "play", we are missing the search query
             phrase = self.get_response("play.what", num_retries=2)
             if not phrase:
@@ -498,8 +498,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         # classify the query media type
         media_type, conf = self.classify_media(utterance, lang, valid_labels=valid_labels)
 
-        # extract the query string
-        query = self.remove_voc(utterance, "Play", lang).strip()
+        # remove play verb from the query string
+        query = self.remove_voc(query, "Play", lang).strip()
 
         if OCPFeaturizer.ocp_keywords is None:
             ents = {}
@@ -545,7 +545,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     def handle_play_search(self, message: Message):
         LOG.info("searching and playing best OCP result")
         utterance = message.data["utterance"].lower()
-        match = self._process_play_query(utterance, self.lang, {"conf": 1.0})
+        query = utterance
+        match = self._process_play_query(query, utterance, self.lang, {"conf": 1.0})
         self.bus.emit(message.forward(match.match_type, match.match_data))
 
     def handle_play_favorites_intent(self, message: Message):
