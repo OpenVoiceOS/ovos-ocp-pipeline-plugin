@@ -14,7 +14,8 @@
     "(spiele|gehen zum) nächsten (Musik|Lied|Titel|Video|Medium)",
     "spiele das nächste",
     "das nächste",
-    "(nächstes|nächsten) (Lied|Titel|Musik|Film|Video|Melodie)"
+    "(nächstes|nächsten) (Lied|Titel|Musik|Film|Video|Melodie)",
+    "(spiele | zum) (nächsten|nächstes) (Lied | Titel | Musik | Film | Video | Melodie)"
   ],
   "resume.intent": [
     "(Pause beenden| fortsetzen| weiter)",
@@ -31,7 +32,8 @@
     "(spiele vorheriges|vorheriges) (Musik|Lied|Track|Video|Medien)",
     "(spiele vorheriges|Vorheriges|gehe zurück)",
     "vorheriges",
-    "(vorheriges|vorheriger) (Lied|Titel|Musik|Film|Video|Melodie)"
+    "(vorheriges|vorheriger) (Lied|Titel|Musik|Film|Video|Melodie)",
+    "vorheriges (Lied|Titel|Musik|Film|Video|Melodie)"
   ],
   "pause.intent": [
     "Pause",
@@ -55,5 +57,14 @@
     "stoppen",
     "Stoppe (Wiedergabe|Medien|Medienwiedergabe|Musik|Film|Filme|Lärm)",
     "alles stoppen"
+  ],
+  "save_game.intent": [
+    "(speichern/sichern)",
+    "(sichere|sicher|speichere|speicher) (den|das|) (Spielstand|Spiel)"
+  ],
+  "load_game.intent": [
+    "(lade|öffne)",
+    "(lade|öffne) (das|) spiel",
+    "(lade|öffne) (den|das) (letzten|letzte) [(gespeicherte|gespeicherten)] (spiel|spielstand) "
   ]
 }
