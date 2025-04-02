@@ -1,1 +1,2 @@
-(joue | démarre) {query}
+démarre {query}
+joue  {query}

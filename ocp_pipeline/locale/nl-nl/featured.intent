@@ -1,2 +1,10 @@
-(open|toon) (uitgelichte) {media} (catalogus|collectie|afspeellijst|playlist)
-(open|toon) uitgelichte {media}
+open uitgelichte {media}
+open uitgelichte {media} afspeellijst
+open uitgelichte {media} catalogus
+open uitgelichte {media} collectie
+open uitgelichte {media} playlist
+toon uitgelichte {media}
+toon uitgelichte {media} afspeellijst
+toon uitgelichte {media} catalogus
+toon uitgelichte {media} collectie
+toon uitgelichte {media} playlist

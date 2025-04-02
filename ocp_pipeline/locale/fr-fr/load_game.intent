@@ -1,3 +1,11 @@
 charger
-charger [la] (dernière|précédente) partie [sauvegardée]
-charger [le] jeu
+charger  dernière partie
+charger  dernière partie sauvegardée
+charger  jeu
+charger  précédente partie
+charger  précédente partie sauvegardée
+charger la dernière partie
+charger la dernière partie sauvegardée
+charger la précédente partie
+charger la précédente partie sauvegardée
+charger le jeu

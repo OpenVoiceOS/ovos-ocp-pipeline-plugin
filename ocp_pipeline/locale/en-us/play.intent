@@ -1,1 +1,2 @@
-(play|start) {query}
+play {query}
+start {query}

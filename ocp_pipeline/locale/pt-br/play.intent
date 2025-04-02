@@ -1,1 +1,2 @@
-(toque|inicie) {query}
+inicie {query}
+toque {query}

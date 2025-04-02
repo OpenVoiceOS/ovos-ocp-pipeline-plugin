@@ -1,3 +1,36 @@
-(llegeix|llegix) (el |es |l'|s')(llibre|audiollibre|àudio llibre|àudiollibre) {query}
-llegeix (el |l'|)(llibre|audiollibre|àudio llibre) {query}
+llegeix audiollibre {query}
+llegeix el audiollibre {query}
+llegeix el llibre {query}
+llegeix el àudio llibre {query}
+llegeix el àudiollibre {query}
+llegeix es audiollibre {query}
+llegeix es llibre {query}
+llegeix es àudio llibre {query}
+llegeix es àudiollibre {query}
+llegeix l'audiollibre {query}
+llegeix l'llibre {query}
+llegeix l'àudio llibre {query}
+llegeix l'àudiollibre {query}
+llegeix llibre {query}
+llegeix s'audiollibre {query}
+llegeix s'llibre {query}
+llegeix s'àudio llibre {query}
+llegeix s'àudiollibre {query}
 llegeix {query}
+llegeix àudio llibre {query}
+llegix el audiollibre {query}
+llegix el llibre {query}
+llegix el àudio llibre {query}
+llegix el àudiollibre {query}
+llegix es audiollibre {query}
+llegix es llibre {query}
+llegix es àudio llibre {query}
+llegix es àudiollibre {query}
+llegix l'audiollibre {query}
+llegix l'llibre {query}
+llegix l'àudio llibre {query}
+llegix l'àudiollibre {query}
+llegix s'audiollibre {query}
+llegix s'llibre {query}
+llegix s'àudio llibre {query}
+llegix s'àudiollibre {query}
