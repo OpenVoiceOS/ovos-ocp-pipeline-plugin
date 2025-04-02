@@ -1,11 +1,12 @@
 # Changelog
 
-## [1.1.10a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.10a1) (2025-04-02)
+## [1.1.11a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.11a1) (2025-04-02)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.10a1...1.1.10a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.10a1...1.1.11a1)
 
 **Merged pull requests:**
 
+- fix: disable ovos-media intents until it releases [\#68](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/68) ([JarbasAl](https://github.com/JarbasAl))
 - fix: improve catalan matching [\#67](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/67) ([JarbasAl](https://github.com/JarbasAl))
 
 ## [1.1.10a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.10a1) (2025-03-15)
