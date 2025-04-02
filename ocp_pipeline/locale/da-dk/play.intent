@@ -1,1 +1,3 @@
-(afspil|start|spil) {query}
+afspil {query}
+spil {query}
+start {query}

@@ -1,6 +1,6 @@
 {
   "play.intent": [
-    "(reprodueix|inicia|comença) {query}"
+    "(reprodueix|inicia|comença|toca|posa) {query}"
   ],
   "like_song.intent": [
     "m'agrada (això|açò|)",

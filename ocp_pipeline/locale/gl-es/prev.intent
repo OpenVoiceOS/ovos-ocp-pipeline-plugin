@@ -1,5 +1,20 @@
-(reproducir anterior|anterior) (música|canción|pista|vídeo|multimedia)
-(reproducir anterior|anterior|atrás)
-(reproducir anterior|volver un atrás) (música|canción|pista|vídeo|multimedia)
 anterior
-anterior (música|pista|música|película|vídeo|melodía)
+anterior canción
+anterior melodía
+anterior multimedia
+anterior música
+anterior película
+anterior pista
+anterior vídeo
+atrás
+reproducir anterior
+reproducir anterior canción
+reproducir anterior multimedia
+reproducir anterior música
+reproducir anterior pista
+reproducir anterior vídeo
+volver un atrás canción
+volver un atrás multimedia
+volver un atrás música
+volver un atrás pista
+volver un atrás vídeo

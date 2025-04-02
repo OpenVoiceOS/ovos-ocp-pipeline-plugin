@@ -1,3 +1,8 @@
 stop
-stop (afspilning|medie|medieafspilning|musik|film|film|støj)
+stop afspilning
 stop alt
+stop film
+stop medie
+stop medieafspilning
+stop musik
+stop støj

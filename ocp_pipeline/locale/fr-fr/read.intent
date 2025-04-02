@@ -1,3 +1,9 @@
-lire [le] (livre|livre audio|livre audio) {query}
+lire  livre audio {query}
+lire  livre {query}
+lire le livre audio {query}
+lire le livre {query}
 lis {query}
-lis {query} (le|) (livre|livre audio)
+lis {query}  livre
+lis {query}  livre audio
+lis {query} le livre
+lis {query} le livre audio

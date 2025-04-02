@@ -1,2 +1,4 @@
-Desculpe, eu não sei como (reproduzir|tocar) {phrase}
-Eu não tenho a certeza de como (reproduzir|tocar) {phrase}
+Desculpe, eu não sei como reproduzir {phrase}
+Desculpe, eu não sei como tocar {phrase}
+Eu não tenho a certeza de como reproduzir {phrase}
+Eu não tenho a certeza de como tocar {phrase}

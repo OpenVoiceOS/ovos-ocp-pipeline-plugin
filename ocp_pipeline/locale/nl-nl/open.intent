@@ -1,4 +1,67 @@
-open (OCP|O C P|common|ovos|open voice os) (speler|mediaspeler)
-open (OCP|O C P|ovos common play|common play|ovos media player|open voice os player) (beginscherm|startpagina|startscherm|homepage|homescreen|startpagina|menu)
-open (OCP|O C P|ovos common play|open voice os common play|common play)
-open (media|muziek|gui|video) (speler|catalogus|skills|menu)
+open O C P
+open O C P beginscherm
+open O C P homepage
+open O C P homescreen
+open O C P mediaspeler
+open O C P menu
+open O C P speler
+open O C P startpagina
+open O C P startscherm
+open OCP
+open OCP beginscherm
+open OCP homepage
+open OCP homescreen
+open OCP mediaspeler
+open OCP menu
+open OCP speler
+open OCP startpagina
+open OCP startscherm
+open common mediaspeler
+open common play
+open common play beginscherm
+open common play homepage
+open common play homescreen
+open common play menu
+open common play startpagina
+open common play startscherm
+open common speler
+open gui catalogus
+open gui menu
+open gui skills
+open gui speler
+open media catalogus
+open media menu
+open media skills
+open media speler
+open muziek catalogus
+open muziek menu
+open muziek skills
+open muziek speler
+open open voice os common play
+open open voice os mediaspeler
+open open voice os player beginscherm
+open open voice os player homepage
+open open voice os player homescreen
+open open voice os player menu
+open open voice os player startpagina
+open open voice os player startscherm
+open open voice os speler
+open ovos common play
+open ovos common play beginscherm
+open ovos common play homepage
+open ovos common play homescreen
+open ovos common play menu
+open ovos common play startpagina
+open ovos common play startscherm
+open ovos media player beginscherm
+open ovos media player homepage
+open ovos media player homescreen
+open ovos media player menu
+open ovos media player startpagina
+open ovos media player startscherm
+open ovos mediaspeler
+open ovos speler
+open video catalogus
+open video menu
+open video skills
+open video speler

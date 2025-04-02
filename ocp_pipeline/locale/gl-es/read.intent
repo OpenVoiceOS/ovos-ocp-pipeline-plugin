@@ -1,3 +1,7 @@
-ler (libro|audiolibro|audio libro) {query}
+ler audio libro {query}
+ler audiolibro {query}
+ler libro {query}
 ler {query}
-ler {query} (libro|audiolibro|audio libro)
+ler {query} audio libro
+ler {query} audiolibro
+ler {query} libro

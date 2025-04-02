@@ -1,2 +1,12 @@
-(Procura[r]|pesquisa[r]) {query} multimédia
-(Toca[r]|reproduz[ir]|(põe|pôr) [a dar]) {query}
+Procura {query} multimédia
+Procurar {query} multimédia
+Toca {query}
+Tocar {query}
+pesquisa {query} multimédia
+pesquisar {query} multimédia
+pôr  {query}
+pôr a dar {query}
+põe  {query}
+põe a dar {query}
+reproduz {query}
+reproduzir {query}

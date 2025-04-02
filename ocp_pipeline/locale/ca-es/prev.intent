@@ -1,6 +1,757 @@
-(anterior|enrere|arrere)
-(cançó|pista|peça|música|pel·lícula|pel·li|film|vídeo|àudio) (anterior|previ|prèvia|últim|última|)
-(posa|reprodueix|reprodueix|vés a|ves a) (la|sa|el|la) (cançó|pista|peça|música|pel·lícula|pel·li|film|vídeo|àudio) (anterior|previ|prèvia)
-(reprodueix|inicia|comença) (el|la|es|sa) (música|cançó|peça|pista|vídeo|mèdia|multimèdia) (anterior|previ|prèvia|enrere)
-(reprodueix|inicia|comença) (l'anterior|enrere|anterior)
-(reprodueix|posa) (la|el|es|sa) (música|peça|pista|vídeo|mèdia|contingut|multimèdia) (anterior|d'abans)
+anterior
+arrere
+cançó
+cançó anterior
+cançó previ
+cançó prèvia
+cançó últim
+cançó última
+comença anterior
+comença el cançó anterior
+comença el cançó enrere
+comença el cançó previ
+comença el cançó prèvia
+comença el multimèdia anterior
+comença el multimèdia enrere
+comença el multimèdia previ
+comença el multimèdia prèvia
+comença el mèdia anterior
+comença el mèdia enrere
+comença el mèdia previ
+comença el mèdia prèvia
+comença el música anterior
+comença el música enrere
+comença el música previ
+comença el música prèvia
+comença el peça anterior
+comença el peça enrere
+comença el peça previ
+comença el peça prèvia
+comença el pista anterior
+comença el pista enrere
+comença el pista previ
+comença el pista prèvia
+comença el vídeo anterior
+comença el vídeo enrere
+comença el vídeo previ
+comença el vídeo prèvia
+comença enrere
+comença es cançó anterior
+comença es cançó enrere
+comença es cançó previ
+comença es cançó prèvia
+comença es multimèdia anterior
+comença es multimèdia enrere
+comença es multimèdia previ
+comença es multimèdia prèvia
+comença es mèdia anterior
+comença es mèdia enrere
+comença es mèdia previ
+comença es mèdia prèvia
+comença es música anterior
+comença es música enrere
+comença es música previ
+comença es música prèvia
+comença es peça anterior
+comença es peça enrere
+comença es peça previ
+comença es peça prèvia
+comença es pista anterior
+comença es pista enrere
+comença es pista previ
+comença es pista prèvia
+comença es vídeo anterior
+comença es vídeo enrere
+comença es vídeo previ
+comença es vídeo prèvia
+comença l'anterior
+comença la cançó anterior
+comença la cançó enrere
+comença la cançó previ
+comença la cançó prèvia
+comença la multimèdia anterior
+comença la multimèdia enrere
+comença la multimèdia previ
+comença la multimèdia prèvia
+comença la mèdia anterior
+comença la mèdia enrere
+comença la mèdia previ
+comença la mèdia prèvia
+comença la música anterior
+comença la música enrere
+comença la música previ
+comença la música prèvia
+comença la peça anterior
+comença la peça enrere
+comença la peça previ
+comença la peça prèvia
+comença la pista anterior
+comença la pista enrere
+comença la pista previ
+comença la pista prèvia
+comença la vídeo anterior
+comença la vídeo enrere
+comença la vídeo previ
+comença la vídeo prèvia
+comença sa cançó anterior
+comença sa cançó enrere
+comença sa cançó previ
+comença sa cançó prèvia
+comença sa multimèdia anterior
+comença sa multimèdia enrere
+comença sa multimèdia previ
+comença sa multimèdia prèvia
+comença sa mèdia anterior
+comença sa mèdia enrere
+comença sa mèdia previ
+comença sa mèdia prèvia
+comença sa música anterior
+comença sa música enrere
+comença sa música previ
+comença sa música prèvia
+comença sa peça anterior
+comença sa peça enrere
+comença sa peça previ
+comença sa peça prèvia
+comença sa pista anterior
+comença sa pista enrere
+comença sa pista previ
+comença sa pista prèvia
+comença sa vídeo anterior
+comença sa vídeo enrere
+comença sa vídeo previ
+comença sa vídeo prèvia
+enrere
+film
+film anterior
+film previ
+film prèvia
+film últim
+film última
+inicia anterior
+inicia el cançó anterior
+inicia el cançó enrere
+inicia el cançó previ
+inicia el cançó prèvia
+inicia el multimèdia anterior
+inicia el multimèdia enrere
+inicia el multimèdia previ
+inicia el multimèdia prèvia
+inicia el mèdia anterior
+inicia el mèdia enrere
+inicia el mèdia previ
+inicia el mèdia prèvia
+inicia el música anterior
+inicia el música enrere
+inicia el música previ
+inicia el música prèvia
+inicia el peça anterior
+inicia el peça enrere
+inicia el peça previ
+inicia el peça prèvia
+inicia el pista anterior
+inicia el pista enrere
+inicia el pista previ
+inicia el pista prèvia
+inicia el vídeo anterior
+inicia el vídeo enrere
+inicia el vídeo previ
+inicia el vídeo prèvia
+inicia enrere
+inicia es cançó anterior
+inicia es cançó enrere
+inicia es cançó previ
+inicia es cançó prèvia
+inicia es multimèdia anterior
+inicia es multimèdia enrere
+inicia es multimèdia previ
+inicia es multimèdia prèvia
+inicia es mèdia anterior
+inicia es mèdia enrere
+inicia es mèdia previ
+inicia es mèdia prèvia
+inicia es música anterior
+inicia es música enrere
+inicia es música previ
+inicia es música prèvia
+inicia es peça anterior
+inicia es peça enrere
+inicia es peça previ
+inicia es peça prèvia
+inicia es pista anterior
+inicia es pista enrere
+inicia es pista previ
+inicia es pista prèvia
+inicia es vídeo anterior
+inicia es vídeo enrere
+inicia es vídeo previ
+inicia es vídeo prèvia
+inicia l'anterior
+inicia la cançó anterior
+inicia la cançó enrere
+inicia la cançó previ
+inicia la cançó prèvia
+inicia la multimèdia anterior
+inicia la multimèdia enrere
+inicia la multimèdia previ
+inicia la multimèdia prèvia
+inicia la mèdia anterior
+inicia la mèdia enrere
+inicia la mèdia previ
+inicia la mèdia prèvia
+inicia la música anterior
+inicia la música enrere
+inicia la música previ
+inicia la música prèvia
+inicia la peça anterior
+inicia la peça enrere
+inicia la peça previ
+inicia la peça prèvia
+inicia la pista anterior
+inicia la pista enrere
+inicia la pista previ
+inicia la pista prèvia
+inicia la vídeo anterior
+inicia la vídeo enrere
+inicia la vídeo previ
+inicia la vídeo prèvia
+inicia sa cançó anterior
+inicia sa cançó enrere
+inicia sa cançó previ
+inicia sa cançó prèvia
+inicia sa multimèdia anterior
+inicia sa multimèdia enrere
+inicia sa multimèdia previ
+inicia sa multimèdia prèvia
+inicia sa mèdia anterior
+inicia sa mèdia enrere
+inicia sa mèdia previ
+inicia sa mèdia prèvia
+inicia sa música anterior
+inicia sa música enrere
+inicia sa música previ
+inicia sa música prèvia
+inicia sa peça anterior
+inicia sa peça enrere
+inicia sa peça previ
+inicia sa peça prèvia
+inicia sa pista anterior
+inicia sa pista enrere
+inicia sa pista previ
+inicia sa pista prèvia
+inicia sa vídeo anterior
+inicia sa vídeo enrere
+inicia sa vídeo previ
+inicia sa vídeo prèvia
+música
+música anterior
+música previ
+música prèvia
+música últim
+música última
+pel·li
+pel·li anterior
+pel·li previ
+pel·li prèvia
+pel·li últim
+pel·li última
+pel·lícula
+pel·lícula anterior
+pel·lícula previ
+pel·lícula prèvia
+pel·lícula últim
+pel·lícula última
+peça
+peça anterior
+peça previ
+peça prèvia
+peça últim
+peça última
+pista
+pista anterior
+pista previ
+pista prèvia
+pista últim
+pista última
+posa el cançó anterior
+posa el cançó previ
+posa el cançó prèvia
+posa el contingut anterior
+posa el contingut d'abans
+posa el film anterior
+posa el film previ
+posa el film prèvia
+posa el multimèdia anterior
+posa el multimèdia d'abans
+posa el mèdia anterior
+posa el mèdia d'abans
+posa el música anterior
+posa el música d'abans
+posa el música previ
+posa el música prèvia
+posa el pel·li anterior
+posa el pel·li previ
+posa el pel·li prèvia
+posa el pel·lícula anterior
+posa el pel·lícula previ
+posa el pel·lícula prèvia
+posa el peça anterior
+posa el peça d'abans
+posa el peça previ
+posa el peça prèvia
+posa el pista anterior
+posa el pista d'abans
+posa el pista previ
+posa el pista prèvia
+posa el vídeo anterior
+posa el vídeo d'abans
+posa el vídeo previ
+posa el vídeo prèvia
+posa el àudio anterior
+posa el àudio previ
+posa el àudio prèvia
+posa es contingut anterior
+posa es contingut d'abans
+posa es multimèdia anterior
+posa es multimèdia d'abans
+posa es mèdia anterior
+posa es mèdia d'abans
+posa es música anterior
+posa es música d'abans
+posa es peça anterior
+posa es peça d'abans
+posa es pista anterior
+posa es pista d'abans
+posa es vídeo anterior
+posa es vídeo d'abans
+posa la cançó anterior
+posa la cançó previ
+posa la cançó prèvia
+posa la contingut anterior
+posa la contingut d'abans
+posa la film anterior
+posa la film previ
+posa la film prèvia
+posa la multimèdia anterior
+posa la multimèdia d'abans
+posa la mèdia anterior
+posa la mèdia d'abans
+posa la música anterior
+posa la música d'abans
+posa la música previ
+posa la música prèvia
+posa la pel·li anterior
+posa la pel·li previ
+posa la pel·li prèvia
+posa la pel·lícula anterior
+posa la pel·lícula previ
+posa la pel·lícula prèvia
+posa la peça anterior
+posa la peça d'abans
+posa la peça previ
+posa la peça prèvia
+posa la pista anterior
+posa la pista d'abans
+posa la pista previ
+posa la pista prèvia
+posa la vídeo anterior
+posa la vídeo d'abans
+posa la vídeo previ
+posa la vídeo prèvia
+posa la àudio anterior
+posa la àudio previ
+posa la àudio prèvia
+posa sa cançó anterior
+posa sa cançó previ
+posa sa cançó prèvia
+posa sa contingut anterior
+posa sa contingut d'abans
+posa sa film anterior
+posa sa film previ
+posa sa film prèvia
+posa sa multimèdia anterior
+posa sa multimèdia d'abans
+posa sa mèdia anterior
+posa sa mèdia d'abans
+posa sa música anterior
+posa sa música d'abans
+posa sa música previ
+posa sa música prèvia
+posa sa pel·li anterior
+posa sa pel·li previ
+posa sa pel·li prèvia
+posa sa pel·lícula anterior
+posa sa pel·lícula previ
+posa sa pel·lícula prèvia
+posa sa peça anterior
+posa sa peça d'abans
+posa sa peça previ
+posa sa peça prèvia
+posa sa pista anterior
+posa sa pista d'abans
+posa sa pista previ
+posa sa pista prèvia
+posa sa vídeo anterior
+posa sa vídeo d'abans
+posa sa vídeo previ
+posa sa vídeo prèvia
+posa sa àudio anterior
+posa sa àudio previ
+posa sa àudio prèvia
+reprodueix anterior
+reprodueix el cançó anterior
+reprodueix el cançó enrere
+reprodueix el cançó previ
+reprodueix el cançó prèvia
+reprodueix el contingut anterior
+reprodueix el contingut d'abans
+reprodueix el film anterior
+reprodueix el film previ
+reprodueix el film prèvia
+reprodueix el multimèdia anterior
+reprodueix el multimèdia d'abans
+reprodueix el multimèdia enrere
+reprodueix el multimèdia previ
+reprodueix el multimèdia prèvia
+reprodueix el mèdia anterior
+reprodueix el mèdia d'abans
+reprodueix el mèdia enrere
+reprodueix el mèdia previ
+reprodueix el mèdia prèvia
+reprodueix el música anterior
+reprodueix el música d'abans
+reprodueix el música enrere
+reprodueix el música previ
+reprodueix el música prèvia
+reprodueix el pel·li anterior
+reprodueix el pel·li previ
+reprodueix el pel·li prèvia
+reprodueix el pel·lícula anterior
+reprodueix el pel·lícula previ
+reprodueix el pel·lícula prèvia
+reprodueix el peça anterior
+reprodueix el peça d'abans
+reprodueix el peça enrere
+reprodueix el peça previ
+reprodueix el peça prèvia
+reprodueix el pista anterior
+reprodueix el pista d'abans
+reprodueix el pista enrere
+reprodueix el pista previ
+reprodueix el pista prèvia
+reprodueix el vídeo anterior
+reprodueix el vídeo d'abans
+reprodueix el vídeo enrere
+reprodueix el vídeo previ
+reprodueix el vídeo prèvia
+reprodueix el àudio anterior
+reprodueix el àudio previ
+reprodueix el àudio prèvia
+reprodueix enrere
+reprodueix es cançó anterior
+reprodueix es cançó enrere
+reprodueix es cançó previ
+reprodueix es cançó prèvia
+reprodueix es contingut anterior
+reprodueix es contingut d'abans
+reprodueix es multimèdia anterior
+reprodueix es multimèdia d'abans
+reprodueix es multimèdia enrere
+reprodueix es multimèdia previ
+reprodueix es multimèdia prèvia
+reprodueix es mèdia anterior
+reprodueix es mèdia d'abans
+reprodueix es mèdia enrere
+reprodueix es mèdia previ
+reprodueix es mèdia prèvia
+reprodueix es música anterior
+reprodueix es música d'abans
+reprodueix es música enrere
+reprodueix es música previ
+reprodueix es música prèvia
+reprodueix es peça anterior
+reprodueix es peça d'abans
+reprodueix es peça enrere
+reprodueix es peça previ
+reprodueix es peça prèvia
+reprodueix es pista anterior
+reprodueix es pista d'abans
+reprodueix es pista enrere
+reprodueix es pista previ
+reprodueix es pista prèvia
+reprodueix es vídeo anterior
+reprodueix es vídeo d'abans
+reprodueix es vídeo enrere
+reprodueix es vídeo previ
+reprodueix es vídeo prèvia
+reprodueix l'anterior
+reprodueix la cançó anterior
+reprodueix la cançó enrere
+reprodueix la cançó previ
+reprodueix la cançó prèvia
+reprodueix la contingut anterior
+reprodueix la contingut d'abans
+reprodueix la film anterior
+reprodueix la film previ
+reprodueix la film prèvia
+reprodueix la multimèdia anterior
+reprodueix la multimèdia d'abans
+reprodueix la multimèdia enrere
+reprodueix la multimèdia previ
+reprodueix la multimèdia prèvia
+reprodueix la mèdia anterior
+reprodueix la mèdia d'abans
+reprodueix la mèdia enrere
+reprodueix la mèdia previ
+reprodueix la mèdia prèvia
+reprodueix la música anterior
+reprodueix la música d'abans
+reprodueix la música enrere
+reprodueix la música previ
+reprodueix la música prèvia
+reprodueix la pel·li anterior
+reprodueix la pel·li previ
+reprodueix la pel·li prèvia
+reprodueix la pel·lícula anterior
+reprodueix la pel·lícula previ
+reprodueix la pel·lícula prèvia
+reprodueix la peça anterior
+reprodueix la peça d'abans
+reprodueix la peça enrere
+reprodueix la peça previ
+reprodueix la peça prèvia
+reprodueix la pista anterior
+reprodueix la pista d'abans
+reprodueix la pista enrere
+reprodueix la pista previ
+reprodueix la pista prèvia
+reprodueix la vídeo anterior
+reprodueix la vídeo d'abans
+reprodueix la vídeo enrere
+reprodueix la vídeo previ
+reprodueix la vídeo prèvia
+reprodueix la àudio anterior
+reprodueix la àudio previ
+reprodueix la àudio prèvia
+reprodueix sa cançó anterior
+reprodueix sa cançó enrere
+reprodueix sa cançó previ
+reprodueix sa cançó prèvia
+reprodueix sa contingut anterior
+reprodueix sa contingut d'abans
+reprodueix sa film anterior
+reprodueix sa film previ
+reprodueix sa film prèvia
+reprodueix sa multimèdia anterior
+reprodueix sa multimèdia d'abans
+reprodueix sa multimèdia enrere
+reprodueix sa multimèdia previ
+reprodueix sa multimèdia prèvia
+reprodueix sa mèdia anterior
+reprodueix sa mèdia d'abans
+reprodueix sa mèdia enrere
+reprodueix sa mèdia previ
+reprodueix sa mèdia prèvia
+reprodueix sa música anterior
+reprodueix sa música d'abans
+reprodueix sa música enrere
+reprodueix sa música previ
+reprodueix sa música prèvia
+reprodueix sa pel·li anterior
+reprodueix sa pel·li previ
+reprodueix sa pel·li prèvia
+reprodueix sa pel·lícula anterior
+reprodueix sa pel·lícula previ
+reprodueix sa pel·lícula prèvia
+reprodueix sa peça anterior
+reprodueix sa peça d'abans
+reprodueix sa peça enrere
+reprodueix sa peça previ
+reprodueix sa peça prèvia
+reprodueix sa pista anterior
+reprodueix sa pista d'abans
+reprodueix sa pista enrere
+reprodueix sa pista previ
+reprodueix sa pista prèvia
+reprodueix sa vídeo anterior
+reprodueix sa vídeo d'abans
+reprodueix sa vídeo enrere
+reprodueix sa vídeo previ
+reprodueix sa vídeo prèvia
+reprodueix sa àudio anterior
+reprodueix sa àudio previ
+reprodueix sa àudio prèvia
+ves a el cançó anterior
+ves a el cançó previ
+ves a el cançó prèvia
+ves a el film anterior
+ves a el film previ
+ves a el film prèvia
+ves a el música anterior
+ves a el música previ
+ves a el música prèvia
+ves a el pel·li anterior
+ves a el pel·li previ
+ves a el pel·li prèvia
+ves a el pel·lícula anterior
+ves a el pel·lícula previ
+ves a el pel·lícula prèvia
+ves a el peça anterior
+ves a el peça previ
+ves a el peça prèvia
+ves a el pista anterior
+ves a el pista previ
+ves a el pista prèvia
+ves a el vídeo anterior
+ves a el vídeo previ
+ves a el vídeo prèvia
+ves a el àudio anterior
+ves a el àudio previ
+ves a el àudio prèvia
+ves a la cançó anterior
+ves a la cançó previ
+ves a la cançó prèvia
+ves a la film anterior
+ves a la film previ
+ves a la film prèvia
+ves a la música anterior
+ves a la música previ
+ves a la música prèvia
+ves a la pel·li anterior
+ves a la pel·li previ
+ves a la pel·li prèvia
+ves a la pel·lícula anterior
+ves a la pel·lícula previ
+ves a la pel·lícula prèvia
+ves a la peça anterior
+ves a la peça previ
+ves a la peça prèvia
+ves a la pista anterior
+ves a la pista previ
+ves a la pista prèvia
+ves a la vídeo anterior
+ves a la vídeo previ
+ves a la vídeo prèvia
+ves a la àudio anterior
+ves a la àudio previ
+ves a la àudio prèvia
+ves a sa cançó anterior
+ves a sa cançó previ
+ves a sa cançó prèvia
+ves a sa film anterior
+ves a sa film previ
+ves a sa film prèvia
+ves a sa música anterior
+ves a sa música previ
+ves a sa música prèvia
+ves a sa pel·li anterior
+ves a sa pel·li previ
+ves a sa pel·li prèvia
+ves a sa pel·lícula anterior
+ves a sa pel·lícula previ
+ves a sa pel·lícula prèvia
+ves a sa peça anterior
+ves a sa peça previ
+ves a sa peça prèvia
+ves a sa pista anterior
+ves a sa pista previ
+ves a sa pista prèvia
+ves a sa vídeo anterior
+ves a sa vídeo previ
+ves a sa vídeo prèvia
+ves a sa àudio anterior
+ves a sa àudio previ
+ves a sa àudio prèvia
+vés a el cançó anterior
+vés a el cançó previ
+vés a el cançó prèvia
+vés a el film anterior
+vés a el film previ
+vés a el film prèvia
+vés a el música anterior
+vés a el música previ
+vés a el música prèvia
+vés a el pel·li anterior
+vés a el pel·li previ
+vés a el pel·li prèvia
+vés a el pel·lícula anterior
+vés a el pel·lícula previ
+vés a el pel·lícula prèvia
+vés a el peça anterior
+vés a el peça previ
+vés a el peça prèvia
+vés a el pista anterior
+vés a el pista previ
+vés a el pista prèvia
+vés a el vídeo anterior
+vés a el vídeo previ
+vés a el vídeo prèvia
+vés a el àudio anterior
+vés a el àudio previ
+vés a el àudio prèvia
+vés a la cançó anterior
+vés a la cançó previ
+vés a la cançó prèvia
+vés a la film anterior
+vés a la film previ
+vés a la film prèvia
+vés a la música anterior
+vés a la música previ
+vés a la música prèvia
+vés a la pel·li anterior
+vés a la pel·li previ
+vés a la pel·li prèvia
+vés a la pel·lícula anterior
+vés a la pel·lícula previ
+vés a la pel·lícula prèvia
+vés a la peça anterior
+vés a la peça previ
+vés a la peça prèvia
+vés a la pista anterior
+vés a la pista previ
+vés a la pista prèvia
+vés a la vídeo anterior
+vés a la vídeo previ
+vés a la vídeo prèvia
+vés a la àudio anterior
+vés a la àudio previ
+vés a la àudio prèvia
+vés a sa cançó anterior
+vés a sa cançó previ
+vés a sa cançó prèvia
+vés a sa film anterior
+vés a sa film previ
+vés a sa film prèvia
+vés a sa música anterior
+vés a sa música previ
+vés a sa música prèvia
+vés a sa pel·li anterior
+vés a sa pel·li previ
+vés a sa pel·li prèvia
+vés a sa pel·lícula anterior
+vés a sa pel·lícula previ
+vés a sa pel·lícula prèvia
+vés a sa peça anterior
+vés a sa peça previ
+vés a sa peça prèvia
+vés a sa pista anterior
+vés a sa pista previ
+vés a sa pista prèvia
+vés a sa vídeo anterior
+vés a sa vídeo previ
+vés a sa vídeo prèvia
+vés a sa àudio anterior
+vés a sa àudio previ
+vés a sa àudio prèvia
+vídeo
+vídeo anterior
+vídeo previ
+vídeo prèvia
+vídeo últim
+vídeo última
+àudio
+àudio anterior
+àudio previ
+àudio prèvia
+àudio últim
+àudio última

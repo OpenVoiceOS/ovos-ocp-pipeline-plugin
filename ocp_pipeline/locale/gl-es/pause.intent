@@ -1,2 +1,7 @@
 pausar
-pausar (música|canción|pista|vídeo|multimedia|reprodución)
+pausar canción
+pausar multimedia
+pausar música
+pausar pista
+pausar reprodución
+pausar vídeo
