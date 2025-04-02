@@ -47,8 +47,9 @@ NormalizedResultsList = List[Union[MediaEntry, Playlist, PluginStream]]
 
 class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     intents = ["play.intent", "open.intent", "media_stop.intent",
-               "next.intent", "prev.intent", "pause.intent", "play_favorites.intent",
-               "resume.intent", "like_song.intent", "save_game.intent", "load_game.intent"]
+               "next.intent", "prev.intent", "pause.intent",
+               #  "play_favorites.intent", "like_song.intent",  # handled by ovos-media not ovos-audio, re-enable later
+               "resume.intent", "save_game.intent", "load_game.intent"]
     intent_matchers = {}
     intent_cache = f"{xdg_data_home()}/{get_xdg_base()}/intent_cache"
 
