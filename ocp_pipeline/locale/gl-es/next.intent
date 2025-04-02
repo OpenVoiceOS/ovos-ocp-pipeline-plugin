@@ -1,6 +1,25 @@
-(reproducir|ir a) seguinte (música|canción|pista|vídeo|multimedia)
-(seguinte|saltar)
-(seguinte|saltar) (música|canción|pista|vídeo|multimedia)
+ir a seguinte canción
+ir a seguinte multimedia
+ir a seguinte música
+ir a seguinte pista
+ir a seguinte vídeo
 reproducir seguinte
+reproducir seguinte canción
+reproducir seguinte multimedia
+reproducir seguinte música
+reproducir seguinte pista
+reproducir seguinte vídeo
+saltar
+saltar canción
+saltar multimedia
+saltar música
+saltar pista
+saltar vídeo
 seguinte
-seguinte (música|pista|música|película|vídeo|melodía)
+seguinte canción
+seguinte melodía
+seguinte multimedia
+seguinte música
+seguinte película
+seguinte pista
+seguinte vídeo

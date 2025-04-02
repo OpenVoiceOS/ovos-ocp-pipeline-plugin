@@ -1,5 +1,21 @@
-(play previous|previous|go back)
-(speel vorige| vorige) (lied|liedje|track|video|media)
-(speel vorige| vorige) (lied|liedje|track|video|media)
-(vorig|vorige) (nummer|track|liedje|film|video)
+go back
+play previous
+previous
+speel vorige lied
+speel vorige liedje
+speel vorige media
+speel vorige track
+speel vorige video
+vorig film
+vorig liedje
+vorig nummer
+vorig track
+vorig video
 vorige
+vorige film
+vorige lied
+vorige liedje
+vorige media
+vorige nummer
+vorige track
+vorige video

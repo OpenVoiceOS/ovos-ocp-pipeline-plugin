@@ -5,6 +5,8 @@ TODO - before PR merge
 import json
 from os.path import dirname
 import os
+from ovos_utils.bracket_expansion import expand_template
+from ovos_utils.list_utils import deduplicate_list, flatten_list
 
 locale = f"{dirname(dirname(__file__))}/ocp_pipeline/locale"
 tx = f"{dirname(dirname(__file__))}/translations"
@@ -21,7 +23,13 @@ for lang in os.listdir(tx):
             data = json.load(f)
         for fid, samples in data.items():
             if samples:
-                samples = [s for s in samples if s and s != "[UNUSED]"]  # s may be None
+                samples = deduplicate_list(flatten_list([expand_template(s.strip()) for s in samples
+                           if s and s.strip() != "[UNUSED]"]))  # s may be None
+                if fid.startswith("/"):
+                    p = f"{locale}/{lang.lower()}{fid}"
+                else:
+                    p = f"{locale}/{lang.lower()}/{fid}"
+                os.makedirs(os.path.dirname(p), exist_ok=True)
                 with open(f"{locale}/{lang.lower()}/{fid}", "w") as f:
                     f.write("\n".join(sorted(samples)))
 
@@ -30,7 +38,13 @@ for lang in os.listdir(tx):
             data = json.load(f)
         for fid, samples in data.items():
             if samples:
-                samples = [s for s in samples if s and s != "[UNUSED]"]  # s may be None
+                samples = deduplicate_list(flatten_list([expand_template(s.strip()) for s in samples
+                                                         if s and s.strip() != "[UNUSED]"]))  # s may be None
+                if fid.startswith("/"):
+                    p = f"{locale}/{lang.lower()}{fid}"
+                else:
+                    p = f"{locale}/{lang.lower()}/{fid}"
+                os.makedirs(os.path.dirname(p), exist_ok=True)
                 with open(f"{locale}/{lang.lower()}/{fid}", "w") as f:
                     f.write("\n".join(sorted(samples)))
 
@@ -39,7 +53,13 @@ for lang in os.listdir(tx):
             data = json.load(f)
         for fid, samples in data.items():
             if samples:
-                samples = [s for s in samples if s and s != "[UNUSED]"]  # s may be None
+                samples = deduplicate_list(flatten_list([expand_template(s.strip()) for s in samples
+                                                         if s and s.strip() != "[UNUSED]"]))  # s may be None
+                if fid.startswith("/"):
+                    p = f"{locale}/{lang.lower()}{fid}"
+                else:
+                    p = f"{locale}/{lang.lower()}/{fid}"
+                os.makedirs(os.path.dirname(p), exist_ok=True)
                 with open(f"{locale}/{lang.lower()}/{fid}", "w") as f:
                     f.write("\n".join(sorted(samples)))
 
@@ -48,7 +68,13 @@ for lang in os.listdir(tx):
             data = json.load(f)
         for fid, samples in data.items():
             if samples:
-                samples = [s for s in samples if s and s != "[UNUSED]"]  # s may be None
+                samples = deduplicate_list(flatten_list([expand_template(s.strip()) for s in samples
+                                                         if s and s.strip() != "[UNUSED]"]))  # s may be None
+                if fid.startswith("/"):
+                    p = f"{locale}/{lang.lower()}{fid}"
+                else:
+                    p = f"{locale}/{lang.lower()}/{fid}"
+                os.makedirs(os.path.dirname(p), exist_ok=True)
                 with open(f"{locale}/{lang.lower()}/{fid}", "w") as f:
                     f.write("\n".join(sorted(samples)))
 

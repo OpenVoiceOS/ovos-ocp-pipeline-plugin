@@ -1,3 +1,7 @@
-lees (boek|audio boek|audioboek) {query}
+lees audio boek {query}
+lees audioboek {query}
+lees boek {query}
 lees {query}
-lees {query} (boek|audio boek|audioboek)
+lees {query} audio boek
+lees {query} audioboek
+lees {query} boek

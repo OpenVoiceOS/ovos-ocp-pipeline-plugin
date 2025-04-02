@@ -1,5 +1,22 @@
-(afspil forrige|forrige) (musik|sang|spor|video|medier)
-(afspil forrige|forrige|gå tilbage)
-(afspil forrige|gå tilbage en) (musik|sang|spor|video|medie)
-forrige (sang|spor|musik|film|video|melodi)
+afspil forrige
+afspil forrige medie
+afspil forrige medier
+afspil forrige musik
+afspil forrige sang
+afspil forrige spor
+afspil forrige video
+forrige
+forrige film
+forrige medier
+forrige melodi
+forrige musik
+forrige sang
+forrige spor
+forrige video
+gå tilbage
+gå tilbage en medie
+gå tilbage en musik
+gå tilbage en sang
+gå tilbage en spor
+gå tilbage en video
 tidligere

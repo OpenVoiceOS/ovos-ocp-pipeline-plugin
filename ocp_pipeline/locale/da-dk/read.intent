@@ -1,3 +1,5 @@
-læs (bog|lydbog|lydbog) {query}
+læs bog {query}
+læs lydbog {query}
 læs {query}
-læs {query} (bog|lydbog|lydbog)
+læs {query} bog
+læs {query} lydbog

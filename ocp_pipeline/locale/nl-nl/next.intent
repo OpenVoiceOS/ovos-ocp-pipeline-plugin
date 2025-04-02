@@ -1,6 +1,26 @@
-(play|go to) next (music|song|track|video|media)
-(volgende|skip) (liedje|track|nummer|video|media)
-(volgende|sla over|overslaan|skip)
+go to next media
+go to next music
+go to next song
+go to next track
+go to next video
+overslaan
+play next media
+play next music
+play next song
+play next track
+play next video
+skip
+skip liedje
+skip media
+skip nummer
+skip track
+skip video
+sla over
 speel volgende
 volgende
-volgende (nummer|track|liedje|film|video)
+volgende film
+volgende liedje
+volgende media
+volgende nummer
+volgende track
+volgende video

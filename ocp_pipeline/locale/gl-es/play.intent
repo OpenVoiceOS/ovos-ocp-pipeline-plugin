@@ -1,1 +1,2 @@
-(reproducir|iniciar) {query}
+iniciar {query}
+reproducir {query}

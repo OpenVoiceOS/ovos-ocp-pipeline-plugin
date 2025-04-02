@@ -1,3 +1,44 @@
-(reprendre|continuer|redémarrer) [la] (musique|chanson|piste|vidéo|média|lecture|jeu)
+continuer  chanson
+continuer  jeu
+continuer  lecture
+continuer  musique
+continuer  média
+continuer  piste
+continuer  vidéo
+continuer la chanson
+continuer la jeu
+continuer la lecture
+continuer la musique
+continuer la média
+continuer la piste
+continuer la vidéo
 joue
+redémarrer  chanson
+redémarrer  jeu
+redémarrer  lecture
+redémarrer  musique
+redémarrer  média
+redémarrer  piste
+redémarrer  vidéo
+redémarrer la chanson
+redémarrer la jeu
+redémarrer la lecture
+redémarrer la musique
+redémarrer la média
+redémarrer la piste
+redémarrer la vidéo
 reprend
+reprendre  chanson
+reprendre  jeu
+reprendre  lecture
+reprendre  musique
+reprendre  média
+reprendre  piste
+reprendre  vidéo
+reprendre la chanson
+reprendre la jeu
+reprendre la lecture
+reprendre la musique
+reprendre la média
+reprendre la piste
+reprendre la vidéo

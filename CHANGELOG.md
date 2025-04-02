@@ -1,20 +1,21 @@
 # Changelog
 
-## [1.1.9a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.9a1) (2025-03-13)
+## [1.1.11a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.11a1) (2025-04-02)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.9a1...1.1.9a1)
-
-**Merged pull requests:**
-
-- fix:dont\_mutate\_utterance [\#65](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/65) ([JarbasAl](https://github.com/JarbasAl))
-
-## [1.1.9a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.9a1) (2025-02-09)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.8...1.1.9a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.10a1...1.1.11a1)
 
 **Merged pull requests:**
 
-- added italian translation [\#64](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/64) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
+- fix: disable ovos-media intents until it releases [\#68](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/68) ([JarbasAl](https://github.com/JarbasAl))
+- fix: improve catalan matching [\#67](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/67) ([JarbasAl](https://github.com/JarbasAl))
+
+## [1.1.10a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.10a1) (2025-03-15)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.9...1.1.10a1)
+
+**Merged pull requests:**
+
+- updating German translation [\#66](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/66) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
 
 
 

@@ -1,6 +1,25 @@
-(afspil|gå til) næste (musik|sang|spor|video|medier)
-(næste|spring over)
-(næste|spring over) (musik|sang|spor|video|medier)
+afspil næste medier
+afspil næste musik
+afspil næste sang
+afspil næste spor
+afspil næste video
+gå til næste medier
+gå til næste musik
+gå til næste sang
+gå til næste spor
+gå til næste video
 næste
-næste (sang|spor|musik|film|video|melodi)
+næste film
+næste medier
+næste melodi
+næste musik
+næste sang
+næste spor
+næste video
 spil næste
+spring over
+spring over medier
+spring over musik
+spring over sang
+spring over spor
+spring over video

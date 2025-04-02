@@ -1,1 +1,3 @@
-(speel|start|begin) {query}
+begin {query}
+speel {query}
+start {query}

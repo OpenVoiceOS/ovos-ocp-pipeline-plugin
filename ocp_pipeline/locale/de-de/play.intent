@@ -1,1 +1,2 @@
-(spiele|starte) {query}
+spiele {query}
+starte {query}

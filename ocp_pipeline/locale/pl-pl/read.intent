@@ -1,3 +1,5 @@
-czytaj (książka|audiobook) {query}
+czytaj audiobook {query}
+czytaj książka {query}
 czytaj {query}
-czytaj {query} (książka|audiobook)
+czytaj {query} audiobook
+czytaj {query} książka
