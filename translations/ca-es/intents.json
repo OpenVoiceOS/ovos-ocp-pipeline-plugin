@@ -1,6 +1,6 @@
 {
   "play.intent": [
-    "(reprodueix|inicia|comença|toca|posa) {query}"
+    "(reprodueix|inicia|comença|toca|posa|posa'm|fes que soni|vull sentir|vull escoltar) {query}"
   ],
   "like_song.intent": [
     "m'agrada (això|açò|)",
@@ -11,27 +11,28 @@
   "next.intent": [
     "(següent|salta)",
     "(següent|salta) (a|al|a la|a sa) (música|cançó|pista|peça|vídeo|mèdia|multimèdia|contingut) ",
-    "(reprodueix|reproduix|ves|vés) (a|al|a es|a la|a sa|) (següent|) (música|cançó|pista|peça|vídeo|mèdia|multimèdia|contingut) (següent|)",
-    "(reprodueix|reproduix|posa) (el|la|es|sa|) següent",
+    "(reprodueix|reproduïx|ves|vés|passa|salta) (a|al|a es|a la|a sa|) (següent|) (música|cançó|pista|peça|vídeo|mèdia|multimèdia|contingut) (següent|)",
+    "(reprodueix|reproduïx|posa) (el|la|es|sa|) següent",
     "següent",
     "(cançó|pista|peça|música|film|pel·li|pel·lícula|vídeo|emissora) següent",
-    "(posa|reprodueix|reproduix) (el|a|es|sa)( següent |)(cançó|peça|pista|música|pel·lícula|pel·li|film|vídeo)(| següent)"
+    "propera (cançó|pista|peça|música|film|pel·li|pel·lícula|vídeo|emissora)",
+    "(posa|reprodueix|reproduïx) (el|a|es|sa)( següent |) (cançó|peça|pista|música|pel·lícula|pel·li|film|vídeo)(| següent)"
   ],
   "resume.intent": [
-    "(deixa de pausar|reprèn|reprén|despausa)",
+    "(deixa de pausar|reprèn|reprén|despausa|segueix)",
     "(despausa|reprèn|reprén|continua|continua amb|reinicia) (el|la|es|sa) (música|cançó|peça|pista|vídeo|mèdia|reproducció|joc|partida)",
-    "(reprodueix|reproduix)"
+    "(reprodueix|reproduïx)"
   ],
   "read.intent": [
-    "(llegeix|llegix) (el |es |l'|s')(llibre|audiollibre|àudio llibre|àudiollibre) {query}",
-    "llegeix {query}",
-    "llegeix (el |l'|)(llibre|audiollibre|àudio llibre) {query}"
+    "(llegeix|llegix|llig) (el |es |l'|s')(llibre|audiollibre|àudio llibre|àudiollibre) {query}",
+    "(llegeix|llegix|llig) {query}",
+    "(llegeix|llegix|llig) (el |l'|)(llibre|audiollibre|àudio llibre) {query}"
   ],
   "prev.intent": [
-    "(reprodueix|posa) (la|el|es|sa) (música|peça|pista|vídeo|mèdia|contingut|multimèdia) (anterior|d'abans)",
-    "(reprodueix|inicia|comença) (el|la|es|sa) (música|cançó|peça|pista|vídeo|mèdia|multimèdia) (anterior|previ|prèvia|enrere)",
-    "(reprodueix|inicia|comença) (l'anterior|enrere|anterior)",
-    "(posa|reprodueix|reprodueix|vés a|ves a) (la|sa|el|la) (cançó|pista|peça|música|pel·lícula|pel·li|film|vídeo|àudio) (anterior|previ|prèvia)",
+    "(reprodueix|reproduïx|inicia|posa|posa'm|toca) (la|el|es|sa) (música|peça|pista|vídeo|mèdia|contingut|multimèdia) (anterior|d'abans)",
+    "(reprodueix|reproduïx|inicia|comença|posa'm|toca) (el|la|es|sa) (música|cançó|peça|pista|vídeo|mèdia|multimèdia) (anterior|previ|prèvia|enrere)",
+    "(reprodueix|reproduïx|inicia|comença|posa'm|toca) (l'anterior|enrere|anterior)",
+    "(posa|reprodueix|reproduïx|reprodueix|vés a|ves a|posa'm) (la|sa|el|la) (cançó|pista|peça|música|pel·lícula|pel·li|film|vídeo|àudio) (anterior|previ|prèvia)",
     "(anterior|enrere|arrere)",
     "(cançó|pista|peça|música|pel·lícula|pel·li|film|vídeo|àudio) (anterior|previ|prèvia|últim|última|)"
   ],
@@ -46,25 +47,27 @@
     "obre (el |la |es |sa |l'|s')(catàleg|reproductor|habilitats|menú) (de |)(multimèdia|mèdia|música|I G U|vídeo|música|musical)"
   ],
   "featured.intent": [
-    "(obre|mostra|reprodueix|posa) (el|la|es|sa|) (catàleg|col·lecció|llista|llista de reproducció) (de|) {media} (destacat|destacada|destacats|destacades)",
-    "(obre|mostra|reprodueix|posa) (el|la|es|sa|){media} (destacat|destacada)"
+    "(obre|mostra|reprodueix|reproduïx|posa|posa'm|toca) (el|la|es|sa|) (catàleg|col·lecció|llista|llista de reproducció) (de|) {media} (destacat|destacada|destacats|destacades)",
+    "(obre|mostra|reprodueix|reproduïx|posa|posa'm|toca) (el|la|es|sa|){media} (destacat|destacada)"
   ],
   "play_favorites.intent": [
-    "(reprodeux|inicia|posa) (les meves|ses meves|els meus|els|ses)(peces|pistes|àudios|cançons|música) (favorita|favorites|preferides|preferida|que m'agrada|preferits|favorits)",
-    "(reprodueix|inicia|comença) (la|les|sa|ses) (cançons|cançó|cançons|música) (preferida|favorita|preferides|favorites)"
+    "(reprodueix|reproduïx|inicia|comença|posa|posa'm|toca) (les meves|ses meves|els meus|els|ses)(peces|pistes|àudios|cançons|música) (favorita|favorites|preferides|preferida|que m'agrada|preferits|favorits)",
+    "(reprodueix|reproduïx|inicia|comença|posa|posa'm|toca) (la|les|sa|ses) (cançons|cançó|cançons|música) (preferida|favorita|preferides|favorites)"
   ],
   "media_stop.intent": [
     "(para|atura)('t|)",
     "(atura|para) (la|el|sa|es|els|les|ses) (reproducció|reproduccions|multimèdia|mèdia|mèdies|reproducció multimèdia|reproduccións multimèdia|música|pel·lícula|pel·lícules|soroll|àudio|peça|pista)",
-    "(atura|para)(-ho) tot"
+    "(atura|para)(-ho) tot",
+    "calla",
+    "prou"
   ],
   "save_game.intent": [
     "(desa|guarda)",
     "(desa|guarda) (el|es|la|sa) (joc|partida)"
   ],
   "load_game.intent": [
-    "(carrega|obre)",
-    "(carrega|obre) (el|es|la|sa) (joc|partida)",
-    "(carrega|obre) (el|es|la|sa|l'últim|l'última|s'últim|s'última) (joc|partida)( anterior|)"
+    "(carrega|obre|obri)",
+    "(carrega|obre|obri) (el|es|la|sa) (joc|partida)",
+    "(carrega|obre|obri) (el|es|la|sa|l'últim|l'última|s'últim|s'última) (joc|partida)( anterior|)"
   ]
 }
