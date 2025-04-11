@@ -336,6 +336,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
         # avoid common confusion with alerts and parrot skill
         if (self.voc_match(utterance, "Alerts") or
+                self.voc_match(utterance, "SoundIntents") or
                 self.voc_match(utterance, "Parrot")):
             return None
 

@@ -1,4 +1,17 @@
 {
+  "SoundIntents.voc":[
+    "inicia notificació",
+    "inicia notificacions",
+    "codi qr d'àudio",
+    "codis qr d'àudio",
+    "inicia la dictada",
+    "inicia la captura de text",
+    "inicia la gravació",
+    "inicia la gravació d'àudio",
+    "inicia la captura de text",
+    "inicia la captació",
+    "ggwave"
+  ],
   "Parrot.voc":[
     "el que et dic",
     "(mode lloro|lloro)",

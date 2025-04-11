@@ -1,4 +1,21 @@
 {
+  "SoundIntents.voc":[
+    "start notification",
+    "start notifications",
+    "start speech",
+    "start sound",
+    "start sounds",
+    "audio qr code",
+    "audio qr codes",
+    "start dictation",
+    "start text capture",
+    "start recording",
+    "start audio recording",
+    "start text capture",
+    "start capturing",
+    "ggwave",
+    "start up"
+  ],
   "Parrot.voc":[
     "parrot mode",
     "start talking"
