@@ -1,0 +1,31 @@
+{
+
+  "SoundIntents.voc":[
+    "iniciar notificación",
+    "iniciar notificaciones",
+    "iniciar habla",
+    "iniciar sonido",
+    "iniciar sonidos",
+    "código qr de audio",
+    "códigos qr de audio",
+    "iniciar dictado",
+    "iniciar captura de texto",
+    "iniciar grabación",
+    "iniciar grabación de audio",
+    "iniciar captura de texto",
+    "iniciar captura",
+    "ggwave"
+  ],
+  "Alerts.voc": [
+    "alerta",
+    "alertas",
+    "temporizador",
+    "temporizadores",
+    "recordatorio",
+    "recordatorios",
+    "alarma",
+    "alarmas",
+    "despiértame",
+    "haz que me despierte"
+  ]
+}
