@@ -1,12 +1,12 @@
 # Changelog
 
-## [1.1.12a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.12a1) (2025-04-03)
+## [1.1.13a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.13a1) (2025-04-11)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.11...1.1.12a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.12...1.1.13a1)
 
 **Merged pull requests:**
 
-- Update intents.json [\#70](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/70) ([c-armentano](https://github.com/c-armentano))
+- fix: avoid false classifications / confusion with default skills [\#73](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/73) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
