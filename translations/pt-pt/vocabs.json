@@ -1,4 +1,16 @@
 {
+  "Alerts.voc": [
+    "alerta",
+    "alertas",
+    "temporizador",
+    "temporizadores",
+    "lembrete",
+    "lembretes",
+    "alarme",
+    "alarmes",
+    "acorda-me",
+    "acorda-me mais tarde"
+  ],
   "video_only.voc": [
     "(sem|não) forçar áudio",
     "não (transmitir|transmitas) apenas áudio",

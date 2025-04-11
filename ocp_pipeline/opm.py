@@ -332,9 +332,15 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if lang is None:  # no intents registered for this lang
             return None
 
+        utterance = utterances[0].lower()
+
+        # avoid common confusion with alerts and parrot skill
+        if (self.voc_match(utterance, "Alerts") or
+                self.voc_match(utterance, "Parrot")):
+            return None
+
         self.bus.emit(Message("ovos.common_play.status"))  # sync
 
-        utterance = utterances[0].lower()
         match = self.intent_matchers[lang].calc_intent(utterance)
 
         if hasattr(match, "name"):  # padatious

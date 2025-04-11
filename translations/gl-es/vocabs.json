@@ -1,4 +1,16 @@
 {
+  "Alerts.voc": [
+    "alerta",
+    "alertas",
+    "temporizador",
+    "temporizadores",
+    "recordatorio",
+    "recordatorios",
+    "alarma",
+    "alarmas",
+    "despiértame",
+    "haz que me despierte"
+  ],
     "video_only.voc": [
         "non transmitir para audio",
         "non transmitir para audio",

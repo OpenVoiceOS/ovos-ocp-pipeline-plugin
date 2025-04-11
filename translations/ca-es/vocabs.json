@@ -1,4 +1,24 @@
 {
+  "Parrot.voc":[
+    "el que et dic",
+    "(mode lloro|lloro)",
+    "mode lloro",
+    "(repeteix|repetix) tot",
+    "comença (el|es) mode",
+    "comença a parlar"
+  ],
+  "Alerts.voc": [
+    "alerta",
+    "alertes",
+    "temporitzador",
+    "temporitzadors",
+    "recordatori",
+    "recordatoris",
+    "alarma",
+    "alarmes",
+    "desperta'm",
+    "fes-me despertar"
+  ],
   "video_only.voc": [
     "no emetis amb àudio",
     "no reprodueixis amb àudio",

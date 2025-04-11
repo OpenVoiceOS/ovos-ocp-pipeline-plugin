@@ -1,4 +1,20 @@
 {
+  "Parrot.voc":[
+    "parrot mode",
+    "start talking"
+  ],
+  "Alerts.voc": [
+    "alert",
+    "alerts",
+    "timer",
+    "timers",
+    "reminder",
+    "reminders",
+    "alarm",
+    "alarms",
+    "wake me",
+    "wake me up"
+  ],
     "video_only.voc": [
         "do not cast to audio",
         "don't cast to audio",
