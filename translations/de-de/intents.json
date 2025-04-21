@@ -54,7 +54,7 @@
     "(spiele|starte) (favorisierte) (Titel|Lied|Lieder|Musik|Jam|Jams)"
   ],
   "media_stop.intent": [
-    "stoppen",
+    "stoppen\nstopp\nstop\nhöre auf damit",
     "Stoppe (Wiedergabe|Medien|Medienwiedergabe|Musik|Film|Filme|Lärm)",
     "alles stoppen"
   ],
