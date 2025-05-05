@@ -1,4 +1,39 @@
 {
+  "SoundIntents.voc":[
+    "inicia notificació",
+    "inicia notificacions",
+    "codi qr d'àudio",
+    "codis qr d'àudio",
+    "inicia la dictada",
+    "inicia la captura de text",
+    "inicia la gravació",
+    "inicia la gravació d'àudio",
+    "inicia la captura de text",
+    "inicia la captació",
+    "ggwave"
+  ],
+  "Parrot.voc":[
+    "el que et dic",
+    "(mode lloro|lloro)",
+    "mode lloro",
+    "(repeteix|repetix) tot",
+    "comença (el|es) mode",
+    "comença a parlar"
+  ],
+  "Alerts.voc": [
+    "alerta",
+    "alertes",
+    "temporitzador",
+    "temporitzadors",
+    "recordatori",
+    "recordatoris",
+    "alarma",
+    "alarmes",
+    "l'alarma",
+    "campaneta",
+    "desperta'm",
+    "fes-me despertar"
+  ],
   "video_only.voc": [
     "no emetis amb àudio",
     "no reprodueixis amb àudio",

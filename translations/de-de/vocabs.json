@@ -1,4 +1,37 @@
 {
+  "SoundIntents.voc": [
+    "starte Benachrichtigung\nBenachrichtigung starten",
+    "Benachrichtigungen starten\nstarte Benachrichtigungen",
+    "(starte|beginne) reden\nRede (starten|beginnen)",
+    "Ton starten\nstarte Ton",
+    "starte Töne\nTöne starten",
+    "Audio-QR-Code",
+    "Audio-QR-Codes",
+    "Diktat starten\nstarte Diktat",
+    "Texterfassung starten\nstarte Texterfassung",
+    "Aufnahme starten\nstarte Aufnahme",
+    "Audioaufnahme starten\nstart Audioaufnahme",
+    "Texterfassung starten\nstarte Texterfassung",
+    "Aufnahme starten",
+    "ggwave",
+    "Start-up"
+  ],
+  "Parrot.voc": [
+    "Papageienmodus",
+    "fang an zu reden"
+  ],
+  "Alerts.voc": [
+    "Alarm",
+    "Warnungen\nAlarme",
+    "Timer",
+    "Timer",
+    "Erinnerung",
+    "Erinnerungen",
+    "Alarm",
+    "Alarme",
+    "weck mich",
+    "wecke mich auf"
+  ],
   "video_only.voc": [
     "nicht auf Audio übertragen",
     "nicht auf Audio übertragen",
