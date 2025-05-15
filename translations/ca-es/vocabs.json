@@ -1,5 +1,5 @@
 {
-  "SoundIntents.voc":[
+  "SoundIntents.voc": [
     "inicia notificació",
     "inicia notificacions",
     "codi qr d'àudio",
@@ -10,15 +10,15 @@
     "inicia la gravació d'àudio",
     "inicia la captura de text",
     "inicia la captació",
-    "ggwave"
+    "ggwave",
+    "inicia la captura de text",
+    "inicia la captura",
+    "ggwave",
+    "inici"
   ],
-  "Parrot.voc":[
+  "Parrot.voc": [
     "el que et dic",
-    "(mode lloro|lloro)",
-    "mode lloro",
-    "(repeteix|repetix) tot",
-    "comença (el|es) mode",
-    "comença a parlar"
+    "(mode lloro|lloro)"
   ],
   "Alerts.voc": [
     "alerta",
@@ -30,9 +30,7 @@
     "alarma",
     "alarmes",
     "l'alarma",
-    "campaneta",
-    "desperta'm",
-    "fes-me despertar"
+    "campaneta"
   ],
   "video_only.voc": [
     "no emetis amb àudio",
