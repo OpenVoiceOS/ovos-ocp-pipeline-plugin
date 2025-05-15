@@ -15,15 +15,15 @@
     "(reprodueix|reproduïx|posa) (el|la|es|sa|) següent",
     "següent",
     "(cançó|pista|peça|música|film|pel·li|pel·lícula|vídeo|emissora) següent",
-    null
+    "propera (cançó|pista|peça|música|film|pel·li|pel·lícula|vídeo|emissora)"
   ],
   "resume.intent": [
     "(deixa de pausar|reprèn|reprén|despausa|segueix)",
-    null,
+    "(despausa|reprèn|reprén|continua|continua amb|reinicia) (el|la|es|sa) (música|cançó|peça|pista|vídeo|mèdia|reproducció|joc|partida)",
     "(reprodueix|reproduïx)"
   ],
   "read.intent": [
-    null,
+    "(llegeix|llegix|llig) (el |es |l'|s')(llibre|audiollibre|àudio llibre|àudiollibre) {query}",
     "(llegeix|llegix|llig) {query}",
     "(llegeix|llegix|llig) (el |l'|)(llibre|audiollibre|àudio llibre) {query}"
   ],
@@ -31,19 +31,19 @@
     "(reprodueix|reproduïx|inicia|posa|posa'm|toca) (la|el|es|sa) (música|peça|pista|vídeo|mèdia|contingut|multimèdia) (anterior|d'abans)",
     "(reprodueix|reproduïx|inicia|comença|posa'm|toca) (el|la|es|sa) (música|cançó|peça|pista|vídeo|mèdia|multimèdia) (anterior|previ|prèvia|enrere)",
     "(reprodueix|reproduïx|inicia|comença|posa'm|toca) (l'anterior|enrere|anterior)",
-    null,
-    null,
-    null
+    "(posa|reprodueix|reproduïx|reprodueix|vés a|ves a|posa'm) (la|sa|el|la) (cançó|pista|peça|música|pel·lícula|pel·li|film|vídeo|àudio) (anterior|previ|prèvia)",
+    "(anterior|enrere|arrere)",
+    "(cançó|pista|peça|música|pel·lícula|pel·li|film|vídeo|àudio) (anterior|previ|prèvia|últim|última|)"
   ],
   "pause.intent": [
     "pausa",
-    null
+    "(pausa|atura) (el|la|es|sa) (música|cançó|peça|pista|vídeo|mèdia|reproducció|joc|partida)"
   ],
   "open.intent": [
     "obre (el|es) (reproductor|reproductor multimèdia) (OCP|O C P|common|ovos|open voice os) ",
     "(obre|executa) (el|es|la|sa) (pantalla d'inici|pantalla|pantalla inicial|menú) (del|des|de) (OCP|O C P|ovos comon plei|comon plei|reproductor ovos multimèdia|reproductor open vois) ",
     "(obre|executa) (el|es) (OCP|O C P|ovos common play|open voice os common play|reproductor multimèdia)",
-    null
+    "obre (el |la |es |sa |l'|s')(catàleg|reproductor|habilitats|menú) (de |)(multimèdia|mèdia|música|I G U|vídeo|música|musical)"
   ],
   "featured.intent": [
     "(obre|mostra|reprodueix|reproduïx|posa|posa'm|toca) (el|la|es|sa|) (catàleg|col·lecció|llista|llista de reproducció) (de|) {media} (destacat|destacada|destacats|destacades)",
@@ -59,12 +59,12 @@
     "(atura|para)(-ho) tot"
   ],
   "save_game.intent": [
-    null,
-    null
+    "(desa|guarda)",
+    "(desa|guarda) (el|es|la|sa) (joc|partida)"
   ],
   "load_game.intent": [
-    null,
-    null,
-    null
+    "(carrega|obre|obri)",
+    "(carrega|obre|obri) (el|es|la|sa) (joc|partida)",
+    "(carrega|obre|obri) (el|es|la|sa|l'últim|l'última|s'últim|s'última) (joc|partida)( anterior|)"
   ]
 }
