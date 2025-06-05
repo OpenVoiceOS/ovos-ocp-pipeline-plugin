@@ -1,21 +1,21 @@
-abrir  {media} catálogo
-abrir  {media} colección
-abrir  {media} lista de reprodución
-abrir en destaque {media}
-abrir en destaque {media} catálogo
-abrir en destaque {media} colección
-abrir en destaque {media} lista de reprodución
-ensinar  {media} catálogo
-ensinar  {media} colección
-ensinar  {media} lista de reprodución
-ensinar en destaque {media}
-ensinar en destaque {media} catálogo
-ensinar en destaque {media} colección
-ensinar en destaque {media} lista de reprodución
-mostrar  {media} catálogo
-mostrar  {media} colección
-mostrar  {media} lista de reprodución
-mostrar en destaque {media}
-mostrar en destaque {media} catálogo
-mostrar en destaque {media} colección
-mostrar en destaque {media} lista de reprodución
+abrir catálogo {media}
+abrir catálogo {media} en destaque
+abrir colección {media}
+abrir colección {media} en destaque
+abrir lista de reprodución {media}
+abrir lista de reprodución {media} en destaque
+abrir {media} en destaque
+ensinar catálogo {media}
+ensinar catálogo {media} en destaque
+ensinar colección {media}
+ensinar colección {media} en destaque
+ensinar lista de reprodución {media}
+ensinar lista de reprodución {media} en destaque
+ensinar {media} en destaque
+mostrar catálogo {media}
+mostrar catálogo {media} en destaque
+mostrar colección {media}
+mostrar colección {media} en destaque
+mostrar lista de reprodución {media}
+mostrar lista de reprodución {media} en destaque
+mostrar {media} en destaque
