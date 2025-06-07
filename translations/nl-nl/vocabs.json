@@ -1,0 +1,158 @@
+{
+  "SoundIntents.voc": [
+    "start melding",
+    "start meldingen",
+    "begin spraak",
+    "start geluid",
+    "start geluiden",
+    "audio qr-code",
+    "audio qr-codes",
+    "start dicteren",
+    "start tekstopname",
+    "start met opnemen",
+    "start audio-opname",
+    "start tekstopname",
+    "begin met opnemen",
+    "ggwave",
+    "begin"
+  ],
+  "Parrot.voc": [
+    "papegaaienmodus",
+    "begin met praten"
+  ],
+  "Alerts.voc": [
+    "herinnering",
+    "herinneringen",
+    "timer",
+    "timers",
+    "herinnering",
+    "herinneringen",
+    "wekker",
+    "wekkers",
+    "maak me wakker",
+    "maak me wakker"
+  ],
+  "video_only.voc": [
+    "niet casten naar audio",
+    "niet casten naar audio",
+    "geen audiospeler",
+    "alleen video",
+    "alleen video"
+  ],
+  "AudioKeyword.voc": [
+    "audio",
+    "geluid"
+  ],
+  "HentaiKeyword.voc": [
+    "hentai"
+  ],
+  "PodcastKeyword.voc": [
+    "podcast",
+    "podcasts"
+  ],
+  "Play.voc": [
+    "zoek",
+    "lees",
+    "speel",
+    "start"
+  ],
+  "audio_only.voc": [
+    "alleen audio",
+    "geen video",
+    "alleen audio",
+    "alleen geluid",
+    "alleen geluid"
+  ],
+  "NewsKeyword.voc": [
+    "nieuws"
+  ],
+  "GameKeyword.voc": [
+    "spel"
+  ],
+  "ADKeyword.voc": [
+    "audiobeschrijving",
+    "filmbeschrijving"
+  ],
+  "TrailerKeyword.voc": [
+    "trailer"
+  ],
+  "MovieKeyword.voc": [
+    "film",
+    "film"
+  ],
+  "CartoonKeyword.voc": [
+    "tekenfilm",
+    "tekenfilms"
+  ],
+  "VideoKeyword.voc": [
+    "video"
+  ],
+  "ASMRKeyword.voc": [
+    "ASMR",
+    "autonomous sensory meridian response"
+  ],
+  "DocumentaryKeyword.voc": [
+    "documentaire",
+    "documentaires"
+  ],
+  "SeriesKeyword.voc": [
+    "series",
+    "tv show",
+    "aflevering",
+    "afleveringen"
+  ],
+  "BWKeyword.voc": [
+    "zwart en wit",
+    "monochroom"
+  ],
+  "AdultKeyword.voc": [
+    "porno",
+    "18 jaar en ouder",
+    "pornografie"
+  ],
+  "RadioKeyword.voc": [
+    "radio",
+    "internetradio"
+  ],
+  "AudioDramaKeyword.voc": [
+    "drama",
+    "theater"
+  ],
+  "Resume.voc": [
+    "ga verder",
+    "ga verder"
+  ],
+  "ComicBookKeyword.voc": [
+    "geanimeerde strip",
+    "strip",
+    "visueel verhaal"
+  ],
+  "TVKeyword.voc": [
+    "TV",
+    "televisie",
+    "zender"
+  ],
+  "AnimeKeyword.voc": [
+    "anime"
+  ],
+  "MusicKeyword.voc": [
+    "muziek",
+    "liedje",
+    "soundtrack",
+    "soundtrack"
+  ],
+  "AudioBookKeyword.voc": [
+    "boek",
+    "boeken",
+    "lees",
+    "luisterboek",
+    "luisterboeken",
+    "vertel"
+  ],
+  "SilentKeyword.voc": [
+    "stom"
+  ],
+  "ShortKeyword.voc": [
+    "kort"
+  ]
+}
