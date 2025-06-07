@@ -1,0 +1,70 @@
+{
+  "play.intent": [
+    "(speel|start) {query}"
+  ],
+  "like_song.intent": [
+    "ik vind (dat|dit|het) leuk",
+    "ik vind (dat|dit|deze)(liedje|muziek|track|song|deuntje) leuk",
+    "(goed|leuk|leuke|geweldig|geweldige|super|cool) (liedje|muziek|track|song|deuntje)",
+    "(dat|dit|het) is een (goed|mooi|geweldig|fantastisch|geweldig|cool) (nummer|track|jam|)"
+  ],
+  "next.intent": [
+    "(volgende|sla over|overslaan)",
+    "(volgende|) (muziek|track|nummer|video|media)",
+    "(speel|ga naar) volgende (muziek|nummer|video|media)[af]",
+    "speel volgende",
+    "volgende",
+    "volgende (nummer|track|muziek|film|video)",
+    "(speel|ga naar) [het] volgende (liedje|track|muziek|film|video|lied)"
+  ],
+  "resume.intent": [
+    "(hervat|ga verder)",
+    "(hervat|ga door met) (de|het) (muziek|nummer|video|media|afspelen|spel)",
+    "speel"
+  ],
+  "read.intent": [
+    "lees [het] (boek|luisterboek|luister boek|audio boek|audioboek) {query}",
+    "lees {query}",
+    "lees (boek|luisterboek|luisterboek| audioboek| audio boek) {query}"
+  ],
+  "prev.intent": [
+    "(vorige afspelen|één teruggaan|speel vorige) (muziek|nummer|video|media)",
+    "(vorige afspelen|vorige|speel vorige) (muziek|nummer|video|media|track)",
+    "(vorige afspelen|vorige|teruggaan|ga terug|speel vorige| speel vorige af)",
+    "(speel|ga naar) (het|de) vorige (lied|track|muziek|film|video|liedje)",
+    "vorige",
+    "vorig (nummer|track|muziek|film|video|liedje)"
+  ],
+  "pause.intent": [
+    "(pauze| pauzeer)",
+    "pauzeer (de|het) (muziek|lied|track|video|media|liedje|spel)"
+  ],
+  "open.intent": [
+    "open (OCP|O C P|common|ovos|open voice os) (speler|mediaspeler)",
+    "open (OCP|O C P|ovos common play|common play|ovos mediaspeler|open voice os-speler) (startscherm|startpagina|menu)",
+    "open (OCP|O C P|ovos gemeenschappelijk spel|open voice os common play|common play)",
+    "open (de|het) (media|muziek|gui|video) (speler|catalogus|skills|menu|)"
+  ],
+  "featured.intent": [
+    "(open|toon|) (uitgelichte|) {media} (catalogus|collectie|afspeellijst)",
+    "(open|toon) uitgelichte {media}"
+  ],
+  "play_favorites.intent": [
+    "(speel|start) mijn (favoriete|leukste) (nummers|lied|liedjes|muziek|tracks)",
+    "(speel|start) (favoriete|leukste) (nummers|lied|liedjes|muziek|tracks)"
+  ],
+  "media_stop.intent": [
+    "stop",
+    "stop (afspelen|spelen|met afspelen|muziek|film|films|ruis)",
+    "stop alles"
+  ],
+  "save_game.intent": [
+    "bewaar",
+    "sla (het) spel op"
+  ],
+  "load_game.intent": [
+    "laad",
+    "laad [het] spel",
+    "laad [het] (laatste|vorige) [opgeslagen] spel"
+  ]
+}

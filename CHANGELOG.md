@@ -1,28 +1,37 @@
 # Changelog
 
-## [1.1.13a3](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.13a3) (2025-04-21)
+## [1.1.14a4](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.14a4) (2025-06-07)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.13a2...1.1.13a3)
-
-**Merged pull requests:**
-
-- optimizing German translation for better usage [\#77](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/77) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
-
-## [1.1.13a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.13a2) (2025-04-21)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.13a1...1.1.13a2)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.14a3...1.1.14a4)
 
 **Merged pull requests:**
 
-- adding missing German translations [\#75](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/75) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
+- nl-nl translation [\#90](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/90) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
+- nl-nl translation [\#89](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/89) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
 
-## [1.1.13a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.13a1) (2025-04-11)
+## [1.1.14a3](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.14a3) (2025-06-07)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.12...1.1.13a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.14a2...1.1.14a3)
 
 **Merged pull requests:**
 
-- fix: avoid false classifications / confusion with default skills [\#73](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/73) ([JarbasAl](https://github.com/JarbasAl))
+- nl-nl translation [\#87](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/87) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
+
+## [1.1.14a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.14a2) (2025-06-05)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.14a1...1.1.14a2)
+
+**Merged pull requests:**
+
+- gl/translate [\#85](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/85) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
+
+## [1.1.14a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.14a1) (2025-06-04)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.13...1.1.14a1)
+
+**Merged pull requests:**
+
+- gl/translate [\#83](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/83) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
 
 
 
