@@ -14,7 +14,7 @@ from ovos_bus_client.message import Message, dig_for_message
 from ovos_bus_client.session import SessionManager
 from ovos_config import Configuration
 from ovos_plugin_manager.ocp import available_extractors
-from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline, PipelineStageMatcher
+from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline, PipelinePlugin
 from ovos_utils.lang import standardize_lang_tag, get_language_dir
 from ovos_utils.log import LOG, deprecated, log_deprecation
 from ovos_utils.fakebus import FakeBus
@@ -1208,12 +1208,12 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         return MycroftCPSLegacyPipeline(self.bus, self.config).match(utterances, lang, message)
 
 
-class MycroftCPSLegacyPipeline(PipelineStageMatcher, OVOSAbstractApplication):
+class MycroftCPSLegacyPipeline(PipelinePlugin, OVOSAbstractApplication):
     def __init__(self, bus: Optional[Union[MessageBusClient, FakeBus]] = None,
                  config: Optional[Dict] = None):
         OVOSAbstractApplication.__init__(self, bus=bus or FakeBus(),
                                          skill_id=OCP_ID, resources_dir=f"{dirname(__file__)}")
-        PipelineStageMatcher.__init__(self, bus, config)
+        PipelinePlugin.__init__(self, bus, config)
         self.mycroft_cps = LegacyCommonPlay(self.bus)
         OCPPipelineMatcher.load_intent_files()
         self.add_event("ocp:legacy_cps", self.handle_legacy_cps, is_intent=True)
