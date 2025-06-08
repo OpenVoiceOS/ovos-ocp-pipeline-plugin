@@ -1,37 +1,12 @@
 # Changelog
 
-## [1.1.14a4](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.14a4) (2025-06-07)
+## [1.1.15a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.15a1) (2025-06-08)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.14a3...1.1.14a4)
-
-**Merged pull requests:**
-
-- nl-nl translation [\#90](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/90) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
-- nl-nl translation [\#89](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/89) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
-
-## [1.1.14a3](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.14a3) (2025-06-07)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.14a2...1.1.14a3)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.14...1.1.15a1)
 
 **Merged pull requests:**
 
-- nl-nl translation [\#87](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/87) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
-
-## [1.1.14a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.14a2) (2025-06-05)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.14a1...1.1.14a2)
-
-**Merged pull requests:**
-
-- gl/translate [\#85](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/85) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
-
-## [1.1.14a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.14a1) (2025-06-04)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.13...1.1.14a1)
-
-**Merged pull requests:**
-
-- gl/translate [\#83](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/83) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
+- fix: compatibility with ovos-workshop 7.X.X and ovos-plugin-manager 1.X.X [\#92](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/92) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
