@@ -1,12 +1,12 @@
 # Changelog
 
-## [1.1.15a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.15a1) (2025-06-08)
+## [1.1.16a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.16a1) (2025-06-09)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.14...1.1.15a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.15...1.1.16a1)
 
 **Merged pull requests:**
 
-- fix: compatibility with ovos-workshop 7.X.X and ovos-plugin-manager 1.X.X [\#92](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/92) ([JarbasAl](https://github.com/JarbasAl))
+- fix:  deprecated\_code\_import\_error [\#94](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/94) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
