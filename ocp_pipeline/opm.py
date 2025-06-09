@@ -72,44 +72,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             m: [] for m in MediaType
         }
         self.entity_csvs = self.config.get("entity_csvs", [])  # user defined keyword csv files
-        self.load_classifiers()
 
         self.register_ocp_api_events()
         self.register_ocp_intents()
         # request available Stream extractor plugins from OCP
         self.bus.emit(Message("ovos.common_play.SEI.get"))
-
-    def load_classifiers(self):
-        # warm up the featurizer so intent matches faster (lazy loaded)
-        try:
-            OCPFeaturizer.init_keyword_matcher()
-            if self.entity_csvs:
-                OCPFeaturizer.load_csv(self.entity_csvs)
-                OCPFeaturizer.extract_entities("UNLEASH THE AUTOMATONS")
-        except ImportError:  # ovos-classifiers is optional
-            pass
-
-        if self.config.get("experimental_binary_classifier", False):  # ocp_medium
-            from ovos_classifiers.skovos.classifier import SklearnOVOSClassifier
-            LOG.info("Using experimental OCP binary classifier")
-            # TODO - train a single multilingual model instead of this
-            b = f"{dirname(__file__)}/models"
-            c = SklearnOVOSClassifier.from_file(f"{b}/binary_ocp_kw_small.clf")
-            self._binary_clf = (c, OCPFeaturizer())
-            # lang specific classifiers (english only for now)
-            c = SklearnOVOSClassifier.from_file(f"{b}/binary_ocp_cv2_kw_medium.clf")
-            self._binary_en_clf = (c, OCPFeaturizer("binary_ocp_cv2_small"))
-
-        if self.config.get("experimental_media_classifier", False):
-            from ovos_classifiers.skovos.classifier import SklearnOVOSClassifier
-            LOG.info("Using experimental OCP media type classifier")
-            # TODO - train a single multilingual model instead of this
-            b = f"{dirname(__file__)}/models"
-            c = SklearnOVOSClassifier.from_file(f"{b}/media_ocp_kw_small.clf")
-            self._media_clf = (c, OCPFeaturizer())
-            # lang specific classifiers (english only for now)
-            c = SklearnOVOSClassifier.from_file(f"{b}/media_ocp_cv2_kw_medium.clf")
-            self._media_en_clf = (c, OCPFeaturizer("media_ocp_cv2_medium"))
 
     @classmethod
     def load_resource_files(cls):
@@ -786,56 +753,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if len(valid_labels) == 1:
             return valid_labels[0], 1.0
 
-        # using a trained classifier (Experimental)
-        if self.config.get("experimental_media_classifier", False):
-            from ovos_classifiers.skovos.classifier import SklearnOVOSClassifier
-            try:
-                if lang.startswith("en"):
-                    clf: SklearnOVOSClassifier = self._media_en_clf[0]
-                    featurizer: OCPFeaturizer = self._media_en_clf[1]
-                else:
-                    clf: SklearnOVOSClassifier = self._media_clf[0]
-                    featurizer: OCPFeaturizer = self._media_clf[1]
-                X = featurizer.transform([query])
-                preds = clf.predict_labels(X)[0]
-                preds = {k: v for k, v in preds.items()
-                         if OCPFeaturizer.label2media(k) in valid_labels}
-                label = max(preds, key=preds.get)
-                prob = float(round(preds[label], 3))
-                LOG.info(f"OVOSCommonPlay MediaType prediction: {label} confidence: {prob}")
-                LOG.debug(f"     utterance: {query}")
-                if prob < self.config.get("classifier_threshold", 0.4):
-                    LOG.info("ignoring MediaType classifier, low confidence prediction")
-                    return MediaType.GENERIC, prob
-                else:
-                    return OCPFeaturizer.label2media(label), prob
-            except:
-                LOG.exception(f"OCP classifier exception: {query}")
         return self.voc_match_media(query, lang, valid_labels)
 
     def is_ocp_query(self, query: str, lang: str) -> Tuple[bool, float]:
         """ determine if a playback question is being asked"""
         lang = standardize_lang_tag(lang)
-        if self.config.get("experimental_binary_classifier", False):
-            from ovos_classifiers.skovos.classifier import SklearnOVOSClassifier
-            try:
-                # TODO - train a single multilingual classifier
-                if lang.startswith("en"):
-                    clf: SklearnOVOSClassifier = self._binary_en_clf[0]
-                    featurizer: OCPFeaturizer = self._binary_en_clf[1]
-                else:
-                    clf: SklearnOVOSClassifier = self._binary_clf[0]
-                    featurizer: OCPFeaturizer = self._binary_clf[1]
-
-                X = featurizer.transform([query])
-                preds = clf.predict_labels(X)[0]
-                label = max(preds, key=preds.get)
-                prob = round(preds[label], 3)
-                LOG.info(f"OVOSCommonPlay prediction: {label} confidence: {prob}")
-                LOG.debug(f"     utterance: {query}")
-                return label == "OCP", float(prob)
-            except:
-                LOG.exception("OCP binary classifier failure")
         m, p = self.voc_match_media(query, lang)
         return m != MediaType.GENERIC, p
 
