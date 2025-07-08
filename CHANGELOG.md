@@ -1,12 +1,12 @@
 # Changelog
 
-## [1.1.16a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.16a1) (2025-06-09)
+## [1.1.17a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.17a1) (2025-07-08)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.15...1.1.16a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.16...1.1.17a1)
 
 **Merged pull requests:**
 
-- fix:  deprecated\_code\_import\_error [\#94](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/94) ([JarbasAl](https://github.com/JarbasAl))
+- fix: drop remnants from ovos-classifiers [\#97](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/97) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
