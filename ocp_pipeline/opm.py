@@ -55,13 +55,13 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     def __init__(self, bus: Optional[Union[MessageBusClient, FakeBus]] = None,
                  config: Optional[Dict] = None):
         """
-                 Initialize the OCPPipelineMatcher, setting up OCP and legacy audio interfaces, intent and event registration, player session tracking, skill and media mappings, and the AhocorasickNER for entity recognition.
-                 
-                 Parameters:
-                     bus (Optional[Union[MessageBusClient, FakeBus]]): The message bus for event communication. If not provided, a fake bus is used.
-                     config (Optional[Dict]): Optional configuration dictionary for pipeline and entity keyword setup.
-                 """
-                 OVOSAbstractApplication.__init__(
+        Initialize the OCPPipelineMatcher, setting up OCP and legacy audio interfaces, intent and event registration, player session tracking, skill and media mappings, and the AhocorasickNER for entity recognition.
+        
+        Parameters:
+            bus (Optional[Union[MessageBusClient, FakeBus]]): The message bus for event communication. If not provided, a fake bus is used.
+            config (Optional[Dict]): Optional configuration dictionary for pipeline and entity keyword setup.
+        """
+        OVOSAbstractApplication.__init__(
             self, bus=bus or FakeBus(), skill_id=OCP_ID, resources_dir=f"{dirname(__file__)}")
         ConfidenceMatcherPipeline.__init__(self, bus, config)
 
@@ -468,21 +468,21 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     def _process_play_query(self, query:str, utterance: str, lang: str, match: dict = None,
                             message: Optional[Message] = None) -> Optional[IntentHandlerMatch]:
         """
-                            Process a play query to determine the appropriate playback action or search intent.
-                            
-                            If the query indicates a resume action (e.g., "play" while paused), returns a resume intent. Otherwise, prompts for missing queries, identifies explicitly requested skills, classifies the media type, extracts relevant entities, and constructs an intent match for playback.
-                            
-                            Parameters:
-                                query (str): The user's spoken or typed query.
-                                utterance (str): The original utterance from the user.
-                                lang (str): The language code for processing.
-                                match (dict, optional): Existing match data to include in the result.
-                                message (Message, optional): The message context for the request.
-                            
-                            Returns:
-                                Optional[IntentHandlerMatch]: An intent match object for playback, resume, or search error, or None if no action is determined.
-                            """
-                            lang = standardize_lang_tag(lang)
+        Process a play query to determine the appropriate playback action or search intent.
+        
+        If the query indicates a resume action (e.g., "play" while paused), returns a resume intent. Otherwise, prompts for missing queries, identifies explicitly requested skills, classifies the media type, extracts relevant entities, and constructs an intent match for playback.
+        
+        Parameters:
+            query (str): The user's spoken or typed query.
+            utterance (str): The original utterance from the user.
+            lang (str): The language code for processing.
+            match (dict, optional): Existing match data to include in the result.
+            message (Message, optional): The message context for the request.
+        
+        Returns:
+            Optional[IntentHandlerMatch]: An intent match object for playback, resume, or search error, or None if no action is determined.
+        """
+        lang = standardize_lang_tag(lang)
         match = match or {}
         player = self.get_player(message)
         # if media is currently paused, empty string means "resume playback"
