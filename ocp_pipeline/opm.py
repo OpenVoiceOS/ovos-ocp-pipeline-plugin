@@ -54,6 +54,13 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
     def __init__(self, bus: Optional[Union[MessageBusClient, FakeBus]] = None,
                  config: Optional[Dict] = None):
+        """
+        Initialize the OCPPipelineMatcher, setting up OCP and legacy audio interfaces, intent and event registration, player session tracking, skill and media mappings, and the AhocorasickNER for entity recognition.
+        
+        Parameters:
+            bus (Optional[Union[MessageBusClient, FakeBus]]): The message bus for event communication. If not provided, a fake bus is used.
+            config (Optional[Dict]): Optional configuration dictionary for pipeline and entity keyword setup.
+        """
         OVOSAbstractApplication.__init__(
             self, bus=bus or FakeBus(), skill_id=OCP_ID, resources_dir=f"{dirname(__file__)}")
         ConfidenceMatcherPipeline.__init__(self, bus, config)
@@ -166,7 +173,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         self.ocp_sessions[player.session_id] = player
 
     def handle_skill_register(self, message: Message):
-        """ register skill names as keywords to match their MediaType"""
+        """
+        Registers a skill's names and aliases as keywords for media type matching.
+        
+        Associates the skill's aliases with appropriate media type labels in the named entity recognizer, enabling accurate media intent classification and routing. Updates internal mappings of skills to media types and aliases.
+        """
         skill_id = message.data["skill_id"]
         media = message.data.get("media_types") or \
                 message.data.get("media_type") or []
@@ -213,7 +224,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 self.ner.add_word("porn_streaming_service", a)
 
     def handle_skill_keyword_register(self, message: Message):
-        """ register skill provided keywords """
+        """
+        Register skill-provided keywords and samples for entity recognition.
+        
+        Adds keywords from a CSV file and/or provided samples to the named entity recognizer for the specified skill and media type.
+        """
         skill_id = message.data["skill_id"]
         kw_label = message.data["label"]
         media = message.data["media_type"]
@@ -234,13 +249,23 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
 
     def handle_skill_keyword_deregister(self, message: Message):
+        """
+        Placeholder for deregistering skill-provided keywords from the entity recognizer.
+        
+        Currently not implemented.
+        """
         skill_id = message.data["skill_id"]
         kw_label = message.data["label"]
         media = message.data["media_type"]
         # TODO
 
     def handle_track_state_update(self, message: Message):
-        """ovos.common_play.track.state"""
+        """
+        Handles track state update messages and updates the player proxy to reflect active playback when a playing state is detected.
+        
+        Raises:
+            ValueError: If the message does not contain a 'state' field.
+        """
         state = message.data.get("state")
         if state is None:
             raise ValueError(f"Got state update message with no state: "
@@ -362,8 +387,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                                   utterance=utterance)
 
     def match_medium(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
-        """ match a utterance via classifiers,
-        recommended before common_qa pipeline stage"""
+        """
+        Performs medium-confidence intent matching for media playback queries using classifiers and entity extraction.
+        
+        Analyzes the first utterance to determine if it is an OCP (Open Common Play) query, classifies the requested media type, and extracts relevant entities. Returns an `IntentHandlerMatch` with extracted information if a match is found; otherwise, returns `None`.
+        
+        Returns:
+            Optional[IntentHandlerMatch]: An intent match object containing media type, entities, query string, and confidence, or `None` if no match is found.
+        """
         lang = standardize_lang_tag(lang)
 
         utterance = utterances[0].lower()
@@ -396,8 +427,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                                   utterance=utterance)
 
     def match_low(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
-        """ match an utterance via presence of known OCP keywords,
-        recommended before fallback_low pipeline stage"""
+        """
+        Perform low-confidence matching of an utterance based on the presence of known OCP media keywords.
+        
+        Attempts to extract media-related entities from the utterance using the internal NER. If entities are found and the media type classification confidence meets a minimum threshold, returns an intent match for OCP playback; otherwise, returns None.
+        
+        Returns:
+            IntentHandlerMatch: An intent match object if a suitable media keyword is found and classified with sufficient confidence, otherwise None.
+        """
         utterance = utterances[0].lower()
         # extract entities
         try:
@@ -430,6 +467,21 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
     def _process_play_query(self, query:str, utterance: str, lang: str, match: dict = None,
                             message: Optional[Message] = None) -> Optional[IntentHandlerMatch]:
+        """
+        Process a play query to determine the appropriate playback action or search intent.
+        
+        If the query indicates a resume action (e.g., "play" while paused), returns a resume intent. Otherwise, prompts for missing queries, identifies explicitly requested skills, classifies the media type, extracts relevant entities, and constructs an intent match for playback.
+        
+        Parameters:
+            query (str): The user's spoken or typed query.
+            utterance (str): The original utterance from the user.
+            lang (str): The language code for processing.
+            match (dict, optional): Existing match data to include in the result.
+            message (Message, optional): The message context for the request.
+        
+        Returns:
+            Optional[IntentHandlerMatch]: An intent match object for playback, resume, or search error, or None if no action is determined.
+        """
         lang = standardize_lang_tag(lang)
         match = match or {}
         player = self.get_player(message)
