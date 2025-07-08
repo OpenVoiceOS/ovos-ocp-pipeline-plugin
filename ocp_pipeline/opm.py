@@ -23,8 +23,7 @@ from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, O
 from ovos_workshop.app import OVOSAbstractApplication
 from ovos_utils.xdg_utils import xdg_data_home
 from ovos_config.meta import get_xdg_base
-
-from ocp_pipeline.feats import OCPFeaturizer
+from ahocorasick_ner import AhocorasickNER
 from ocp_pipeline.legacy import LegacyCommonPlay
 
 
@@ -55,6 +54,13 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
     def __init__(self, bus: Optional[Union[MessageBusClient, FakeBus]] = None,
                  config: Optional[Dict] = None):
+        """
+        Initialize the OCPPipelineMatcher, setting up OCP and legacy audio interfaces, intent and event registration, player session tracking, skill and media mappings, and the AhocorasickNER for entity recognition.
+        
+        Parameters:
+            bus (Optional[Union[MessageBusClient, FakeBus]]): The message bus for event communication. If not provided, a fake bus is used.
+            config (Optional[Dict]): Optional configuration dictionary for pipeline and entity keyword setup.
+        """
         OVOSAbstractApplication.__init__(
             self, bus=bus or FakeBus(), skill_id=OCP_ID, resources_dir=f"{dirname(__file__)}")
         ConfidenceMatcherPipeline.__init__(self, bus, config)
@@ -72,6 +78,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             m: [] for m in MediaType
         }
         self.entity_csvs = self.config.get("entity_csvs", [])  # user defined keyword csv files
+        self.ner = AhocorasickNER()
 
         self.register_ocp_api_events()
         self.register_ocp_intents()
@@ -166,7 +173,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         self.ocp_sessions[player.session_id] = player
 
     def handle_skill_register(self, message: Message):
-        """ register skill names as keywords to match their MediaType"""
+        """
+        Registers a skill's names and aliases as keywords for media type matching.
+        
+        Associates the skill's aliases with appropriate media type labels in the named entity recognizer, enabling accurate media intent classification and routing. Updates internal mappings of skills to media types and aliases.
+        """
         skill_id = message.data["skill_id"]
         media = message.data.get("media_types") or \
                 message.data.get("media_type") or []
@@ -185,70 +196,76 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             except:
                 LOG.error(f"{skill_id} reported an invalid media_type: {m}")
 
-        if OCPFeaturizer.ocp_keywords is None:
-            return
         # TODO - review below and add missing
         # set bias in classifier
         # aliases -> {type}_streaming_service bias
-        if MediaType.MUSIC in media:
-            OCPFeaturizer.ocp_keywords.register_entity("music_streaming_service", aliases)
-        if MediaType.MOVIE in media:
-            OCPFeaturizer.ocp_keywords.register_entity("movie_streaming_service", aliases)
-        # if MediaType.SILENT_MOVIE in media:
-        #    OCPFeaturizer.ocp_keywords.register_entity("silent_movie_streaming_service", aliases)
-        # if MediaType.BLACK_WHITE_MOVIE in media:
-        #    OCPFeaturizer.ocp_keywords.register_entity("bw_movie_streaming_service", aliases)
-        if MediaType.SHORT_FILM in media:
-            OCPFeaturizer.ocp_keywords.register_entity("shorts_streaming_service", aliases)
-        if MediaType.PODCAST in media:
-            OCPFeaturizer.ocp_keywords.register_entity("podcast_streaming_service", aliases)
-        if MediaType.AUDIOBOOK in media:
-            OCPFeaturizer.ocp_keywords.register_entity("audiobook_streaming_service", aliases)
-        if MediaType.NEWS in media:
-            OCPFeaturizer.ocp_keywords.register_entity("news_provider", aliases)
-        if MediaType.TV in media:
-            OCPFeaturizer.ocp_keywords.register_entity("tv_streaming_service", aliases)
-        if MediaType.RADIO in media:
-            OCPFeaturizer.ocp_keywords.register_entity("radio_streaming_service", aliases)
-        if MediaType.ADULT in media:
-            OCPFeaturizer.ocp_keywords.register_entity("porn_streaming_service", aliases)
+        for a in aliases:
+            if MediaType.MUSIC in media:
+                self.ner.add_word("music_streaming_service", a)
+            if MediaType.MOVIE in media:
+                self.ner.add_word("movie_streaming_service", a)
+            # if MediaType.SILENT_MOVIE in media:
+            #    self.ner.add_word("silent_movie_streaming_service", a)
+            # if MediaType.BLACK_WHITE_MOVIE in media:
+            #    self.ner.add_word("bw_movie_streaming_service", a)
+            if MediaType.SHORT_FILM in media:
+                self.ner.add_word("shorts_streaming_service", a)
+            if MediaType.PODCAST in media:
+                self.ner.add_word("podcast_streaming_service", a)
+            if MediaType.AUDIOBOOK in media:
+                self.ner.add_word("audiobook_streaming_service", a)
+            if MediaType.NEWS in media:
+                self.ner.add_word("news_provider", a)
+            if MediaType.TV in media:
+                self.ner.add_word("tv_streaming_service", a)
+            if MediaType.RADIO in media:
+                self.ner.add_word("radio_streaming_service", a)
+            if MediaType.ADULT in media:
+                self.ner.add_word("porn_streaming_service", a)
 
     def handle_skill_keyword_register(self, message: Message):
-        """ register skill provided keywords """
-        if OCPFeaturizer.ocp_keywords is None:
-            return
+        """
+        Register skill-provided keywords and samples for entity recognition.
+        
+        Adds keywords from a CSV file and/or provided samples to the named entity recognizer for the specified skill and media type.
+        """
         skill_id = message.data["skill_id"]
         kw_label = message.data["label"]
         media = message.data["media_type"]
         samples = message.data.get("samples", [])
         csv_path = message.data.get("csv")
 
-        # NB: we need to validate labels,
-        # they MUST be part of the classifier training data
+        if csv_path:
+            with open(csv_path) as f:
+                lines = f.read().split("\n")[1:]
+                for l in lines:
+                    if not l.strip():
+                        continue
+                    label, value = l.split(",", 1)
+                    self.ner.add_word(label, value)
 
-        if kw_label in OCPFeaturizer.labels:
-            # set bias in classifier
-            if csv_path:
-                OCPFeaturizer.ocp_keywords.load_entities(csv_path)
-            if samples:
-                OCPFeaturizer.ocp_keywords.register_entity(kw_label, samples)
-            OCPFeaturizer.ocp_keywords.fit()  # update
+        for s in samples:
+            self.ner.add_word(kw_label, s)
 
-            # warm up the featurizer so intent matches faster (lazy loaded)
-            OCPFeaturizer.extract_entities("UNLEASH THE AUTOMATONS")
 
     def handle_skill_keyword_deregister(self, message: Message):
+        """
+        Placeholder for deregistering skill-provided keywords from the entity recognizer.
+        
+        Currently not implemented.
+        """
         skill_id = message.data["skill_id"]
         kw_label = message.data["label"]
         media = message.data["media_type"]
-
-        # unset bias in classifier
-        # TODO - support for removing samples, instead of full keyword
-        # we need to keep the keyword available to the classifier
-        # OCPFeaturizer.ocp_keywords.deregister_entity(kw_label)
+        # TODO
 
     def handle_track_state_update(self, message: Message):
-        """ovos.common_play.track.state"""
+        """
+        Handles track state update messages and updates the player proxy to reflect active playback when a playing state is detected.
+        
+        Raises:
+            ValueError: If the message does not contain a 'state' field.
+        """
         state = message.data.get("state")
         if state is None:
             raise ValueError(f"Got state update message with no state: "
@@ -370,8 +387,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                                   utterance=utterance)
 
     def match_medium(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
-        """ match a utterance via classifiers,
-        recommended before common_qa pipeline stage"""
+        """
+        Performs medium-confidence intent matching for media playback queries using classifiers and entity extraction.
+        
+        Analyzes the first utterance to determine if it is an OCP (Open Common Play) query, classifies the requested media type, and extracts relevant entities. Returns an `IntentHandlerMatch` with extracted information if a match is found; otherwise, returns `None`.
+        
+        Returns:
+            Optional[IntentHandlerMatch]: An intent match object containing media type, entities, query string, and confidence, or `None` if no match is found.
+        """
         lang = standardize_lang_tag(lang)
 
         utterance = utterances[0].lower()
@@ -385,10 +408,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         media_type, confidence = self.classify_media(utterance, lang)
 
         # extract entities
-        if OCPFeaturizer.ocp_keywords is None:
+        try:
+            ents = {e["label"]: e["word"] for e in self.ner.tag(utterance)}
+        except Exception as e:
+            LOG.error(f"failed to extract media entities: ({e})")
             ents = {}
-        else:
-            ents = OCPFeaturizer.extract_entities(utterance)
 
         # extract the query string
         query = self.remove_voc(utterance, "Play", lang).strip()
@@ -403,13 +427,21 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                                   utterance=utterance)
 
     def match_low(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
-        """ match an utterance via presence of known OCP keywords,
-        recommended before fallback_low pipeline stage"""
+        """
+        Perform low-confidence matching of an utterance based on the presence of known OCP media keywords.
+        
+        Attempts to extract media-related entities from the utterance using the internal NER. If entities are found and the media type classification confidence meets a minimum threshold, returns an intent match for OCP playback; otherwise, returns None.
+        
+        Returns:
+            IntentHandlerMatch: An intent match object if a suitable media keyword is found and classified with sufficient confidence, otherwise None.
+        """
         utterance = utterances[0].lower()
-        if OCPFeaturizer.ocp_keywords is None:
+        # extract entities
+        try:
+            ents = {e["label"]: e["word"] for e in self.ner.tag(utterance)}
+        except Exception as e:
+            LOG.error(f"failed to extract media entities: ({e})")
             ents = {}
-        else:
-            ents = OCPFeaturizer.extract_entities(utterance)
 
         if not ents:
             return None
@@ -435,6 +467,21 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
     def _process_play_query(self, query:str, utterance: str, lang: str, match: dict = None,
                             message: Optional[Message] = None) -> Optional[IntentHandlerMatch]:
+        """
+        Process a play query to determine the appropriate playback action or search intent.
+        
+        If the query indicates a resume action (e.g., "play" while paused), returns a resume intent. Otherwise, prompts for missing queries, identifies explicitly requested skills, classifies the media type, extracts relevant entities, and constructs an intent match for playback.
+        
+        Parameters:
+            query (str): The user's spoken or typed query.
+            utterance (str): The original utterance from the user.
+            lang (str): The language code for processing.
+            match (dict, optional): Existing match data to include in the result.
+            message (Message, optional): The message context for the request.
+        
+        Returns:
+            Optional[IntentHandlerMatch]: An intent match object for playback, resume, or search error, or None if no action is determined.
+        """
         lang = standardize_lang_tag(lang)
         match = match or {}
         player = self.get_player(message)
@@ -476,10 +523,12 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         # remove play verb from the query string
         query = self.remove_voc(query, "Play", lang).strip()
 
-        if OCPFeaturizer.ocp_keywords is None:
+        # extract entities
+        try:
+            ents = {e["label"]: e["word"] for e in self.ner.tag(utterance)}
+        except Exception as e:
+            LOG.error(f"failed to extract media entities: ({e})")
             ents = {}
-        else:
-            ents = OCPFeaturizer.extract_entities(utterance)
 
         return IntentHandlerMatch(match_type="ocp:play",
                                   match_data={"media_type": media_type,

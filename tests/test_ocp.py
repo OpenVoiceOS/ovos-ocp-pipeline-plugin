@@ -1,43 +1,11 @@
 import os.path
 import unittest
-from unittest.mock import patch, Mock
 
-from ovos_classifiers.skovos.features import ClassifierProbaVectorizer
-from sklearn.pipeline import FeatureUnion
-import ocp_pipeline.opm
 from ovos_bus_client.message import Message
 from ovos_utils.ocp import MediaType
-from ocp_pipeline.opm import OCPFeaturizer, OCPPipelineMatcher
-from ovos_utils.log import LOG
 
-
-class TestOCPFeaturizer(unittest.TestCase):
-
-    def setUp(self):
-        self.featurizer = OCPFeaturizer()
-
-    @patch('os.path.isfile', return_value=True)
-    @patch('ovos_classifiers.skovos.features.KeywordFeaturesVectorizer.load_entities')
-    @patch.object(LOG, 'info')
-    def test_load_csv_with_existing_file(self, mock_log_info, mock_load_entities, mock_isfile):
-        csv_path = "existing_file.csv"
-        self.featurizer.load_csv([csv_path])
-        mock_isfile.assert_called_with(csv_path)
-        mock_load_entities.assert_called_with(csv_path)
-        mock_log_info.assert_called_with(f"Loaded OCP keywords: {csv_path}")
-
-    @patch.object(LOG, 'error')
-    def test_load_csv_with_nonexistent_file(self, mock_log_error):
-        csv_path = "nonexistent_file.csv"
-        self.featurizer.load_csv([csv_path])
-        mock_log_error.assert_called_with(f"Requested OCP entities file does not exist? {csv_path}")
-
-    @patch.object(FeatureUnion, 'transform', return_value='mock_transform_result')
-    def test_transform(self, mock_transform):
-        self.featurizer.clf_feats = Mock(spec=ClassifierProbaVectorizer)
-        result = self.featurizer.transform(["example_text"])
-        mock_transform.assert_called_with(["example_text"])
-        self.assertEqual(result, 'mock_transform_result')
+import ocp_pipeline.opm
+from ocp_pipeline.opm import OCPPipelineMatcher
 
 
 class TestOCPPipelineNoClassifierMatcher(unittest.TestCase):
