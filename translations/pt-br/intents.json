@@ -14,7 +14,8 @@
     "(toque|ponha) (a|o) (próxima|próximo) (música|canção|faixa|vídeo|mídia)",
     "toque (a|o) (próxima|próximo|seguinte)",
     "(próxima|próximo|seguinte)",
-    "(próxima|próximo) (canção|faixa|música|filme|vídeo|som)"
+    "(próxima|próximo) (canção|faixa|música|filme|vídeo|som)",
+    "(toque|passe à|passe ao) (próximo|próxima) (música|canção|faixa|vídeo|mídia)"
   ],
   "resume.intent": [
     "(recomece|continue)",
@@ -31,7 +32,8 @@
     "(toque|) (o|a|) (último|última|) (música|canção|faixa|vídeo|mídia) (anterior|)",
     "(toque|) (o|a|) (anterior|última|último|volte)",
     "anterior",
-    "(última|último) (canção|faixa|música|filme|vídeo|som) (anterior|)"
+    "(última|último) (canção|faixa|música|filme|vídeo|som) (anterior|)",
+    "(música|canção|faixa|vídeo|mídia) anterior"
   ],
   "pause.intent": [
     "Pause",
@@ -55,5 +57,14 @@
     "pare",
     "pare (o|a) (reprodução|mídia|música|filme|filmes|ruído)",
     "pare tudo"
+  ],
+  "save_game.intent": [
+    "salve",
+    "salve o jogo"
+  ],
+  "load_game.intent": [
+    "carregue",
+    "carregue o jogo",
+    "carregue [o] (último|anterior) jogo [salvo]"
   ]
 }
