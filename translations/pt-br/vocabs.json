@@ -1,4 +1,37 @@
 {
+  "SoundIntents.voc": [
+    "inicie notificação",
+    "inicie notificações",
+    "comece o discurso",
+    "ligue o som",
+    "ligue os sons",
+    "código qr de áudio",
+    "códigos qr de áudio",
+    "comece a ditar",
+    "inicie captura de texto",
+    "comece a gravar",
+    "inicie a gravação de áudio",
+    "inicie a captura de texto",
+    "comece a capturar",
+    "ggwave",
+    "inicie"
+  ],
+  "Parrot.voc": [
+    "modo papagaio",
+    "comece a falar"
+  ],
+  "Alerts.voc": [
+    "alerta",
+    "alertas",
+    "cronômetro",
+    "temporizadores",
+    "lembrete",
+    "lembretes",
+    "alarme",
+    "alarmes",
+    "me acorde",
+    "me acorde"
+  ],
   "video_only.voc": [
     "não transmita para áudio",
     "não transmita para áudio",
@@ -111,13 +144,13 @@
   "AudioBookKeyword.voc": [
     "livro",
     "livros",
-    "ler",
+    "(ler|leia)",
     "audiobook",
     "audiobooks",
     "narre"
   ],
   "SilentKeyword.voc": [
-    "silencioso"
+    "(mudo|silêncio|silencioso)"
   ],
   "ShortKeyword.voc": [
     "curto"
