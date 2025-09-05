@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.18a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.18a1) (2025-09-05)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.17a2...1.1.18a1)
+
+**Merged pull requests:**
+
+- fix: make orjson optional [\#102](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/102) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.17a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.17a2) (2025-08-01)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.17a1...1.1.17a2)
