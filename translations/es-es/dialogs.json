@@ -1,0 +1,19 @@
+{
+  "cant.play.dialog": [
+    "No estoy seguro de cómo tocar {phrase}",
+    "Lo siento, no sé cómo tocar {phrase}"
+  ],
+  "play.what.dialog": [
+    "¿Qué debería reproducir a continuación?"
+  ],
+  "no.media.skills.dialog": [
+    "Lo siento, no tengo ninguna función multimedia instalada",
+    "Necesito instalar algunas funciones multimedia antes de poder reproducir contenido multimedia.",
+    "No puedo reproducir contenido multimedia hasta que se instalen algunas funciones multimedia"
+  ],
+  "just.one.moment.dialog": [
+    "Dame un momento",
+    "Dame un segundo",
+    "Sólo un momento mientras busco eso."
+  ]
+}
