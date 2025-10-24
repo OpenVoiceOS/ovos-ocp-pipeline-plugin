@@ -1,20 +1,24 @@
 {
-
-  "SoundIntents.voc":[
+  "SoundIntents.voc": [
     "iniciar notificación",
     "iniciar notificaciones",
-    "iniciar habla",
+    "iniciar discurso",
     "iniciar sonido",
     "iniciar sonidos",
-    "código qr de audio",
-    "códigos qr de audio",
+    "código QR de audio",
+    "códigos QR de audio",
     "iniciar dictado",
     "iniciar captura de texto",
     "iniciar grabación",
     "iniciar grabación de audio",
     "iniciar captura de texto",
     "iniciar captura",
-    "ggwave"
+    null,
+    "Puesta en marcha"
+  ],
+  "Parrot.voc": [
+    "modo loro",
+    "empezar a hablar"
   ],
   "Alerts.voc": [
     "alerta",
@@ -27,5 +31,128 @@
     "alarmas",
     "despiértame",
     "haz que me despierte"
+  ],
+  "video_only.voc": [
+    "no transmitir a audio",
+    "no transmitir a audio",
+    "sin reproductor de audio",
+    "solo video",
+    "solo video"
+  ],
+  "AudioKeyword.voc": [
+    "audio",
+    "sonido"
+  ],
+  "HentaiKeyword.voc": [
+    "hentai"
+  ],
+  "PodcastKeyword.voc": [
+    "podcast",
+    "podcasts"
+  ],
+  "Play.voc": [
+    "buscar",
+    "leer",
+    "(Reproducir|Tocar)",
+    "comenzar"
+  ],
+  "audio_only.voc": [
+    "solo audio",
+    "sin video",
+    "solo audio",
+    "solo sonido",
+    "solo sonido"
+  ],
+  "NewsKeyword.voc": [
+    "noticias"
+  ],
+  "GameKeyword.voc": [
+    "juego"
+  ],
+  "ADKeyword.voc": [
+    "descripción de audio",
+    "descripción de la película"
+  ],
+  "TrailerKeyword.voc": [
+    "tráiler"
+  ],
+  "MovieKeyword.voc": [
+    "película",
+    "película"
+  ],
+  "CartoonKeyword.voc": [
+    "dibujo animado",
+    "dibujos animados"
+  ],
+  "VideoKeyword.voc": [
+    "video"
+  ],
+  "ASMRKeyword.voc": [
+    "ASMR",
+    "respuesta sensorial meridiana autónoma"
+  ],
+  "DocumentaryKeyword.voc": [
+    "documental",
+    "documentales"
+  ],
+  "SeriesKeyword.voc": [
+    "series",
+    "programa de televisión",
+    "episodio",
+    "episodios"
+  ],
+  "BWKeyword.voc": [
+    "blanco y negro",
+    "monocromo"
+  ],
+  "AdultKeyword.voc": [
+    "porno",
+    "mayores de 18 años",
+    "pornografía"
+  ],
+  "RadioKeyword.voc": [
+    "radio",
+    "radio por Internet"
+  ],
+  "AudioDramaKeyword.voc": [
+    "drama",
+    "teatro"
+  ],
+  "Resume.voc": [
+    "reanudar",
+    "reanudar la pausa"
+  ],
+  "ComicBookKeyword.voc": [
+    "cómic animado",
+    "cómic",
+    "historia visual"
+  ],
+  "TVKeyword.voc": [
+    "TELEVISOR",
+    "televisión",
+    "canal"
+  ],
+  "AnimeKeyword.voc": [
+    "anime"
+  ],
+  "MusicKeyword.voc": [
+    "música",
+    "canción",
+    "banda sonora",
+    "banda sonora"
+  ],
+  "AudioBookKeyword.voc": [
+    "libro",
+    "libros",
+    "leer",
+    "audiolibro",
+    "audiolibros",
+    "narrar"
+  ],
+  "SilentKeyword.voc": [
+    "(silencio|silencioso)"
+  ],
+  "ShortKeyword.voc": [
+    "corto"
   ]
 }
