@@ -1,13 +1,7 @@
-lees  audio boek {query}
-lees  audioboek {query}
-lees  boek {query}
-lees  luister boek {query}
-lees  luisterboek {query}
+lees audio boek {query}
+lees audioboek {query}
 lees boek {query}
-lees het audio boek {query}
-lees het audioboek {query}
-lees het boek {query}
-lees het luister boek {query}
-lees het luisterboek {query}
-lees luisterboek {query}
 lees {query}
+lees {query} audio boek
+lees {query} audioboek
+lees {query} boek
