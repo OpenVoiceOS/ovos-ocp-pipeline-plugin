@@ -1,0 +1,70 @@
+{
+  "play.intent": [
+    "(reproducir|iniciar) {query}"
+  ],
+  "like_song.intent": [
+    "me gusta (eso|esto|eso)",
+    "me gusta (esa|esta)(canción|música|pista|jam|sonido)",
+    "(bueno|agradable|genial|increíble|impresionante|genial) (canción|música|pista|jam|sonido)",
+    "(Eso/Esto/Eso) es una (buena/agradable/genial/increíble/impresionante/genial) (canción/música/pista/jam/sonido)"
+  ],
+  "next.intent": [
+    "(siguiente|saltar)",
+    "(siguiente|saltar) (música|canción|pista|vídeo|medios)",
+    "(reproducir|ir a) siguiente (música|canción|pista|vídeo|medio)",
+    "reproducir siguiente",
+    "siguiente",
+    "siguiente (canción|pista|música|película|vídeo|melodía)",
+    "(reproducir|ir a) [la] siguiente (canción|pista|música|película|vídeo|melodía)"
+  ],
+  "resume.intent": [
+    "(reanudar|reanudar)",
+    "(reanudar|reanudar|continuar|reiniciar) [la] (música|canción|pista|vídeo|medio|reproducción|juego)",
+    "jugar"
+  ],
+  "read.intent": [
+    "leer [el] (libro|audiolibro|audiolibro) {query}",
+    "leer {query}",
+    "leer {query} (libro|audiolibro|audiolibro)"
+  ],
+  "prev.intent": [
+    "(reproducir anterior|regresar uno) (música|canción|pista|vídeo|medios)",
+    "(reproducir anterior|anterior) (música|canción|pista|vídeo|medios)",
+    "(reproducir anterior|anterior|volver)",
+    "(reproducir|ir a) [la] anterior (canción|pista|música|película|vídeo|melodía)",
+    "previo",
+    "anterior (canción|pista|música|película|vídeo|melodía)"
+  ],
+  "pause.intent": [
+    "pausa",
+    "pausar [la] (música|canción|pista|vídeo|medio|reproducción|juego)"
+  ],
+  "open.intent": [
+    "abrir (OCP|O C P|común|ovos|open voice os) (reproductor|reproductor multimedia)",
+    "abierto (OCP|O C P|ovos common play|common play|ovos reproductor multimedia open voice os reproductor) (pantalla de inicio|página de inicio|pantalla de inicio|página de inicio|menú)",
+    "abrir (OCP|O C P|ovos juego común|open voice os juego común|juego común)",
+    "abrir [el] (medios|música|gui|video) (reproductor|catálogo|habilidades|menú|reproducción)"
+  ],
+  "featured.intent": [
+    "(abrir|mostrar|mostrar) (destacado|) {media} (catálogo|colección|lista de reproducción)",
+    "(abrir|mostrar|mostrar) destacado {media}"
+  ],
+  "play_favorites.intent": [
+    "(reproducir|iniciar) mis (pistas|canciones|canciones|música|jam|jams) (favoritas|que me gustan)",
+    "(reproducir|iniciar) (favorito|me gusta) (pistas|canción|canciones|música|jam|jams)"
+  ],
+  "media_stop.intent": [
+    "detener",
+    "detener (reproducción|medios|reproducción de medios|música|película|películas|ruido)",
+    "detener todo"
+  ],
+  "save_game.intent": [
+    "guardar",
+    "guardar [el] juego"
+  ],
+  "load_game.intent": [
+    "cargar",
+    "cargar [el] juego",
+    "cargar [el] (último|anterior) juego [guardado]"
+  ]
+}
