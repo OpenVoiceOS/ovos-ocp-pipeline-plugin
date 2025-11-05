@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.18a4](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.18a4) (2025-11-05)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.18a3...1.1.18a4)
+
+**Merged pull requests:**
+
+- Update ovos-plugin-manager version range [\#108](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/108) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.18a3](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.18a3) (2025-10-24)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.18a2...1.1.18a3)
