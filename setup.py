@@ -45,7 +45,7 @@ PLUGIN_ENTRY_POINT = ('ovos-ocp-pipeline-plugin=ocp_pipeline.opm:OCPPipelineMatc
                       'ovos-ocp-pipeline-plugin-legacy=ocp_pipeline.opm:MycroftCPSLegacyPipeline')
 
 setup(
-    name="ovos-ocp-pipeline-plugin",
+    name="ovos_ocp_pipeline_plugin",
     version=get_version(),
     author="JarbasAI",
     description="media intent parser for OVOS",

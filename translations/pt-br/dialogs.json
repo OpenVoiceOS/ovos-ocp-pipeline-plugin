@@ -6,6 +6,11 @@
   "play.what.dialog": [
     "O que deveria tocar em seguida?"
   ],
+  "no.media.skills.dialog": [
+    "Desculpe, não tenho nenhuma aplicação de mídia instalada",
+    "Preciso instalar algumas aplicações de mídia antes de poder reproduzir mídia",
+    "Não consigo reproduzir mídia até que algumas aplicações de mídia sejam instaladas"
+  ],
   "just.one.moment.dialog": [
     "Um instante",
     "Só um segundo",
