@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.19a4](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.19a4) (2025-12-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.19a3...1.1.19a4)
+
+**Merged pull requests:**
+
+- chore\(deps\): update dependency python to 3.14 [\#111](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/111) ([renovate[bot]](https://github.com/apps/renovate))
+
+## [1.1.19a3](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.19a3) (2025-12-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.19a2...1.1.19a3)
+
 ## [1.1.19a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.19a2) (2025-12-19)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.19a1...1.1.19a2)
