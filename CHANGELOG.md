@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.19a5](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.19a5) (2025-12-20)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.19a4...1.1.19a5)
+
+**Merged pull requests:**
+
+- chore\(deps\): update dependency ovos-workshop to v8 [\#119](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/119) ([renovate[bot]](https://github.com/apps/renovate))
+
 ## [1.1.19a4](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.19a4) (2025-12-19)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.19a3...1.1.19a4)
