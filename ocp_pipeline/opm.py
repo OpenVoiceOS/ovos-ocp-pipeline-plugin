@@ -66,6 +66,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             bus (Optional[Union[MessageBusClient, FakeBus]]): The message bus for event communication. If not provided, a fake bus is used.
             config (Optional[Dict]): Optional configuration dictionary for pipeline and entity keyword setup.
         """
+        intent_config = Configuration().get('intents', {})
+        config = config or intent_config.get("ovos-ocp-pipeline-plugin") or intent_config.get("OCP") or dict()              
         OVOSAbstractApplication.__init__(
             self, bus=bus or FakeBus(), skill_id=OCP_ID, resources_dir=f"{dirname(__file__)}")
         ConfidenceMatcherPipeline.__init__(self, bus, config)
