@@ -4,7 +4,8 @@
     "Désolé, je ne sais pas comment jouer {phrase}"
   ],
   "play.what.dialog": [
-    "Que dois-je jouer par la suite?"
+    "Que voulez-vous que je lance ?",
+    "Que dois-je lancer ensuite ?"
   ],
   "no.media.skills.dialog": [
     "Je suis désolé, je n'ai aucune compétence multimédia installée",

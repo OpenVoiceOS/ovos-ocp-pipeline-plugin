@@ -1,4 +1,15 @@
 {
+  "Alerts.voc": [
+    "alarme",
+    "alarmes",
+    "alerte",
+    "alertes",
+    "minuteur",
+    "minuteurs",
+    "rappel",
+    "rappels",
+    "réveille-moi"
+  ],
   "video_only.voc": [
     "ne pas diffuser en audio",
     "ne pas diffuser en audio",
@@ -37,7 +48,8 @@
     "jeu"
   ],
   "ADKeyword.voc": [
-    "déscription du audio",
+    "audiodescription",
+    "description audio",
     "description du film"
   ],
   "TrailerKeyword.voc": [
@@ -45,7 +57,7 @@
   ],
   "MovieKeyword.voc": [
     "film",
-    "film"
+    "cinéma"
   ],
   "CartoonKeyword.voc": [
     "dessin animé",
@@ -56,7 +68,7 @@
   ],
   "ASMRKeyword.voc": [
     "ASMR",
-    "réponse du méridien sensorielle autonome"
+    "réponse autonome du méridien sensoriel"
   ],
   "DocumentaryKeyword.voc": [
     "documentaire",
@@ -84,6 +96,11 @@
   "AudioDramaKeyword.voc": [
     "drame",
     "théâtre"
+  ],
+  "Parrot.voc": [
+    "mode perroquet",
+    "répète après moi",
+    "commence à parler"
   ],
   "Resume.voc": [
     "reprend",
@@ -121,5 +138,21 @@
   ],
   "ShortKeyword.voc": [
     "court"
+  ],
+  "SoundIntents.voc": [
+    "capture de texte",
+    "code qr audio",
+    "codes qr audio",
+    "démarre la dictée",
+    "démarre la notification",
+    "démarre les notifications",
+    "démarre l'enregistrement",
+    "démarre l'enregistrement audio",
+    "démarre la capture",
+    "démarre le son",
+    "démarre les sons",
+    "ggwave",
+    "lance la dictée",
+    "lance l'enregistrement audio"
   ]
 }
