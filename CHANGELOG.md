@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.20a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.20a1) (2026-03-24)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.19a6...1.1.20a1)
+
+**Merged pull requests:**
+
+- fix: rename bare lang code locale directories [\#125](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/125) ([ovos-localize[bot]](https://github.com/apps/ovos-localize))
+- Complete French OCP media vocab [\#124](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/124) ([goldyfruit](https://github.com/goldyfruit))
+
 ## [1.1.19a6](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.19a6) (2026-01-19)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.19a5...1.1.19a6)
