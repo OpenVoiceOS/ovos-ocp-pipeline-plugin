@@ -1,16 +1,10 @@
 open O C P
-open O C P beginscherm
-open O C P homepage
-open O C P homescreen
 open O C P mediaspeler
 open O C P menu
 open O C P speler
 open O C P startpagina
 open O C P startscherm
 open OCP
-open OCP beginscherm
-open OCP homepage
-open OCP homescreen
 open OCP mediaspeler
 open OCP menu
 open OCP speler
@@ -18,50 +12,62 @@ open OCP startpagina
 open OCP startscherm
 open common mediaspeler
 open common play
-open common play beginscherm
-open common play homepage
-open common play homescreen
 open common play menu
 open common play startpagina
 open common play startscherm
 open common speler
-open gui catalogus
-open gui menu
-open gui skills
-open gui speler
-open media catalogus
-open media menu
-open media skills
-open media speler
-open muziek catalogus
-open muziek menu
-open muziek skills
-open muziek speler
+open de gui
+open de gui catalogus
+open de gui menu
+open de gui skills
+open de gui speler
+open de media
+open de media catalogus
+open de media menu
+open de media skills
+open de media speler
+open de muziek
+open de muziek catalogus
+open de muziek menu
+open de muziek skills
+open de muziek speler
+open de video
+open de video catalogus
+open de video menu
+open de video skills
+open de video speler
+open het gui
+open het gui catalogus
+open het gui menu
+open het gui skills
+open het gui speler
+open het media
+open het media catalogus
+open het media menu
+open het media skills
+open het media speler
+open het muziek
+open het muziek catalogus
+open het muziek menu
+open het muziek skills
+open het muziek speler
+open het video
+open het video catalogus
+open het video menu
+open het video skills
+open het video speler
 open open voice os common play
 open open voice os mediaspeler
-open open voice os player beginscherm
-open open voice os player homepage
-open open voice os player homescreen
-open open voice os player menu
-open open voice os player startpagina
-open open voice os player startscherm
 open open voice os speler
-open ovos common play
-open ovos common play beginscherm
-open ovos common play homepage
-open ovos common play homescreen
+open open voice os-speler menu
+open open voice os-speler startpagina
+open open voice os-speler startscherm
 open ovos common play menu
 open ovos common play startpagina
 open ovos common play startscherm
-open ovos media player beginscherm
-open ovos media player homepage
-open ovos media player homescreen
-open ovos media player menu
-open ovos media player startpagina
-open ovos media player startscherm
+open ovos gemeenschappelijk spel
 open ovos mediaspeler
+open ovos mediaspeler menu
+open ovos mediaspeler startpagina
+open ovos mediaspeler startscherm
 open ovos speler
-open video catalogus
-open video menu
-open video skills
-open video speler
