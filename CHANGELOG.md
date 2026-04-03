@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.21a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.21a1) (2026-04-03)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.20a1...1.1.21a1)
+
+**Merged pull requests:**
+
+- fix\(i18n\): normalize locale folders to canonical BCP-47 [\#127](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/127) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.20a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.20a1) (2026-03-24)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.19a6...1.1.20a1)
