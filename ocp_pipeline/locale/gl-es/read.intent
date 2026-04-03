@@ -1,0 +1,10 @@
+ler  audio libro {query}
+ler  audiolibro {query}
+ler  libro {query}
+ler o audio libro {query}
+ler o audiolibro {query}
+ler o libro {query}
+ler {query}
+ler {query} audio libro
+ler {query} audiolibro
+ler {query} libro

@@ -1,0 +1,7 @@
+leer  audiolibro {query}
+leer  libro {query}
+leer el audiolibro {query}
+leer el libro {query}
+leer {query}
+leer {query} audiolibro
+leer {query} libro

@@ -1,0 +1,24 @@
+abre  catálogo{media}
+abre  coleção{media}
+abre  lista de{media}
+abre recomendado catálogo{media}
+abre recomendado coleção{media}
+abre recomendado lista de{media}
+abrir {media} recomendada
+abrir {media} recomendado
+mostra  catálogo{media}
+mostra  coleção{media}
+mostra  lista de{media}
+mostra recomendado catálogo{media}
+mostra recomendado coleção{media}
+mostra recomendado lista de{media}
+mostrar {media} recomendada
+mostrar {media} recomendado
+ver  catálogo{media}
+ver  coleção{media}
+ver  lista de{media}
+ver recomendado catálogo{media}
+ver recomendado coleção{media}
+ver recomendado lista de{media}
+ver {media} recomendada
+ver {media} recomendado

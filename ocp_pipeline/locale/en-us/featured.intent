@@ -1,0 +1,21 @@
+display  {media} catalog
+display  {media} collection
+display  {media} playlist
+display featured {media}
+display featured {media} catalog
+display featured {media} collection
+display featured {media} playlist
+open  {media} catalog
+open  {media} collection
+open  {media} playlist
+open featured {media}
+open featured {media} catalog
+open featured {media} collection
+open featured {media} playlist
+show  {media} catalog
+show  {media} collection
+show  {media} playlist
+show featured {media}
+show featured {media} catalog
+show featured {media} collection
+show featured {media} playlist

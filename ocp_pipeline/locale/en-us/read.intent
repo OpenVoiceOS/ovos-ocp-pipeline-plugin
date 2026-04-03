@@ -1,0 +1,10 @@
+read  audio book {query}
+read  audiobook {query}
+read  book {query}
+read the audio book {query}
+read the audiobook {query}
+read the book {query}
+read {query}
+read {query} audio book
+read {query} audiobook
+read {query} book

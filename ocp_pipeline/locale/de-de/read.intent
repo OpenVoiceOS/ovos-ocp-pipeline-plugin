@@ -1,0 +1,5 @@
+lese Buch {query}
+lese Hörbuch {query}
+lese {query}
+lese {query} Buch
+lese {query} Hörbuch
