@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.21a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.21a2) (2026-04-09)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.21a1...1.1.21a2)
+
+**Merged pull requests:**
+
+- chore\(ovos-ocp-pipeline-plugin\): allow ovos-workshop\<9.0.0 [\#129](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/129) ([JarbasAl](https://github.com/JarbasAl))
+- chore\(ovos\_ocp\_pipeline\_plugin\): allow ovos-workshop\<9.0.0 [\#128](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/128) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.21a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.21a1) (2026-04-03)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.20a1...1.1.21a1)
