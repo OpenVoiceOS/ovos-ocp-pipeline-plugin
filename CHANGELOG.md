@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.21a3](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.21a3) (2026-04-09)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.21a2...1.1.21a3)
+
 ## [1.1.21a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.21a2) (2026-04-09)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.21a1...1.1.21a2)
