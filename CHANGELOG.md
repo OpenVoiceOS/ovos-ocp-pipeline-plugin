@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.21a5](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.21a5) (2026-06-16)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.21a3...1.1.21a5)
+
+**Merged pull requests:**
+
+- chore: add missing shared CI workflows [\#132](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/132) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.21a3](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.21a3) (2026-04-09)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.21a2...1.1.21a3)
