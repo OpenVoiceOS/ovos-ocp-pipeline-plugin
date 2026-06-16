@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ovos_ocp_pipeline_plugin"
+dynamic = ["version"]
+description = "media intent parser for OVOS"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "JarbasAI", email = "jarbasai@mailfence.com"}
+]
+keywords = ["natural language processing"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Text Processing :: Linguistic",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
+dependencies = [
+    "ovos-workshop>=8.0.0,<9.0.0",
+    "ovos-utils>=0.3.5,<1.0.0",
+    "ovos-plugin-manager>=1.0.0,<3.0.0",
+    "ahocorasick-ner>=0.1.1,<1.0.0",
+    "langcodes"
+]
+
+[project.optional-dependencies]
+test = [
+    "coveralls>=1.8.2",
+    "flake8>=3.7.9",
+    "pytest>=5.2.4",
+    "pytest-cov>=2.8.1",
+    "cov-core>=1.15.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin"
+
+[project.entry-points."opm.pipeline"]
+"ovos-ocp-pipeline-plugin" = "ocp_pipeline.opm:OCPPipelineMatcher"
+"ovos-ocp-pipeline-plugin-legacy" = "ocp_pipeline.opm:MycroftCPSLegacyPipeline"
+
+[tool.setuptools.dynamic]
+version = {attr = "ocp_pipeline.version.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ocp_pipeline*"]
+
+[tool.setuptools.package-data]
+ocp_pipeline = [
+    "*.json",
+    "locale/**/*",
+]
