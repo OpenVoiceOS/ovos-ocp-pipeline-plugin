@@ -12,6 +12,6 @@ jobs:
     with:
       python_version: '3.11'
       coverage_source: 'ocp_pipeline'
-      test_path: 'tests'
-      install_extras: '-r tests/requirements.txt'
+      test_path: 'test'
+      install_extras: '-r test/requirements.txt'
       min_coverage: 0

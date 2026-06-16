@@ -386,6 +386,23 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                                   skill_id=OCP_ID,
                                   utterance=utterance)
 
+    def _extract_entities(self, utterance: str) -> Dict[str, str]:
+        """
+        Extract media-related entities from an utterance using the NER.
+
+        Returns an empty dict when no skill keywords/entities have been
+        registered yet. ahocorasick refuses to build an automaton from an
+        empty trie (raising "Not an Aho-Corasick automaton yet"), so guard
+        against that instead of relying on a noisy try/except.
+        """
+        if not len(self.ner.automaton):
+            return {}
+        try:
+            return {e["label"]: e["word"] for e in self.ner.tag(utterance)}
+        except Exception as e:
+            LOG.error(f"failed to extract media entities: ({e})")
+            return {}
+
     def match_medium(self, utterances: List[str], lang: str, message: Message = None) -> Optional[IntentHandlerMatch]:
         """
         Performs medium-confidence intent matching for media playback queries using classifiers and entity extraction.
@@ -408,11 +425,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         media_type, confidence = self.classify_media(utterance, lang)
 
         # extract entities
-        try:
-            ents = {e["label"]: e["word"] for e in self.ner.tag(utterance)}
-        except Exception as e:
-            LOG.error(f"failed to extract media entities: ({e})")
-            ents = {}
+        ents = self._extract_entities(utterance)
 
         # extract the query string
         query = self.remove_voc(utterance, "Play", lang).strip()
@@ -437,11 +450,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         """
         utterance = utterances[0].lower()
         # extract entities
-        try:
-            ents = {e["label"]: e["word"] for e in self.ner.tag(utterance)}
-        except Exception as e:
-            LOG.error(f"failed to extract media entities: ({e})")
-            ents = {}
+        ents = self._extract_entities(utterance)
 
         if not ents:
             return None
@@ -524,11 +533,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         query = self.remove_voc(query, "Play", lang).strip()
 
         # extract entities
-        try:
-            ents = {e["label"]: e["word"] for e in self.ner.tag(utterance)}
-        except Exception as e:
-            LOG.error(f"failed to extract media entities: ({e})")
-            ents = {}
+        ents = self._extract_entities(utterance)
 
         return IntentHandlerMatch(match_type="ocp:play",
                                   match_data={"media_type": media_type,
