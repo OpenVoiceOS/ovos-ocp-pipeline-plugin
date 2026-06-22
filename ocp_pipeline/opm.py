@@ -1,6 +1,7 @@
 import os
 import random
 import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from os.path import join, dirname
 from threading import RLock
@@ -25,6 +26,19 @@ from ovos_utils.xdg_utils import xdg_data_home
 from ovos_config.meta import get_xdg_base
 from ahocorasick_ner import AhocorasickNER
 from ocp_pipeline.legacy import LegacyCommonPlay
+
+try:
+    from ovos_plugin_manager.media_provider import load_media_providers
+    from ovos_plugin_manager.templates.media_provider import MediaProvider
+    from ocp_pipeline.bridge import media_type_to_signals, release_to_ocp_result
+    _HAS_MEDIA_PROVIDERS = True
+except ImportError:
+    # ovos-plugin-manager without the MediaProvider type / mediavocab missing.
+    # Provider dispatch silently degrades to the bus-only OCP-skill path.
+    load_media_providers = None
+    MediaProvider = None
+    media_type_to_signals = release_to_ocp_result = None
+    _HAS_MEDIA_PROVIDERS = False
 
 
 @dataclass
@@ -79,6 +93,13 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         }
         self.entity_csvs = self.config.get("entity_csvs", [])  # user defined keyword csv files
         self.ner = AhocorasickNER()
+
+        # in-process MediaProvider plugins (opm.media.provider). These replace
+        # the bus-broadcast OCP search skills: the pipeline gates them by routing
+        # and calls search() directly. The bus-skill path is kept alongside; both
+        # sources compete in the same normalize/rank/select_best flow.
+        self.media_providers: Dict[str, "MediaProvider"] = {}
+        self._load_media_providers()
 
         self.register_ocp_api_events()
         self.register_ocp_intents()
@@ -167,6 +188,29 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         self.add_event("ocp:like_song", self.handle_like_intent, is_intent=True)
         self.add_event("ocp:save_game", self.handle_save_intent, is_intent=True)
         self.add_event("ocp:load_game", self.handle_load_intent, is_intent=True)
+
+    def _load_media_providers(self):
+        """Discover and instantiate installed ``opm.media.provider`` plugins.
+
+        ``load_media_providers`` already filters by ``is_available()`` and the
+        per-provider ``enabled: false`` config gate. When the MediaProvider type
+        (ovos-plugin-manager) or mediavocab is unavailable, or no providers are
+        installed/enabled, ``self.media_providers`` stays empty and the pipeline
+        behaves exactly as the bus-only OCP-skill path.
+        """
+        if not _HAS_MEDIA_PROVIDERS:
+            LOG.debug("MediaProvider plugin type unavailable; "
+                      "using bus-only OCP search")
+            return
+        try:
+            cfg = self.config.get("media_providers", None)
+            self.media_providers = load_media_providers(cfg) or {}
+            if self.media_providers:
+                LOG.info(f"Loaded {len(self.media_providers)} MediaProvider "
+                         f"plugins: {list(self.media_providers)}")
+        except Exception:
+            LOG.exception("failed to load MediaProvider plugins")
+            self.media_providers = {}
 
     def update_player_proxy(self, player: OCPPlayerProxy):
         """remember OCP session state"""
@@ -954,6 +998,65 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
         return results
 
+    def _search_providers(self, phrase: str, media_type: MediaType,
+                          lang: str) -> RawResultsList:
+        """Dispatch the query to in-process MediaProvider plugins.
+
+        Builds a :class:`mediavocab.Signals` from the classified media type and
+        query, gates each provider with its three-axis ``matches()`` routing
+        test, then runs the surviving providers concurrently through a thread
+        pool calling ``search_safe`` (which never raises). Each returned
+        ``mediavocab.Release`` is bridged to the OCP playback result dict so it
+        can compete in the same normalize/rank/select_best flow as bus results.
+
+        Returns an empty list when no providers are installed/enabled.
+        """
+        if not self.media_providers:
+            return []
+
+        signals = media_type_to_signals(media_type, phrase)
+
+        # three-axis routing gate: skip providers that can't serve this query
+        targets = {}
+        for name, provider in self.media_providers.items():
+            try:
+                if provider.matches(signals):
+                    targets[name] = provider
+            except Exception:
+                LOG.exception(f"MediaProvider '{name}' routing gate failed")
+        if not targets:
+            LOG.debug("no MediaProvider matched the query routing")
+            return []
+
+        LOG.debug(f"dispatching to {len(targets)} MediaProviders: {list(targets)}")
+        min_timeout = self.config.get("min_timeout", 5)
+        max_timeout = self.config.get("max_timeout", 15)
+
+        results: RawResultsList = []
+        with ThreadPoolExecutor(max_workers=len(targets)) as executor:
+            futures = {
+                executor.submit(p.search_safe, signals, lang): name
+                for name, p in targets.items()
+            }
+            got_results = False
+            for fut in as_completed(futures, timeout=None):
+                name = futures[fut]
+                try:
+                    releases = fut.result(timeout=max_timeout) or []
+                except Exception:
+                    LOG.exception(f"MediaProvider '{name}' search failed")
+                    continue
+                if releases:
+                    got_results = True
+                for release in releases:
+                    try:
+                        results.append(release_to_ocp_result(release, name))
+                    except Exception:
+                        LOG.exception(f"failed to bridge result from '{name}'")
+        LOG.debug(f"MediaProviders returned {len(results)} results "
+                  f"(min_timeout={min_timeout}, max_timeout={max_timeout})")
+        return results
+
     def _search(self, phrase: str, media_type: MediaType, lang: str,
                 skills: Optional[List[str]] = None,
                 message: Optional[Message] = None) -> list:
@@ -968,6 +1071,13 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                                      skills=skills,
                                      message=message):
             results += r["results"]
+
+        # in-process MediaProvider plugins are an additional source; their
+        # bridged results compete with the bus results by match_confidence.
+        # Skill-targeted searches (user named a specific OCP skill) stay
+        # bus-only.
+        if not skills:
+            results += self._search_providers(phrase, media_type, lang)
 
         results = self.normalize_results(results)
 

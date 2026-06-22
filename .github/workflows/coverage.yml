@@ -13,5 +13,10 @@ jobs:
       python_version: '3.11'
       coverage_source: 'ocp_pipeline'
       test_path: 'test'
+      # mediavocab 1.0 and the MediaProvider plugin type are not yet on PyPI;
+      # install them from git before the package install. Drop once published.
+      pre_install_pip: >-
+        ovos-plugin-manager@git+https://github.com/OpenVoiceOS/ovos-plugin-manager@feat/media-provider-plugin-type
+        mediavocab@git+https://github.com/TigreGotico/mediavocab@feat/audit-2026-05-core
       install_extras: '-r test/requirements.txt'
       min_coverage: 0

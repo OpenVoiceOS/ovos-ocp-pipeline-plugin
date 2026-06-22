@@ -28,6 +28,7 @@ dependencies = [
     "ovos-workshop>=8.0.0,<9.0.0",
     "ovos-utils>=0.3.5,<1.0.0",
     "ovos-plugin-manager>=2.1.0,<3.0.0",
+    "mediavocab>=1.0.0,<2.0.0",
     "ahocorasick-ner>=0.1.1,<1.0.0",
     "langcodes"
 ]
