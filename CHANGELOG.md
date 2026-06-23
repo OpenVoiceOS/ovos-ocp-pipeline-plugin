@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.21a6](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.21a6) (2026-06-23)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.21a5...1.1.21a6)
+
+**Merged pull requests:**
+
+- chore: migrate to ovos-spec-tools [\#130](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/130) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.21a5](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.21a5) (2026-06-16)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.21a3...1.1.21a5)
