@@ -6,7 +6,6 @@ from os.path import join, dirname
 from threading import RLock
 from typing import Tuple, Optional, Dict, List, Union, Any
 
-from langcodes import closest_match
 from ovos_bus_client.apis.ocp import ClassicAudioServiceInterface
 from ovos_bus_client.apis.ocp import OCPInterface, OCPQuery
 from ovos_bus_client.client import MessageBusClient
@@ -15,7 +14,8 @@ from ovos_bus_client.session import SessionManager
 from ovos_config import Configuration
 from ovos_plugin_manager.ocp import available_extractors
 from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline, PipelinePlugin
-from ovos_utils.lang import standardize_lang_tag, get_language_dir
+from ovos_utils.lang import get_language_dir
+from ovos_spec_tools import standardize_lang, closest_lang
 from ovos_utils.log import LOG, deprecated, log_deprecation
 from ovos_utils.fakebus import FakeBus
 from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
@@ -89,9 +89,9 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     def load_resource_files(cls):
         intents = {}
         langs = Configuration().get('secondary_langs', []) + [Configuration().get('lang', "en-US")]
-        langs = set([standardize_lang_tag(l) for l in langs])
+        langs = set([standardize_lang(l) for l in langs])
         for lang in langs:
-            lang = standardize_lang_tag(lang)
+            lang = standardize_lang(lang)
             intents[lang] = {}
             locale_folder = get_language_dir(join(dirname(__file__), "locale"), lang)
             if locale_folder is not None:
@@ -138,7 +138,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             LOG.warning("Padatious not available, using padacioso. intent matching will be orders of magnitude slower!")
 
         for lang, intent_data in intent_files.items():
-            lang = standardize_lang_tag(lang)
+            lang = standardize_lang(lang)
             if is_padatious:
                 cache = f"{cls.intent_cache}/{lang}"
                 cls.intent_matchers[lang] = IntentContainer(cache)
@@ -412,7 +412,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         Returns:
             Optional[IntentHandlerMatch]: An intent match object containing media type, entities, query string, and confidence, or `None` if no match is found.
         """
-        lang = standardize_lang_tag(lang)
+        lang = standardize_lang(lang)
 
         utterance = utterances[0].lower()
         # is this a OCP query ?
@@ -455,7 +455,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not ents:
             return None
 
-        lang = standardize_lang_tag(lang)
+        lang = standardize_lang(lang)
 
         # classify the query media type
         media_type, confidence = self.classify_media(utterance, lang)
@@ -491,7 +491,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         Returns:
             Optional[IntentHandlerMatch]: An intent match object for playback, resume, or search error, or None if no action is determined.
         """
-        lang = standardize_lang_tag(lang)
+        lang = standardize_lang(lang)
         match = match or {}
         player = self.get_player(message)
         # if media is currently paused, empty string means "resume playback"
@@ -557,7 +557,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if num:
             phrase += " " + num
 
-        lang = standardize_lang_tag(lang)
+        lang = standardize_lang(lang)
         # classify the query media type
         media_type, prob = self.classify_media(utterance, lang)
         # search common play skills
@@ -616,7 +616,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         sess = SessionManager.get(message)
 
         # search common play skills
-        lang = standardize_lang_tag(lang)
+        lang = standardize_lang(lang)
         results = self._search(query, media_type, lang,
                                skills=skills, message=message)
 
@@ -737,7 +737,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
     # NLP
     def voc_match_media(self, query: str, lang: str, valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
-        lang = standardize_lang_tag(lang)
+        lang = standardize_lang(lang)
         valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
         # simplistic approach via voc_match, works anywhere
         # and it's easy to localize, but isn't very accurate
@@ -801,7 +801,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
     def classify_media(self, query: str, lang: str, valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
         """ determine what media type is being requested """
-        lang = standardize_lang_tag(lang)
+        lang = standardize_lang(lang)
         valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
         LOG.debug(f"valid media types: {valid_labels}")
         if len(valid_labels) == 1:
@@ -811,7 +811,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
     def is_ocp_query(self, query: str, lang: str) -> Tuple[bool, float]:
         """ determine if a playback question is being asked"""
-        lang = standardize_lang_tag(lang)
+        lang = standardize_lang(lang)
         m, p = self.voc_match_media(query, lang)
         return m != MediaType.GENERIC, p
 
@@ -822,7 +822,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         @param phrase: Extracted playback phrase
         @return: True if player should resume, False if this is a new request
         """
-        lang = standardize_lang_tag(lang)
+        lang = standardize_lang(lang)
         player = self.get_player(message)
         if player.player_state == PlayerState.PAUSED:
             if not phrase.strip() or \
@@ -896,7 +896,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     def filter_results(self, results: list, phrase: str, lang: str,
                        media_type: MediaType = MediaType.GENERIC,
                        message: Optional[Message] = None) -> list:
-        lang = standardize_lang_tag(lang)
+        lang = standardize_lang(lang)
         # ignore very low score matches
         l1 = len(results)
         results = [r for r in results
@@ -1151,14 +1151,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     @classmethod
     def _get_closest_lang(cls, lang: str) -> Optional[str]:
         if cls.intent_matchers:
-            lang = standardize_lang_tag(lang)
-            closest, score = closest_match(lang, list(cls.intent_matchers.keys()))
-            # https://langcodes-hickford.readthedocs.io/en/sphinx/index.html#distance-values
-            # 0 -> These codes represent the same language, possibly after filling in values and normalizing.
-            # 1- 3 -> These codes indicate a minor regional difference.
-            # 4 - 10 -> These codes indicate a significant but unproblematic regional difference.
-            if score < 10:
-                return closest
+            return closest_lang(standardize_lang(lang), list(cls.intent_matchers.keys()))
         return None
 
     def shutdown(self):
