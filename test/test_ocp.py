@@ -6,11 +6,15 @@ real (localized) .voc resource files. Media-type detection is delegated to
 files); the previous ovos-classifiers based predictor was removed (see #97),
 so detection only fires on explicit media keywords present in the .voc files,
 not on free-text artist/title guesses.
+
+The pipeline is mediavocab-native: classification returns
+``mediavocab.MediaType`` values, not the legacy ``ovos_utils.ocp.MediaType``
+taxonomy.
 """
 import os.path
 import unittest
 
-from ovos_utils.ocp import MediaType
+from mediavocab import MediaType
 
 import ocp_pipeline.opm
 from ocp_pipeline.opm import OCPPipelineMatcher
@@ -70,7 +74,7 @@ class TestOCPPipelineMatcher(unittest.TestCase):
             ocp_pipeline.opm.Message("", {
                 "skill_id": "fake",
                 "label": "music_streaming_service",
-                "media_type": int(MediaType.MUSIC),
+                "media_type": MediaType.MUSIC.value,
                 "samples": ["spotify"],
             })
         )

@@ -1,92 +1,34 @@
-"""Bridge between in-process ``MediaProvider`` plugins and the OCP pipeline.
+"""Seam between in-process ``MediaProvider`` plugins and the OCP pipeline.
 
 ``MediaProvider`` plugins (``opm.media.provider``) speak the *mediavocab*
 catalog model: they consume a :class:`mediavocab.Signals` query and return
-:class:`mediavocab.Release` candidates. The rest of the OCP pipeline speaks the
-``ovos_utils.ocp`` playback model (``MediaEntry`` dicts / ``MediaType`` /
-``PlaybackType``).
+:class:`mediavocab.Release` candidates. The pipeline is now *mediavocab-native*
+too — it classifies and routes on :class:`mediavocab.MediaType` directly, so
+there is no media-type taxonomy translation here anymore.
 
-This module is the seam between the two:
-
-* :func:`media_type_to_signals` builds a ``Signals`` query from the pipeline's
-  classified ``ovos_utils.ocp.MediaType`` + text query, mapping the playback
-  taxonomy across to mediavocab's ``MediaType``.
-* :func:`release_to_ocp_result` maps a ``Release`` back into the OCP playback
-  result dict the pipeline already emits and ranks.
-
-Two distinct ``PlaybackType`` enums are involved and are mapped explicitly:
+The only thing this module still maps is the **playback backend selector**:
 
 * ``mediavocab.taxonomy.PlaybackType`` — *routing* (audio/video/paged/
-  interactive), describes how a work is consumed.
+  interactive), describes how a work is consumed. This is part of the catalog
+  model and is mediavocab's own taxonomy.
 * ``ovos_utils.ocp.PlaybackType`` — *backend selector* (AUDIO/VIDEO/SKILL/
-  WEBVIEW/…), tells OCP which player backend to hand the track to.
+  WEBVIEW/…), tells OCP which player backend to hand the track to. This is part
+  of the ``MediaEntry`` container structure, not the media-type taxonomy, so it
+  stays and is derived from the routing playback type.
 """
 from typing import Optional
 
-from ovos_utils.ocp import MediaType as OCPMediaType
 from ovos_utils.ocp import PlaybackType as OCPPlaybackType
 
 import mediavocab
-from mediavocab import MediaType as MVMediaType
+from mediavocab import MediaType
 from mediavocab import Release, Signals
 from mediavocab.taxonomy import PlaybackType as MVPlaybackType
 
 
-# ovos_utils.ocp.MediaType  ->  mediavocab.MediaType
-# Only the playback taxonomy the providers actually route on; anything not
-# listed (or GENERIC) is left as a typeless query so providers self-select via
-# their own three-axis gate.
-_OCP_TO_MV_MEDIA = {
-    OCPMediaType.MUSIC: MVMediaType.MUSIC,
-    OCPMediaType.AUDIO: MVMediaType.MUSIC,
-    OCPMediaType.PODCAST: MVMediaType.PODCAST,
-    OCPMediaType.AUDIOBOOK: MVMediaType.AUDIOBOOK,
-    OCPMediaType.RADIO: MVMediaType.RADIO,
-    OCPMediaType.RADIO_THEATRE: MVMediaType.AUDIO_DRAMA,
-    OCPMediaType.ADULT_AUDIO: MVMediaType.MUSIC,
-    OCPMediaType.ASMR: MVMediaType.PROCEDURAL_AMBIENT,
-    OCPMediaType.MOVIE: MVMediaType.MOVIE,
-    OCPMediaType.SILENT_MOVIE: MVMediaType.MOVIE,
-    OCPMediaType.BLACK_WHITE_MOVIE: MVMediaType.MOVIE,
-    OCPMediaType.SHORT_FILM: MVMediaType.SHORT_FILM,
-    OCPMediaType.TV: MVMediaType.TV,
-    OCPMediaType.VIDEO_EPISODES: MVMediaType.EPISODIC_SERIES,
-    OCPMediaType.CARTOON: MVMediaType.EPISODIC_SERIES,
-    OCPMediaType.ANIME: MVMediaType.EPISODIC_SERIES,
-    OCPMediaType.DOCUMENTARY: MVMediaType.MOVIE,
-    OCPMediaType.VIDEO: MVMediaType.MOVIE,
-    OCPMediaType.ADULT: MVMediaType.MOVIE,
-    OCPMediaType.HENTAI: MVMediaType.EPISODIC_SERIES,
-    OCPMediaType.GAME: MVMediaType.GAME,
-    OCPMediaType.VISUAL_STORY: MVMediaType.COMIC,
-    OCPMediaType.NEWS: MVMediaType.RADIO,
-}
-
-# reverse direction: mediavocab.MediaType -> ovos_utils.ocp.MediaType, used when
-# a Release comes back so the pipeline can keep filtering/ranking on its own
-# taxonomy. Picks the closest OCP label.
-_MV_TO_OCP_MEDIA = {
-    MVMediaType.MOVIE: OCPMediaType.MOVIE,
-    MVMediaType.SHORT_FILM: OCPMediaType.SHORT_FILM,
-    MVMediaType.EPISODIC_SERIES: OCPMediaType.VIDEO_EPISODES,
-    MVMediaType.TV: OCPMediaType.TV,
-    MVMediaType.MUSIC: OCPMediaType.MUSIC,
-    MVMediaType.MUSIC_VIDEO: OCPMediaType.VIDEO,
-    MVMediaType.PODCAST: OCPMediaType.PODCAST,
-    MVMediaType.AUDIOBOOK: OCPMediaType.AUDIOBOOK,
-    MVMediaType.AUDIO_DRAMA: OCPMediaType.RADIO_THEATRE,
-    MVMediaType.RADIO: OCPMediaType.RADIO,
-    MVMediaType.BOOK: OCPMediaType.AUDIOBOOK,
-    MVMediaType.COMIC: OCPMediaType.VISUAL_STORY,
-    MVMediaType.GAME: OCPMediaType.GAME,
-    MVMediaType.INTERACTIVE_FICTION: OCPMediaType.GAME,
-    MVMediaType.SOUND_EFFECT: OCPMediaType.AUDIO,
-    MVMediaType.PROCEDURAL_AMBIENT: OCPMediaType.ASMR,
-    MVMediaType.PLAYLIST: OCPMediaType.AUDIO,
-    MVMediaType.GENERIC: OCPMediaType.GENERIC,
-}
-
-# mediavocab routing taxonomy -> ovos_utils.ocp backend selector
+# mediavocab routing taxonomy -> ovos_utils.ocp backend selector.
+# This is NOT a media-type bridge: it maps mediavocab's playback routing onto
+# the OCP MediaEntry backend selector (which player to hand the track to).
 _MV_PLAYBACK_TO_OCP = {
     MVPlaybackType.AUDIO: OCPPlaybackType.AUDIO,
     MVPlaybackType.VIDEO: OCPPlaybackType.VIDEO,
@@ -96,39 +38,27 @@ _MV_PLAYBACK_TO_OCP = {
 }
 
 
-def ocp_media_type_to_mediavocab(media_type: OCPMediaType) -> Optional[MVMediaType]:
-    """Map an ``ovos_utils.ocp.MediaType`` to the closest ``mediavocab.MediaType``.
-
-    Returns ``None`` for ``GENERIC`` (and anything unmapped) so the query stays
-    typeless and providers self-select via their own routing gate.
-    """
-    if media_type == OCPMediaType.GENERIC:
-        return None
-    return _OCP_TO_MV_MEDIA.get(media_type)
-
-
-def mediavocab_media_type_to_ocp(media_type: MVMediaType) -> OCPMediaType:
-    """Map a ``mediavocab.MediaType`` back to the closest ``ovos_utils.ocp.MediaType``."""
-    return _MV_TO_OCP_MEDIA.get(media_type, OCPMediaType.GENERIC)
-
-
 def mediavocab_playback_to_ocp(pb: MVPlaybackType) -> OCPPlaybackType:
     """Map a ``mediavocab.taxonomy.PlaybackType`` (routing) to an
-    ``ovos_utils.ocp.PlaybackType`` (backend selector)."""
+    ``ovos_utils.ocp.PlaybackType`` (``MediaEntry`` backend selector)."""
     return _MV_PLAYBACK_TO_OCP.get(pb, OCPPlaybackType.UNDEFINED)
 
 
-def media_type_to_signals(media_type: OCPMediaType, query: str,
+def media_type_to_signals(media_type: MediaType, query: str,
                           artist: Optional[str] = None) -> Signals:
     """Build a query-role :class:`mediavocab.Signals` from the pipeline's
-    classified media type and free-text query."""
-    medium = ocp_media_type_to_mediavocab(media_type)
+    classified :class:`mediavocab.MediaType` and free-text query.
+
+    ``GENERIC`` (and the ``NOT_MEDIA``/``CONTROL`` sentinels) stay typeless so
+    providers self-select via their own three-axis routing gate.
+    """
     kwargs = {"title": query or None}
     if artist:
         kwargs["artist"] = artist
-    if medium is not None:
-        kwargs["medium"] = medium
-        kwargs["playback_type"] = mediavocab.infer_playback_type(medium)
+    if media_type not in (None, MediaType.GENERIC,
+                          MediaType.NOT_MEDIA, MediaType.CONTROL):
+        kwargs["medium"] = media_type
+        kwargs["playback_type"] = mediavocab.infer_playback_type(media_type)
     return Signals.as_query(**kwargs)
 
 
@@ -148,14 +78,18 @@ def release_to_ocp_result(release: Release, provider_id: str) -> dict:
     """Map a :class:`mediavocab.Release` to the OCP playback result dict the
     pipeline normalizes, ranks and plays.
 
+    The result's ``media_type`` is the release's :class:`mediavocab.MediaType`
+    directly (the pipeline is mediavocab-native). Only ``playback`` is derived,
+    mapping mediavocab's routing onto the OCP ``MediaEntry`` backend selector.
+
     @param release: the catalog candidate returned by a provider.
     @param provider_id: registry name of the provider; becomes ``skill_id``.
-    @return: a dict in the ``ovos_utils.ocp`` ``MediaEntry`` shape.
+    @return: a dict in the ``ovos_utils.ocp`` ``MediaEntry`` shape, carrying a
+             ``mediavocab.MediaType`` in ``media_type``.
     """
     work = release.work
-    mv_media = work.media_type
-    ocp_media = mediavocab_media_type_to_ocp(mv_media)
-    playback = mediavocab_playback_to_ocp(mediavocab.infer_playback_type(mv_media))
+    media_type = work.media_type
+    playback = mediavocab_playback_to_ocp(mediavocab.infer_playback_type(media_type))
 
     # match_confidence: mediavocab is 0.0..1.0 float, OCP MediaEntry is 0..100 int
     conf = release.match_confidence or 0.0
@@ -167,7 +101,7 @@ def release_to_ocp_result(release: Release, provider_id: str) -> dict:
         "image": release.image,
         "artist": _first_credit_name(release),
         "length": work.runtime or 0,
-        "media_type": ocp_media,
+        "media_type": media_type,
         "playback": playback,
         "match_confidence": match_conf,
         "skill_id": provider_id,

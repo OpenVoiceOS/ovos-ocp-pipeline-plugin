@@ -19,16 +19,15 @@ from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, Confidenc
 from ovos_utils.lang import standardize_lang_tag, get_language_dir
 from ovos_utils.log import LOG, deprecated, log_deprecation
 from ovos_utils.fakebus import FakeBus
-from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
+from ovos_utils.ocp import PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
     MediaEntry, Playlist, MediaState, TrackState, dict2entry, PluginStream
 from ovos_workshop.app import OVOSAbstractApplication
 from ovos_utils.xdg_utils import xdg_data_home
 from ovos_config.meta import get_xdg_base
 from ahocorasick_ner import AhocorasickNER
 from ovos_media_classifier import load_media_classifier
+from mediavocab import MediaType
 from ocp_pipeline.legacy import LegacyCommonPlay
-from ocp_pipeline.bridge import (ocp_media_type_to_mediavocab,
-                                 mediavocab_media_type_to_ocp)
 
 try:
     from ovos_plugin_manager.media_provider import load_media_providers
@@ -258,24 +257,18 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 self.ner.add_word("music_streaming_service", a)
             if MediaType.MOVIE in media:
                 self.ner.add_word("movie_streaming_service", a)
-            # if MediaType.SILENT_MOVIE in media:
-            #    self.ner.add_word("silent_movie_streaming_service", a)
-            # if MediaType.BLACK_WHITE_MOVIE in media:
-            #    self.ner.add_word("bw_movie_streaming_service", a)
             if MediaType.SHORT_FILM in media:
                 self.ner.add_word("shorts_streaming_service", a)
             if MediaType.PODCAST in media:
                 self.ner.add_word("podcast_streaming_service", a)
             if MediaType.AUDIOBOOK in media:
                 self.ner.add_word("audiobook_streaming_service", a)
-            if MediaType.NEWS in media:
-                self.ner.add_word("news_provider", a)
             if MediaType.TV in media:
                 self.ner.add_word("tv_streaming_service", a)
             if MediaType.RADIO in media:
+                # mediavocab folds news/talk radio into RADIO
                 self.ner.add_word("radio_streaming_service", a)
-            if MediaType.ADULT in media:
-                self.ner.add_word("porn_streaming_service", a)
+                self.ner.add_word("news_provider", a)
 
     def handle_skill_keyword_register(self, message: Message):
         """
@@ -353,7 +346,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             player.media_state = MediaState(mstate)
             LOG.debug(f"Session: {player.session_id} MediaState: {player.media_state}")
         if mtype is not None:
-            player.media_type = MediaType(pstate)
+            try:
+                player.media_type = self._normalize_media_enum(mtype)
+            except Exception:
+                LOG.debug(f"unrecognized media_type in status update: {mtype}")
+                player.media_type = MediaType.GENERIC
             LOG.debug(f"Session: {player.session_id} MediaType: {player.media_type}")
         player = self._update_player_skill_id(player, message)
         self.update_player_proxy(player)
@@ -638,14 +635,29 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
     # intent handlers
     @staticmethod
-    def _normalize_media_enum(m: Union[int, MediaType]):
+    def _normalize_media_enum(m: Union[str, MediaType]) -> MediaType:
+        """Coerce a media-type token into a :class:`mediavocab.MediaType`.
+
+        Accepts a ``MediaType`` (passthrough), its string value (e.g.
+        ``"music"``) or its member name (e.g. ``"MUSIC"``). Anything else
+        (including the legacy ``ovos_utils.ocp`` integer ids that pre-mediavocab
+        skills emit) is not a valid mediavocab media type and raises -- callers
+        treat that as an untyped/GENERIC registration.
+        """
         if isinstance(m, MediaType):
             return m
-        # convert int to enum
-        for e in MediaType:
-            if e == m:
-                return e
-        raise ValueError(f"{m} is not a valid media type")
+        if isinstance(m, str):
+            # by value (mediavocab is a str-enum), e.g. "music"
+            try:
+                return MediaType(m)
+            except ValueError:
+                pass
+            # by member name, e.g. "MUSIC"
+            try:
+                return MediaType[m.upper()]
+            except KeyError:
+                pass
+        raise ValueError(f"{m!r} is not a valid mediavocab media type")
 
     def handle_save_intent(self, message: Message):
         skill_id = self.get_player(message).skill_id
@@ -814,30 +826,30 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 getattr(self, "config", None), voc_match_func=self._voc_match)
         return clf
 
-    def classify_media(self, query: str, lang: str, valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
-        """Determine what media type is being requested.
+    def classify_media(self, query: str, lang: str,
+                       valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
+        """Determine what :class:`mediavocab.MediaType` is being requested.
 
         Delegates classification to ``ovos-media-classifier`` (whose keyword
-        backend is the extraction of this pipeline's own voc logic) and bridges
-        the result between the ``ovos_utils.ocp`` and ``mediavocab`` taxonomies.
+        backend is the extraction of this pipeline's own voc logic). The
+        classifier is mediavocab-native, so its result is returned directly --
+        there is no taxonomy translation. ``valid_labels`` are
+        ``mediavocab.MediaType`` and restrict the candidate set.
         """
         lang = standardize_lang_tag(lang)
-        valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
+        valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or None
         LOG.debug(f"valid media types: {valid_labels}")
-        if len(valid_labels) == 1:
+        if valid_labels and len(valid_labels) == 1:
             return valid_labels[0], 1.0
 
-        # ocp valid_labels -> mediavocab (drop GENERIC/unmapped)
-        mv_valid = [mv for mv in (ocp_media_type_to_mediavocab(m) for m in valid_labels)
-                    if mv is not None] or None
-        mv_type, conf = self.media_clf.classify(query, lang, mv_valid)
-        ocp_type = mediavocab_media_type_to_ocp(mv_type)
-        # the mediavocab<->ocp mapping is many-to-one, so re-apply the original
-        # ocp valid_labels filter; if the mapped type is excluded, fall back to
-        # GENERIC rather than returning a label the caller forbade.
-        if ocp_type not in valid_labels:
-            return MediaType.GENERIC, 0.0
-        return ocp_type, conf
+        # GENERIC (and the NOT_MEDIA/CONTROL sentinels) are never a useful
+        # restriction; drop them so the classifier can still pick a real type.
+        mv_valid = None
+        if valid_labels:
+            mv_valid = [m for m in valid_labels
+                        if m not in (MediaType.GENERIC, MediaType.NOT_MEDIA,
+                                     MediaType.CONTROL)] or None
+        return self.media_clf.classify(query, lang, mv_valid)
 
     def is_ocp_query(self, query: str, lang: str) -> Tuple[bool, float]:
         """Determine if a playback question is being asked."""

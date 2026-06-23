@@ -3,24 +3,24 @@
 These exercise the *real* classifier (not mocked) end to end: the pipeline
 hands its own ``voc_match`` + locale ``.voc`` files to
 ``ovos-media-classifier``'s keyword backend (which is the extraction of the
-pipeline's former embedded voc logic), and the result is bridged from
-``mediavocab.MediaType`` back to ``ovos_utils.ocp.MediaType``.
+pipeline's former embedded voc logic), and the result -- a
+:class:`mediavocab.MediaType` -- is returned directly. The pipeline is
+mediavocab-native; there is no ``ovos_utils.ocp`` taxonomy translation.
 
-Two taxonomies are involved and converge here: e.g. ``anime``/``cartoon`` now
-classify through mediavocab ``EPISODIC_SERIES`` and surface as ocp
-``VIDEO_EPISODES``; ``documentary`` and ``news`` collapse onto ``MOVIE`` /
-``RADIO`` respectively. See ``ocp_pipeline.bridge`` for the exact mapping.
+Some legacy keyword buckets converge onto the mediavocab taxonomy: e.g.
+``anime``/``cartoon`` classify to ``EPISODIC_SERIES``; ``documentary`` collapses
+onto ``MOVIE``; ``news`` onto ``RADIO``.
 """
 import unittest
 
 from ovos_utils.fakebus import FakeBus
-from ovos_utils.ocp import MediaType
+from mediavocab import MediaType
 
 from ocp_pipeline.opm import OCPPipelineMatcher
 
 
 class TestMediaClassifierE2E(unittest.TestCase):
-    """Real classifier, real locale .voc files, real mediavocab<->ocp bridge."""
+    """Real classifier, real locale .voc files, mediavocab-native results."""
 
     @classmethod
     def setUpClass(cls):
@@ -32,26 +32,25 @@ class TestMediaClassifierE2E(unittest.TestCase):
         self.assertIsInstance(self.ocp.media_clf, AbstractMediaClassifier)
 
     def test_classify_media_real_utterances(self):
-        """Real utterances classify to the expected ocp.MediaType after the
-        mediavocab -> ocp bridge."""
+        """Real utterances classify to the expected mediavocab.MediaType."""
         cases = {
-            # query                       -> expected ovos_utils.ocp.MediaType
+            # query                       -> expected mediavocab.MediaType
             "play some music": MediaType.MUSIC,
             "watch a movie": MediaType.MOVIE,
             "play a podcast": MediaType.PODCAST,
-            # taxonomy convergence: ANIME/CARTOON -> mediavocab EPISODIC_SERIES
-            # -> ocp VIDEO_EPISODES
-            "i want to watch an anime": MediaType.VIDEO_EPISODES,
-            "play a cartoon": MediaType.VIDEO_EPISODES,
-            # NEWS -> mediavocab RADIO -> ocp RADIO
+            # ANIME/CARTOON -> mediavocab EPISODIC_SERIES
+            "i want to watch an anime": MediaType.EPISODIC_SERIES,
+            "play a cartoon": MediaType.EPISODIC_SERIES,
+            # NEWS -> mediavocab RADIO
             "play the news": MediaType.RADIO,
-            # DOCUMENTARY -> mediavocab MOVIE -> ocp MOVIE
+            # DOCUMENTARY -> mediavocab MOVIE
             "show me a documentary": MediaType.MOVIE,
         }
         for query, expected in cases.items():
             media, conf = self.ocp.classify_media(query, "en-US")
             self.assertEqual(media, expected,
                              f"{query!r} -> {media} (expected {expected})")
+            self.assertIsInstance(media, MediaType)
             self.assertIsInstance(conf, float)
             self.assertGreater(conf, 0.0)
 
@@ -62,7 +61,7 @@ class TestMediaClassifierE2E(unittest.TestCase):
         self.assertEqual(conf, 0.0)
 
     def test_classify_media_respects_valid_labels(self):
-        """A query whose mapped type is excluded by valid_labels -> GENERIC."""
+        """A query whose type is excluded by valid_labels is not returned."""
         # "play some music" maps to MUSIC, but MUSIC is not allowed here
         media, _ = self.ocp.classify_media(
             "play some music", "en-US", valid_labels=[MediaType.PODCAST])
