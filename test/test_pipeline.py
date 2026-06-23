@@ -153,7 +153,7 @@ class TestNormalizeResults(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
-# classify_media / voc_match_media
+# classify_media (delegated to ovos-media-classifier + mediavocab<->ocp bridge)
 # ---------------------------------------------------------------------------
 
 class TestClassifyMedia(unittest.TestCase):
@@ -208,6 +208,32 @@ class TestClassifyMedia(unittest.TestCase):
         p.voc_match = _voc
         media, conf = p.classify_media("play radio", "en-us")
         self.assertEqual(media, MediaType.RADIO)
+
+    def test_anime_keyword_converges_to_video_episodes(self):
+        """Taxonomy convergence: an AnimeKeyword hit classifies through
+        mediavocab EPISODIC_SERIES and surfaces as ocp VIDEO_EPISODES (the
+        standalone classifier has no separate ANIME label)."""
+        p = _make_pipeline()
+        p.media2skill = {m: ["skill-x"] for m in MediaType}
+
+        def _voc(phrase, vocab, **kw):
+            return vocab == "AnimeKeyword"
+
+        p.voc_match = _voc
+        media, _ = p.classify_media("i want to watch an anime", "en-us")
+        self.assertEqual(media, MediaType.VIDEO_EPISODES)
+
+    def test_documentary_keyword_converges_to_movie(self):
+        """DocumentaryKeyword -> mediavocab MOVIE -> ocp MOVIE."""
+        p = _make_pipeline()
+        p.media2skill = {m: ["skill-x"] for m in MediaType}
+
+        def _voc(phrase, vocab, **kw):
+            return vocab == "DocumentaryKeyword"
+
+        p.voc_match = _voc
+        media, _ = p.classify_media("show me a documentary", "en-us")
+        self.assertEqual(media, MediaType.MOVIE)
 
     def test_valid_labels_filter_limits_candidates(self):
         """If valid_labels excludes a type, that type must not be returned."""
