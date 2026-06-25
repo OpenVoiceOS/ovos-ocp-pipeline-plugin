@@ -96,12 +96,12 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         self.entity_csvs = self.config.get("entity_csvs", [])  # user defined keyword csv files
         self.ner = AhocorasickNER()
 
-        # media-type classification is delegated to ovos-media-classifier.
-        # The keyword backend is the extraction of this pipeline's own voc
-        # logic, so we hand it our voc_match (late-bound) and our locale .voc
-        # files. An external plugin can be selected via
-        # config["media_classifier_plugin"].
-        self._media_clf = load_media_classifier(self.config, voc_match_func=self._voc_match)
+        # All media NLP (domain/media-type/control/Signals) is delegated to
+        # ovos-media-classifier; the pipeline is a thin interface to it. The
+        # classifier owns its own bundled locale (a superset of the keyword vocab
+        # this pipeline used to ship), so we do NOT hand it a voc_match anymore.
+        # An external plugin can be selected via config["media_classifier_plugin"].
+        self._media_clf = load_media_classifier(self.config)
 
         # in-process MediaProvider plugins (opm.media.provider). These replace
         # the bus-broadcast OCP search skills: the pipeline gates them by routing
@@ -802,28 +802,18 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             self.ocp_api.stop(source_message=message)
 
     # NLP
-    def _voc_match(self, phrase: str, vocab_name: str, *, lang: str) -> bool:
-        """Late-bound ``(phrase, vocab_name, *, lang) -> bool`` matcher handed to
-        ``ovos-media-classifier``.
-
-        It defers to ``self.voc_match`` at call time (rather than binding it
-        once) so the classifier always uses the pipeline's current locale
-        ``.voc`` files. Classification itself lives in the package now; this
-        only exposes the pipeline's keyword matcher to it.
-        """
-        return self.voc_match(phrase, vocab_name, lang=lang)
-
     @property
     def media_clf(self):
-        """The media classifier, built lazily from the pipeline's voc_match.
+        """The media classifier (``ovos-media-classifier``) — the single home of
+        all media NLP. It uses its own bundled locale; the pipeline no longer
+        ships media-keyword ``.voc`` of its own.
 
-        Normally instantiated in ``__init__``; this also covers callers that
-        bypass ``__init__`` (e.g. tests via ``__new__``).
+        Normally instantiated in ``__init__``; this lazy guard also covers
+        callers that bypass ``__init__`` (e.g. tests via ``__new__``).
         """
         clf = getattr(self, "_media_clf", None)
         if clf is None:
-            clf = self._media_clf = load_media_classifier(
-                getattr(self, "config", None), voc_match_func=self._voc_match)
+            clf = self._media_clf = load_media_classifier(getattr(self, "config", None))
         return clf
 
     def classify_media(self, query: str, lang: str,
