@@ -1,6 +1,7 @@
 import os
 import random
 import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from os.path import join, dirname
 from threading import RLock
@@ -18,13 +19,28 @@ from ovos_utils.lang import get_language_dir
 from ovos_spec_tools import standardize_lang, closest_lang
 from ovos_utils.log import LOG, deprecated, log_deprecation
 from ovos_utils.fakebus import FakeBus
-from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
+from ovos_utils.ocp import PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
     MediaEntry, Playlist, MediaState, TrackState, dict2entry, PluginStream
 from ovos_workshop.app import OVOSAbstractApplication
 from ovos_utils.xdg_utils import xdg_data_home
 from ovos_config.meta import get_xdg_base
 from ahocorasick_ner import AhocorasickNER
+from ovos_media_classifier import load_media_classifier
+from mediavocab import MediaType
 from ocp_pipeline.legacy import LegacyCommonPlay
+
+try:
+    from ovos_plugin_manager.media_provider import load_media_providers
+    from ovos_plugin_manager.templates.media_provider import MediaProvider
+    from ocp_pipeline.bridge import media_type_to_signals, release_to_ocp_result
+    _HAS_MEDIA_PROVIDERS = True
+except ImportError:
+    # ovos-plugin-manager without the MediaProvider type / mediavocab missing.
+    # Provider dispatch silently degrades to the bus-only OCP-skill path.
+    load_media_providers = None
+    MediaProvider = None
+    media_type_to_signals = release_to_ocp_result = None
+    _HAS_MEDIA_PROVIDERS = False
 
 
 @dataclass
@@ -79,6 +95,20 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         }
         self.entity_csvs = self.config.get("entity_csvs", [])  # user defined keyword csv files
         self.ner = AhocorasickNER()
+
+        # media-type classification is delegated to ovos-media-classifier.
+        # The keyword backend is the extraction of this pipeline's own voc
+        # logic, so we hand it our voc_match (late-bound) and our locale .voc
+        # files. An external plugin can be selected via
+        # config["media_classifier_plugin"].
+        self._media_clf = load_media_classifier(self.config, voc_match_func=self._voc_match)
+
+        # in-process MediaProvider plugins (opm.media.provider). These replace
+        # the bus-broadcast OCP search skills: the pipeline gates them by routing
+        # and calls search() directly. The bus-skill path is kept alongside; both
+        # sources compete in the same normalize/rank/select_best flow.
+        self.media_providers: Dict[str, "MediaProvider"] = {}
+        self._load_media_providers()
 
         self.register_ocp_api_events()
         self.register_ocp_intents()
@@ -168,6 +198,29 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         self.add_event("ocp:save_game", self.handle_save_intent, is_intent=True)
         self.add_event("ocp:load_game", self.handle_load_intent, is_intent=True)
 
+    def _load_media_providers(self):
+        """Discover and instantiate installed ``opm.media.provider`` plugins.
+
+        ``load_media_providers`` already filters by ``is_available()`` and the
+        per-provider ``enabled: false`` config gate. When the MediaProvider type
+        (ovos-plugin-manager) or mediavocab is unavailable, or no providers are
+        installed/enabled, ``self.media_providers`` stays empty and the pipeline
+        behaves exactly as the bus-only OCP-skill path.
+        """
+        if not _HAS_MEDIA_PROVIDERS:
+            LOG.debug("MediaProvider plugin type unavailable; "
+                      "using bus-only OCP search")
+            return
+        try:
+            cfg = self.config.get("media_providers", None)
+            self.media_providers = load_media_providers(cfg) or {}
+            if self.media_providers:
+                LOG.info(f"Loaded {len(self.media_providers)} MediaProvider "
+                         f"plugins: {list(self.media_providers)}")
+        except Exception:
+            LOG.exception("failed to load MediaProvider plugins")
+            self.media_providers = {}
+
     def update_player_proxy(self, player: OCPPlayerProxy):
         """remember OCP session state"""
         self.ocp_sessions[player.session_id] = player
@@ -204,24 +257,18 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 self.ner.add_word("music_streaming_service", a)
             if MediaType.MOVIE in media:
                 self.ner.add_word("movie_streaming_service", a)
-            # if MediaType.SILENT_MOVIE in media:
-            #    self.ner.add_word("silent_movie_streaming_service", a)
-            # if MediaType.BLACK_WHITE_MOVIE in media:
-            #    self.ner.add_word("bw_movie_streaming_service", a)
             if MediaType.SHORT_FILM in media:
                 self.ner.add_word("shorts_streaming_service", a)
             if MediaType.PODCAST in media:
                 self.ner.add_word("podcast_streaming_service", a)
             if MediaType.AUDIOBOOK in media:
                 self.ner.add_word("audiobook_streaming_service", a)
-            if MediaType.NEWS in media:
-                self.ner.add_word("news_provider", a)
             if MediaType.TV in media:
                 self.ner.add_word("tv_streaming_service", a)
             if MediaType.RADIO in media:
+                # mediavocab folds news/talk radio into RADIO
                 self.ner.add_word("radio_streaming_service", a)
-            if MediaType.ADULT in media:
-                self.ner.add_word("porn_streaming_service", a)
+                self.ner.add_word("news_provider", a)
 
     def handle_skill_keyword_register(self, message: Message):
         """
@@ -299,7 +346,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             player.media_state = MediaState(mstate)
             LOG.debug(f"Session: {player.session_id} MediaState: {player.media_state}")
         if mtype is not None:
-            player.media_type = MediaType(pstate)
+            try:
+                player.media_type = self._normalize_media_enum(mtype)
+            except Exception:
+                LOG.debug(f"unrecognized media_type in status update: {mtype}")
+                player.media_type = MediaType.GENERIC
             LOG.debug(f"Session: {player.session_id} MediaType: {player.media_type}")
         player = self._update_player_skill_id(player, message)
         self.update_player_proxy(player)
@@ -584,14 +635,29 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
     # intent handlers
     @staticmethod
-    def _normalize_media_enum(m: Union[int, MediaType]):
+    def _normalize_media_enum(m: Union[str, MediaType]) -> MediaType:
+        """Coerce a media-type token into a :class:`mediavocab.MediaType`.
+
+        Accepts a ``MediaType`` (passthrough), its string value (e.g.
+        ``"music"``) or its member name (e.g. ``"MUSIC"``). Anything else
+        (including the legacy ``ovos_utils.ocp`` integer ids that pre-mediavocab
+        skills emit) is not a valid mediavocab media type and raises -- callers
+        treat that as an untyped/GENERIC registration.
+        """
         if isinstance(m, MediaType):
             return m
-        # convert int to enum
-        for e in MediaType:
-            if e == m:
-                return e
-        raise ValueError(f"{m} is not a valid media type")
+        if isinstance(m, str):
+            # by value (mediavocab is a str-enum), e.g. "music"
+            try:
+                return MediaType(m)
+            except ValueError:
+                pass
+            # by member name, e.g. "MUSIC"
+            try:
+                return MediaType[m.upper()]
+            except KeyError:
+                pass
+        raise ValueError(f"{m!r} is not a valid mediavocab media type")
 
     def handle_save_intent(self, message: Message):
         skill_id = self.get_player(message).skill_id
@@ -736,84 +802,59 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             self.ocp_api.stop(source_message=message)
 
     # NLP
-    def voc_match_media(self, query: str, lang: str, valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
-        lang = standardize_lang(lang)
-        valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
-        # simplistic approach via voc_match, works anywhere
-        # and it's easy to localize, but isn't very accurate
-        if MediaType.DOCUMENTARY in valid_labels and self.voc_match(query, "DocumentaryKeyword", lang=lang):
-            return MediaType.DOCUMENTARY, 0.6
-        elif MediaType.AUDIOBOOK in valid_labels and self.voc_match(query, "AudioBookKeyword", lang=lang):
-            return MediaType.AUDIOBOOK, 0.6
-        elif MediaType.NEWS in valid_labels and self.voc_match(query, "NewsKeyword", lang=lang):
-            return MediaType.NEWS, 0.6
-        elif MediaType.ANIME in valid_labels and  self.voc_match(query, "AnimeKeyword", lang=lang):
-            return MediaType.ANIME, 0.6
-        elif MediaType.CARTOON in valid_labels and self.voc_match(query, "CartoonKeyword", lang=lang):
-            return MediaType.CARTOON, 0.6
-        elif MediaType.PODCAST in valid_labels and self.voc_match(query, "PodcastKeyword", lang=lang):
-            return MediaType.PODCAST, 0.6
-        elif MediaType.RADIO_THEATRE in valid_labels and self.voc_match(query, "AudioDramaKeyword", lang=lang):
-            # NOTE - before "radio" to allow "radio theatre"
-            return MediaType.RADIO_THEATRE, 0.6
-        elif MediaType.RADIO in valid_labels and self.voc_match(query, "RadioKeyword", lang=lang):
-            return MediaType.RADIO, 0.6
-        elif MediaType.MUSIC in valid_labels and self.voc_match(query, "MusicKeyword", lang=lang):
-            # NOTE - before movie to handle "{movie_name} soundtrack"
-            return MediaType.MUSIC, 0.6
-        elif MediaType.TV in valid_labels and self.voc_match(query, "TVKeyword", lang=lang):
-            return MediaType.TV, 0.6
-        elif MediaType.VIDEO_EPISODES in valid_labels and self.voc_match(query, "SeriesKeyword", lang=lang):
-            return MediaType.VIDEO_EPISODES, 0.6
-        elif any([s in valid_labels for s in [MediaType.MOVIE, MediaType.SHORT_FILM, MediaType.SILENT_MOVIE, MediaType.BLACK_WHITE_MOVIE]]) and \
-                self.voc_match(query, "MovieKeyword", lang=lang):
-            if MediaType.SHORT_FILM in valid_labels and self.voc_match(query, "ShortKeyword", lang=lang):
-                return MediaType.SHORT_FILM, 0.7
-            elif MediaType.SILENT_MOVIE in valid_labels and self.voc_match(query, "SilentKeyword", lang=lang):
-                return MediaType.SILENT_MOVIE, 0.7
-            elif MediaType.BLACK_WHITE_MOVIE in valid_labels and self.voc_match(query, "BWKeyword", lang=lang):
-                return MediaType.BLACK_WHITE_MOVIE, 0.7
-            return MediaType.MOVIE, 0.6
-        elif MediaType.VISUAL_STORY in valid_labels and self.voc_match(query, "ComicBookKeyword", lang=lang):
-            return MediaType.VISUAL_STORY, 0.4
-        elif MediaType.GAME in valid_labels and self.voc_match(query, "GameKeyword", lang=lang):
-            return MediaType.GAME, 0.4
-        elif MediaType.AUDIO_DESCRIPTION in valid_labels and self.voc_match(query, "ADKeyword", lang=lang):
-            return MediaType.AUDIO_DESCRIPTION, 0.4
-        elif MediaType.ASMR in valid_labels and self.voc_match(query, "ASMRKeyword", lang=lang):
-            return MediaType.ASMR, 0.4
-        elif any([s in valid_labels for s in [MediaType.ADULT, MediaType.HENTAI, MediaType.ADULT_AUDIO]]) and self.voc_match(query, "AdultKeyword", lang=lang):
-            if MediaType.HENTAI in valid_labels and self.voc_match(query, "CartoonKeyword", lang=lang) or \
-                    self.voc_match(query, "AnimeKeyword", lang=lang) or \
-                    self.voc_match(query, "HentaiKeyword", lang=lang):
-                return MediaType.HENTAI, 0.4
-            elif MediaType.ADULT_AUDIO in valid_labels and  self.voc_match(query, "AudioKeyword", lang=lang) or \
-                    self.voc_match(query, "ASMRKeyword", lang=lang):
-                return MediaType.ADULT_AUDIO, 0.4
-            return MediaType.ADULT, 0.4
-        elif MediaType.HENTAI in valid_labels and self.voc_match(query, "HentaiKeyword", lang=lang):
-            return MediaType.HENTAI, 0.4
-        elif MediaType.VIDEO in valid_labels and self.voc_match(query, "VideoKeyword", lang=lang):
-            return MediaType.VIDEO, 0.4
-        elif MediaType.AUDIO in valid_labels and self.voc_match(query, "AudioKeyword", lang=lang):
-            return MediaType.AUDIO, 0.4
-        return MediaType.GENERIC, 0.0
+    def _voc_match(self, phrase: str, vocab_name: str, *, lang: str) -> bool:
+        """Late-bound ``(phrase, vocab_name, *, lang) -> bool`` matcher handed to
+        ``ovos-media-classifier``.
 
-    def classify_media(self, query: str, lang: str, valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
-        """ determine what media type is being requested """
+        It defers to ``self.voc_match`` at call time (rather than binding it
+        once) so the classifier always uses the pipeline's current locale
+        ``.voc`` files. Classification itself lives in the package now; this
+        only exposes the pipeline's keyword matcher to it.
+        """
+        return self.voc_match(phrase, vocab_name, lang=lang)
+
+    @property
+    def media_clf(self):
+        """The media classifier, built lazily from the pipeline's voc_match.
+
+        Normally instantiated in ``__init__``; this also covers callers that
+        bypass ``__init__`` (e.g. tests via ``__new__``).
+        """
+        clf = getattr(self, "_media_clf", None)
+        if clf is None:
+            clf = self._media_clf = load_media_classifier(
+                getattr(self, "config", None), voc_match_func=self._voc_match)
+        return clf
+
+    def classify_media(self, query: str, lang: str,
+                       valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
+        """Determine what :class:`mediavocab.MediaType` is being requested.
+
+        Delegates classification to ``ovos-media-classifier`` (whose keyword
+        backend is the extraction of this pipeline's own voc logic). The
+        classifier is mediavocab-native, so its result is returned directly --
+        there is no taxonomy translation. ``valid_labels`` are
+        ``mediavocab.MediaType`` and restrict the candidate set.
+        """
         lang = standardize_lang(lang)
-        valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
+        valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or None
         LOG.debug(f"valid media types: {valid_labels}")
-        if len(valid_labels) == 1:
+        if valid_labels and len(valid_labels) == 1:
             return valid_labels[0], 1.0
 
-        return self.voc_match_media(query, lang, valid_labels)
+        # GENERIC (and the NOT_MEDIA/CONTROL sentinels) are never a useful
+        # restriction; drop them so the classifier can still pick a real type.
+        mv_valid = None
+        if valid_labels:
+            mv_valid = [m for m in valid_labels
+                        if m not in (MediaType.GENERIC, MediaType.NOT_MEDIA,
+                                     MediaType.CONTROL)] or None
+        return self.media_clf.classify(query, lang, mv_valid)
 
     def is_ocp_query(self, query: str, lang: str) -> Tuple[bool, float]:
-        """ determine if a playback question is being asked"""
+        """Determine if a playback question is being asked."""
         lang = standardize_lang(lang)
-        m, p = self.voc_match_media(query, lang)
-        return m != MediaType.GENERIC, p
+        return self.media_clf.is_ocp_query(query, lang)
 
     def _should_resume(self, phrase: str, lang: str, message: Optional[Message] = None) -> bool:
         """
@@ -954,6 +995,118 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
         return results
 
+    def _build_query_context(self, lang: str):
+        """Build a :class:`QueryContext` from the session/config so providers are
+        gated on what the device and the user's content policy can actually use.
+
+        Reads (all optional, permissive by default):
+          * ``media.supported_playback_types`` — e.g. ``["audio", "video"]``;
+            empty ⇒ no device gate. (A headless/audio-only device sets ``["audio"]``
+            so video providers are skipped.)
+          * the content-filter policy — ``media_content_filter.blocked_genres``
+            plus ``allow_adult_content`` (default ``false`` ⇒ ``adult`` blocked),
+            mirroring ``ovos_media_classifier.ContentFilter`` so the same policy
+            that blocks a request also prunes the providers that would serve it.
+        """
+        try:
+            from ovos_plugin_manager.templates.media_provider import QueryContext
+        except Exception:
+            return None
+        media_cfg = self.config.get("media", {}) if isinstance(self.config, dict) else {}
+        supported = set(media_cfg.get("supported_playback_types", []) or [])
+
+        cf = self.config.get("media_content_filter", {}) or {}
+        blocked = set(cf.get("blocked_genres", ["adult"]))
+        if self.config.get("allow_adult_content", cf.get("allow_adult_content", False)):
+            blocked.discard("adult")
+
+        return QueryContext(
+            supported_playback_types={str(p) for p in supported},
+            blocked_genres={str(g) for g in blocked},
+            lang=lang,
+        )
+
+    @staticmethod
+    def _provider_search(provider, signals, context, lang):
+        """Call a provider's context-aware search, tolerating older providers
+        whose ``search_safe`` predates the ``context`` parameter."""
+        try:
+            return provider.search_safe(signals, context, lang=lang)
+        except TypeError:
+            return provider.search_safe(signals, lang=lang)
+
+    def _search_providers(self, phrase: str, media_type: MediaType,
+                          lang: str) -> RawResultsList:
+        """Dispatch the query to in-process MediaProvider plugins.
+
+        Builds a :class:`mediavocab.Signals` from the classified media type and
+        query, gates each provider with its three-axis ``matches()`` routing
+        test, then runs the surviving providers concurrently through a thread
+        pool calling ``search_safe`` (which never raises). Each returned
+        ``mediavocab.Release`` is bridged to the OCP playback result dict so it
+        can compete in the same normalize/rank/select_best flow as bus results.
+
+        Returns an empty list when no providers are installed/enabled.
+        """
+        if not self.media_providers:
+            return []
+
+        # The classifier owns the NLP: it emits the provider-ready Signals which
+        # the pipeline forwards verbatim to the MediaProviders. Fall back to the
+        # local media_type→Signals bridge only for classifiers without to_signals.
+        if hasattr(self._media_clf, "to_signals"):
+            signals = self._media_clf.to_signals(phrase, lang)
+        else:
+            signals = media_type_to_signals(media_type, phrase)
+        context = self._build_query_context(lang)
+
+        # context-aware routing gate: the three-axis match AND the requesting
+        # device/policy can actually use the provider (skip video providers on
+        # an audio-only device, adult providers when the content filter blocks
+        # adult). Falls back to bare matches() if the installed MediaProvider
+        # predates serves().
+        targets = {}
+        for name, provider in self.media_providers.items():
+            try:
+                gate = getattr(provider, "serves", None)
+                ok = gate(signals, context) if gate else provider.matches(signals)
+                if ok:
+                    targets[name] = provider
+            except Exception:
+                LOG.exception(f"MediaProvider '{name}' routing gate failed")
+        if not targets:
+            LOG.debug("no MediaProvider matched the query routing/context")
+            return []
+
+        LOG.debug(f"dispatching to {len(targets)} MediaProviders: {list(targets)}")
+        min_timeout = self.config.get("min_timeout", 5)
+        max_timeout = self.config.get("max_timeout", 15)
+
+        results: RawResultsList = []
+        with ThreadPoolExecutor(max_workers=len(targets)) as executor:
+            futures = {
+                executor.submit(self._provider_search, p, signals, context, lang): name
+                for name, p in targets.items()
+            }
+            got_results = False
+            for fut in as_completed(futures, timeout=None):
+                name = futures[fut]
+                try:
+                    releases = fut.result(timeout=max_timeout) or []
+                except Exception:
+                    LOG.exception(f"MediaProvider '{name}' search failed")
+                    continue
+                if releases:
+                    got_results = True
+                for release in releases:
+                    try:
+                        results.append(release_to_ocp_result(release, name))
+                    except Exception:
+                        LOG.exception(f"failed to bridge result from '{name}'")
+        LOG.debug(f"MediaProviders returned {len(results)} results "
+                  f"(min_timeout={min_timeout}, max_timeout={max_timeout})")
+        return results
+
     def _search(self, phrase: str, media_type: MediaType, lang: str,
                 skills: Optional[List[str]] = None,
                 message: Optional[Message] = None) -> list:
@@ -968,6 +1121,13 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                                      skills=skills,
                                      message=message):
             results += r["results"]
+
+        # in-process MediaProvider plugins are an additional source; their
+        # bridged results compete with the bus results by match_confidence.
+        # Skill-targeted searches (user named a specific OCP skill) stay
+        # bus-only.
+        if not skills:
+            results += self._search_providers(phrase, media_type, lang)
 
         results = self.normalize_results(results)
 

@@ -8,7 +8,8 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from ovos_utils.fakebus import FakeBus
-from ovos_utils.ocp import MediaType, PlayerState, MediaState, TrackState, MediaEntry
+from ovos_utils.ocp import PlayerState, MediaState, TrackState, MediaEntry
+from mediavocab import MediaType
 
 
 # ---------------------------------------------------------------------------
@@ -98,12 +99,18 @@ class TestNormalizeMediaEnum(unittest.TestCase):
         result = OCPPipelineMatcher._normalize_media_enum(MediaType.MUSIC)
         self.assertEqual(result, MediaType.MUSIC)
 
-    def test_int_converted_to_enum(self):
+    def test_value_converted_to_enum(self):
+        """mediavocab is a str-enum: its value (e.g. 'music') round-trips."""
         from ocp_pipeline.opm import OCPPipelineMatcher
-        result = OCPPipelineMatcher._normalize_media_enum(int(MediaType.MUSIC))
+        result = OCPPipelineMatcher._normalize_media_enum(MediaType.MUSIC.value)
         self.assertEqual(result, MediaType.MUSIC)
 
-    def test_invalid_int_raises(self):
+    def test_name_converted_to_enum(self):
+        from ocp_pipeline.opm import OCPPipelineMatcher
+        result = OCPPipelineMatcher._normalize_media_enum("MUSIC")
+        self.assertEqual(result, MediaType.MUSIC)
+
+    def test_invalid_token_raises(self):
         from ocp_pipeline.opm import OCPPipelineMatcher
         with self.assertRaises((ValueError, Exception)):
             OCPPipelineMatcher._normalize_media_enum(99999)
@@ -126,7 +133,7 @@ class TestNormalizeResults(unittest.TestCase):
     def test_valid_dict_converted_to_entry(self):
         from ocp_pipeline.opm import OCPPipelineMatcher
         d = {"uri": "http://example.com/t.mp3", "title": "Track",
-             "media_type": int(MediaType.MUSIC),
+             "media_type": MediaType.MUSIC.value,
              "playback": 2, "match_confidence": 75}
         out = OCPPipelineMatcher.normalize_results([d])
         self.assertEqual(len(out), 1)
@@ -146,14 +153,14 @@ class TestNormalizeResults(unittest.TestCase):
         from ocp_pipeline.opm import OCPPipelineMatcher
         entry = MediaEntry(uri="http://x.com/t.mp3", title="X")
         valid_dict = {"uri": "http://y.com/t.mp3", "title": "Y",
-                      "media_type": int(MediaType.MUSIC),
+                      "media_type": MediaType.MUSIC.value,
                       "playback": 2, "match_confidence": 60}
         out = OCPPipelineMatcher.normalize_results([entry, valid_dict, {"bad": True}])
         self.assertEqual(len(out), 2)
 
 
 # ---------------------------------------------------------------------------
-# classify_media / voc_match_media
+# classify_media (delegated to mediavocab-native ovos-media-classifier)
 # ---------------------------------------------------------------------------
 
 class TestClassifyMedia(unittest.TestCase):
@@ -209,6 +216,31 @@ class TestClassifyMedia(unittest.TestCase):
         media, conf = p.classify_media("play radio", "en-us")
         self.assertEqual(media, MediaType.RADIO)
 
+    def test_anime_keyword_converges_to_episodic_series(self):
+        """Taxonomy convergence: an AnimeKeyword hit classifies to mediavocab
+        EPISODIC_SERIES (mediavocab has no separate ANIME label)."""
+        p = _make_pipeline()
+        p.media2skill = {m: ["skill-x"] for m in MediaType}
+
+        def _voc(phrase, vocab, **kw):
+            return vocab == "AnimeKeyword"
+
+        p.voc_match = _voc
+        media, _ = p.classify_media("i want to watch an anime", "en-us")
+        self.assertEqual(media, MediaType.EPISODIC_SERIES)
+
+    def test_documentary_keyword_converges_to_movie(self):
+        """DocumentaryKeyword -> mediavocab MOVIE (no DOCUMENTARY label)."""
+        p = _make_pipeline()
+        p.media2skill = {m: ["skill-x"] for m in MediaType}
+
+        def _voc(phrase, vocab, **kw):
+            return vocab == "DocumentaryKeyword"
+
+        p.voc_match = _voc
+        media, _ = p.classify_media("show me a documentary", "en-us")
+        self.assertEqual(media, MediaType.MOVIE)
+
     def test_valid_labels_filter_limits_candidates(self):
         """If valid_labels excludes a type, that type must not be returned."""
         p = _make_pipeline()
@@ -258,7 +290,7 @@ class TestHandleSkillRegister(unittest.TestCase):
         msg = Message("ovos.common_play.announce", data={
             "skill_id": skill_id,
             "skill_name": "Test Skill",
-            "media_types": media_types or [int(MediaType.MUSIC)],
+            "media_types": media_types or [MediaType.MUSIC.value],
             "aliases": aliases or ["Test Skill"],
             "featured_tracks": False,
             "thumbnail": "",
@@ -268,7 +300,7 @@ class TestHandleSkillRegister(unittest.TestCase):
     def test_skill_added_to_media2skill(self):
         p = _make_pipeline()
         self._register_skill(p, skill_id="music.skill",
-                             media_types=[int(MediaType.MUSIC)])
+                             media_types=[MediaType.MUSIC.value])
         self.assertIn("music.skill", p.media2skill[MediaType.MUSIC])
 
     def test_skill_aliases_stored(self):
@@ -280,8 +312,8 @@ class TestHandleSkillRegister(unittest.TestCase):
     def test_multiple_media_types_registered(self):
         p = _make_pipeline()
         self._register_skill(p, skill_id="av.skill",
-                             media_types=[int(MediaType.MUSIC),
-                                          int(MediaType.PODCAST)])
+                             media_types=[MediaType.MUSIC.value,
+                                          MediaType.PODCAST.value])
         self.assertIn("av.skill", p.media2skill[MediaType.MUSIC])
         self.assertIn("av.skill", p.media2skill[MediaType.PODCAST])
 
@@ -289,7 +321,7 @@ class TestHandleSkillRegister(unittest.TestCase):
         p = _make_pipeline()
         # Confirm that an alias for a MUSIC skill is added to the NER
         self._register_skill(p, skill_id="spotify.skill",
-                             media_types=[int(MediaType.MUSIC)],
+                             media_types=[MediaType.MUSIC.value],
                              aliases=["Spotify"])
         # The NER should be able to tag "Spotify" as music_streaming_service
         tags = p.ner.tag("play Spotify")
@@ -323,7 +355,7 @@ class TestHandleSkillKeywordRegister(unittest.TestCase):
         msg = Message("ovos.common_play.register_keyword", data={
             "skill_id": "music.skill",
             "label": "music_streaming_service",
-            "media_type": int(MediaType.MUSIC),
+            "media_type": MediaType.MUSIC.value,
             "samples": ["BandCamp", "SoundCloud"],
         })
         p.handle_skill_keyword_register(msg)
@@ -337,7 +369,7 @@ class TestHandleSkillKeywordRegister(unittest.TestCase):
         msg = Message("ovos.common_play.register_keyword", data={
             "skill_id": "music.skill",
             "label": "music_streaming_service",
-            "media_type": int(MediaType.MUSIC),
+            "media_type": MediaType.MUSIC.value,
             "samples": [],
         })
         p.handle_skill_keyword_register(msg)  # must not raise

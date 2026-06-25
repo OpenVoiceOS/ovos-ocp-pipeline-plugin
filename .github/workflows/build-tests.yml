@@ -12,5 +12,12 @@ jobs:
     with:
       python_versions: '["3.10", "3.11", "3.12", "3.13", "3.14"]'
       system_deps: 'swig'
-      pre_install_pip: '-r test/requirements.txt'
+      # mediavocab 1.0, the MediaProvider plugin type and ovos-media-classifier
+      # are not yet on PyPI; install them from git before the package
+      # build/install. Drop these once all are published.
+      pre_install_pip: >-
+        ovos-plugin-manager@git+https://github.com/OpenVoiceOS/ovos-plugin-manager@feat/media-provider-plugin-type
+        mediavocab@git+https://github.com/TigreGotico/mediavocab@feat/audit-2026-05-core
+        ovos-media-classifier@git+https://github.com/OpenVoiceOS/ovos-media-classifier@dev
+        -r test/requirements.txt
       test_path: 'test'
