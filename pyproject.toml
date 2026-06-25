@@ -43,6 +43,23 @@ test = [
     "pytest-cov>=2.8.1",
     "cov-core>=1.15.0"
 ]
+# Install the full set of first-party MediaProvider (search/catalog) plugins.
+# `pip install ovos-ocp-pipeline-plugin[media]` gives the pipeline something to
+# search out of the box.
+media = [
+    "ovos-media-provider-bandcamp",
+    "ovos-media-provider-soundcloud",
+    "ovos-media-provider-somafm",
+    "ovos-media-provider-pyradios",
+    "ovos-media-provider-tunein",
+    "ovos-media-provider-youtube",
+    "ovos-media-provider-youtube-music",
+    "ovos-media-provider-mass",
+    "ovos-media-provider-spotify",
+    "ovos-media-provider-news",
+    "ovos-media-provider-radio-spain",
+    "ovos-media-provider-radio-tuga",
+]
 
 [project.urls]
 Homepage = "https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin"
