@@ -3,11 +3,18 @@
 These use mock ``MediaProvider`` subclasses returning synthetic
 ``mediavocab.Release`` objects. They cover:
 
-* the three-axis routing gate (a provider that can't serve a query is skipped),
+* dispatch to every loaded provider (no routing gate — a provider that cannot
+  serve the query self-filters by returning ``[]``),
 * concurrent dispatch returning ranked results,
 * the ``Release`` -> OCP result field mapping (mediavocab-native ``media_type``,
   ``PlaybackType`` backend selector derived from mediavocab routing),
 * that bus-path behaviour is unchanged when no providers are installed.
+
+The MediaProvider contract is a single
+``search(signals, lang="en-us", *, supported_playback_types, blocked_genres,
+region, session_id)`` call: there is no
+``is_available``/``serves``/``matches``/``QueryContext``. A provider reads the
+context kwargs it cares about and returns ``[]`` when it cannot serve the query.
 
 The pipeline is mediavocab-native: routing and result ``media_type`` use
 ``mediavocab.MediaType`` directly. The only translation left is the playback
@@ -15,7 +22,7 @@ The pipeline is mediavocab-native: routing and result ``media_type`` use
 structure, not a media-type taxonomy.
 """
 import unittest
-from typing import List, Set
+from typing import List
 
 from mediavocab import MediaType
 from mediavocab import EntityKind, Release, Signals, Work
@@ -51,12 +58,14 @@ def _make_release(title: str, media_type: MediaType, uri: str,
 if HAS_MP:
     class MusicProvider(MediaProvider):
         name = "mock.music"
-        media: Set[MediaType] = {MediaType.MUSIC}
 
-        def is_available(self) -> bool:
-            return True
-
-        def search(self, signals: Signals, lang: str = "en-us") -> List[Release]:
+        def search(self, signals: Signals, lang: str = "en-us", *,
+                   supported_playback_types=None, blocked_genres=None,
+                   region=None, session_id=None) -> List[Release]:
+            # self-filter: only serve MUSIC queries (medium is None for an
+            # untyped/generic query — serve those too).
+            if signals.medium not in (None, MediaType.MUSIC):
+                return []
             return [
                 _make_release("Black Album", MediaType.MUSIC,
                               "https://music/black", 0.9, artist="Metallica",
@@ -67,12 +76,12 @@ if HAS_MP:
 
     class MovieProvider(MediaProvider):
         name = "mock.movie"
-        media: Set[MediaType] = {MediaType.MOVIE}
 
-        def is_available(self) -> bool:
-            return True
-
-        def search(self, signals: Signals, lang: str = "en-us") -> List[Release]:
+        def search(self, signals: Signals, lang: str = "en-us", *,
+                   supported_playback_types=None, blocked_genres=None,
+                   region=None, session_id=None) -> List[Release]:
+            if signals.medium not in (None, MediaType.MOVIE):
+                return []
             return [
                 _make_release("Some Movie", MediaType.MOVIE,
                               "https://movie/x", 0.75, runtime=7200),
@@ -80,12 +89,10 @@ if HAS_MP:
 
     class ExplodingProvider(MediaProvider):
         name = "mock.boom"
-        media: Set[MediaType] = {MediaType.MUSIC}
 
-        def is_available(self) -> bool:
-            return True
-
-        def search(self, signals: Signals, lang: str = "en-us") -> List[Release]:
+        def search(self, signals: Signals, lang: str = "en-us", *,
+                   supported_playback_types=None, blocked_genres=None,
+                   region=None, session_id=None) -> List[Release]:
             raise RuntimeError("boom")
 
 
@@ -158,14 +165,15 @@ class TestProviderDispatch(unittest.TestCase):
     def _install(self, *providers):
         self.ocp.media_providers = {p.name: p for p in providers}
 
-    def test_routing_gate_skips_non_matching(self):
-        # only MovieProvider installed; a MUSIC query must not reach it
+    def test_provider_self_filters_non_matching(self):
+        # only MovieProvider installed; a MUSIC-typed query reaches it but it
+        # self-filters (returns []) — no routing gate in the pipeline.
         self._install(MovieProvider())
-        results = self.ocp._search_providers("metallica", MediaType.MUSIC,
+        results = self.ocp._search_providers("play some music", MediaType.MUSIC,
                                              "en-us")
         self.assertEqual(results, [])
 
-    def test_routing_gate_matches(self):
+    def test_provider_serves_matching_query(self):
         self._install(MovieProvider())
         results = self.ocp._search_providers("some movie", MediaType.MOVIE,
                                              "en-us")
@@ -193,7 +201,7 @@ class TestProviderDispatch(unittest.TestCase):
         self.assertIn("https://movie/x", uris)
 
     def test_exploding_provider_is_isolated(self):
-        # search_safe swallows the error; other providers still return
+        # _safe_search swallows the error; other providers still return
         self._install(MusicProvider(), ExplodingProvider())
         results = self.ocp._search_providers("metallica", MediaType.MUSIC,
                                              "en-us")

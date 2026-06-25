@@ -201,11 +201,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     def _load_media_providers(self):
         """Discover and instantiate installed ``opm.media.provider`` plugins.
 
-        ``load_media_providers`` already filters by ``is_available()`` and the
-        per-provider ``enabled: false`` config gate. When the MediaProvider type
-        (ovos-plugin-manager) or mediavocab is unavailable, or no providers are
-        installed/enabled, ``self.media_providers`` stays empty and the pipeline
-        behaves exactly as the bus-only OCP-skill path.
+        ``load_media_providers`` instantiates every installed provider that is
+        not disabled by the per-provider ``enabled: false`` config gate. Runtime
+        availability (missing API key, no network, …) is the provider's own
+        concern — it simply returns ``[]`` from :meth:`MediaProvider.search`.
+        When the MediaProvider type (ovos-plugin-manager) or mediavocab is
+        unavailable, or no providers are installed/enabled,
+        ``self.media_providers`` stays empty and the pipeline behaves exactly as
+        the bus-only OCP-skill path.
         """
         if not _HAS_MEDIA_PROVIDERS:
             LOG.debug("MediaProvider plugin type unavailable; "
@@ -985,23 +988,29 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
         return results
 
-    def _build_query_context(self, lang: str):
-        """Build a :class:`QueryContext` from the session/config so providers are
-        gated on what the device and the user's content policy can actually use.
+    def _build_query_context(self, lang: str,
+                             message: Optional[Message] = None) -> dict:
+        """Build the request-context kwargs from the session/config.
 
-        Reads (all optional, permissive by default):
-          * ``media.supported_playback_types`` — e.g. ``["audio", "video"]``;
-            empty ⇒ no device gate. (A headless/audio-only device sets ``["audio"]``
-            so video providers are skipped.)
-          * the content-filter policy — ``media_content_filter.blocked_genres``
-            plus ``allow_adult_content`` (default ``false`` ⇒ ``adult`` blocked),
-            mirroring ``ovos_media_classifier.ContentFilter`` so the same policy
-            that blocks a request also prunes the providers that would serve it.
+        The MediaProvider contract is a single ``search(signals, lang="en-us",
+        *, supported_playback_types, blocked_genres, region, session_id)`` call:
+        there is no routing/gating API and no ``QueryContext`` object. The
+        pipeline passes what it knows about the request as explicit kwargs; each
+        provider reads the keys it cares about and self-filters (returning ``[]``
+        when it cannot serve the query/context).
+
+        Returns the four context kwargs (all permissive by default):
+          * ``supported_playback_types`` — e.g. ``{"audio", "video"}``;
+            empty ⇒ no device gate. (A headless/audio-only device sets
+            ``{"audio"}`` so video providers can skip themselves.) Read from
+            ``media.supported_playback_types``.
+          * ``blocked_genres`` — genre tags the content policy blocks, from
+            ``media_content_filter.blocked_genres`` plus ``allow_adult_content``
+            (default ``false`` ⇒ ``adult`` blocked), mirroring
+            ``ovos_media_classifier.ContentFilter``.
+          * ``region`` — ISO 3166-1 alpha-2 from ``location.city.region`` config.
+          * ``session_id`` — originating session id (from ``message`` when given).
         """
-        try:
-            from ovos_plugin_manager.templates.media_provider import QueryContext
-        except Exception:
-            return None
         media_cfg = self.config.get("media", {}) if isinstance(self.config, dict) else {}
         supported = set(media_cfg.get("supported_playback_types", []) or [])
 
@@ -1010,31 +1019,54 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if self.config.get("allow_adult_content", cf.get("allow_adult_content", False)):
             blocked.discard("adult")
 
-        return QueryContext(
-            supported_playback_types={str(p) for p in supported},
-            blocked_genres={str(g) for g in blocked},
-            lang=lang,
-        )
+        region = None
+        loc = self.config.get("location", {}) if isinstance(self.config, dict) else {}
+        code = (((loc.get("city") or {}).get("region") or {}).get("country") or {}).get("code")
+        if code:
+            region = str(code)
+
+        session_id = None
+        if message is not None:
+            try:
+                from ovos_bus_client.session import SessionManager
+                session_id = SessionManager.get(message).session_id
+            except Exception:
+                session_id = None
+
+        return {
+            "supported_playback_types": {str(p) for p in supported},
+            "blocked_genres": {str(g) for g in blocked},
+            "region": region,
+            "session_id": session_id,
+        }
 
     @staticmethod
-    def _provider_search(provider, signals, context, lang):
-        """Call a provider's context-aware search, tolerating older providers
-        whose ``search_safe`` predates the ``context`` parameter."""
+    def _safe_search(provider, signals, lang, **context):
+        """Call ``provider.search`` so one provider raising cannot abort the
+        multi-provider search. Returns ``[]`` on any exception. ``**context``
+        carries the explicit MediaProvider kwargs (``supported_playback_types``,
+        ``blocked_genres``, ``region``, ``session_id``)."""
         try:
-            return provider.search_safe(signals, context, lang=lang)
-        except TypeError:
-            return provider.search_safe(signals, lang=lang)
+            return provider.search(signals, lang=lang, **context) or []
+        except Exception:
+            LOG.exception(f"MediaProvider '{getattr(provider, 'name', provider)}' "
+                          f"search failed")
+            return []
 
     def _search_providers(self, phrase: str, media_type: MediaType,
-                          lang: str) -> RawResultsList:
+                          lang: str,
+                          message: Optional[Message] = None) -> RawResultsList:
         """Dispatch the query to in-process MediaProvider plugins.
 
         Builds a :class:`mediavocab.Signals` from the classified media type and
-        query, gates each provider with its three-axis ``matches()`` routing
-        test, then runs the surviving providers concurrently through a thread
-        pool calling ``search_safe`` (which never raises). Each returned
-        ``mediavocab.Release`` is bridged to the OCP playback result dict so it
-        can compete in the same normalize/rank/select_best flow as bus results.
+        query, then runs every loaded provider concurrently through a thread
+        pool calling :meth:`_safe_search` (which never raises). Each provider
+        receives the query ``Signals``, ``lang`` and the request-context kwargs
+        from :meth:`_build_query_context`; a provider that cannot serve the
+        query/context returns ``[]`` (it self-filters — there is no separate
+        routing gate). Each returned ``mediavocab.Release`` is bridged to the OCP
+        playback result dict so it can compete in the same normalize/rank/
+        select_best flow as bus results.
 
         Returns an empty list when no providers are installed/enabled.
         """
@@ -1048,37 +1080,18 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             signals = self._media_clf.to_signals(phrase, lang)
         else:
             signals = media_type_to_signals(media_type, phrase)
-        context = self._build_query_context(lang)
+        context = self._build_query_context(lang, message=message)
 
-        # context-aware routing gate: the three-axis match AND the requesting
-        # device/policy can actually use the provider (skip video providers on
-        # an audio-only device, adult providers when the content filter blocks
-        # adult). Falls back to bare matches() if the installed MediaProvider
-        # predates serves().
-        targets = {}
-        for name, provider in self.media_providers.items():
-            try:
-                gate = getattr(provider, "serves", None)
-                ok = gate(signals, context) if gate else provider.matches(signals)
-                if ok:
-                    targets[name] = provider
-            except Exception:
-                LOG.exception(f"MediaProvider '{name}' routing gate failed")
-        if not targets:
-            LOG.debug("no MediaProvider matched the query routing/context")
-            return []
-
+        targets = self.media_providers
         LOG.debug(f"dispatching to {len(targets)} MediaProviders: {list(targets)}")
-        min_timeout = self.config.get("min_timeout", 5)
         max_timeout = self.config.get("max_timeout", 15)
 
         results: RawResultsList = []
         with ThreadPoolExecutor(max_workers=len(targets)) as executor:
             futures = {
-                executor.submit(self._provider_search, p, signals, context, lang): name
+                executor.submit(self._safe_search, p, signals, lang, **context): name
                 for name, p in targets.items()
             }
-            got_results = False
             for fut in as_completed(futures, timeout=None):
                 name = futures[fut]
                 try:
@@ -1086,15 +1099,12 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 except Exception:
                     LOG.exception(f"MediaProvider '{name}' search failed")
                     continue
-                if releases:
-                    got_results = True
                 for release in releases:
                     try:
                         results.append(release_to_ocp_result(release, name))
                     except Exception:
                         LOG.exception(f"failed to bridge result from '{name}'")
-        LOG.debug(f"MediaProviders returned {len(results)} results "
-                  f"(min_timeout={min_timeout}, max_timeout={max_timeout})")
+        LOG.debug(f"MediaProviders returned {len(results)} results")
         return results
 
     def _search(self, phrase: str, media_type: MediaType, lang: str,
@@ -1117,7 +1127,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         # Skill-targeted searches (user named a specific OCP skill) stay
         # bus-only.
         if not skills:
-            results += self._search_providers(phrase, media_type, lang)
+            results += self._search_providers(phrase, media_type, lang,
+                                              message=message)
 
         results = self.normalize_results(results)
 
