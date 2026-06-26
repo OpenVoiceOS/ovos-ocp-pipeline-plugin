@@ -28,6 +28,7 @@ dependencies = [
     "ovos-workshop>=8.0.0,<9.0.0",
     "ovos-utils>=0.3.5,<1.0.0",
     "ovos-plugin-manager>=2.1.0,<3.0.0",
+    "mediavocab>=1.0.0,<2.0.0",
     "ahocorasick-ner>=0.1.1,<1.0.0",
     "langcodes",
     "ovos-spec-tools>=0.1.0,<1.0.0"
@@ -40,6 +41,23 @@ test = [
     "pytest>=5.2.4",
     "pytest-cov>=2.8.1",
     "cov-core>=1.15.0"
+]
+# Install the full set of first-party MediaProvider (search/catalog) plugins.
+# `pip install ovos-ocp-pipeline-plugin[media]` gives the pipeline something to
+# search out of the box.
+media = [
+    "ovos-media-provider-bandcamp",
+    "ovos-media-provider-soundcloud",
+    "ovos-media-provider-somafm",
+    "ovos-media-provider-pyradios",
+    "ovos-media-provider-tunein",
+    "ovos-media-provider-youtube",
+    "ovos-media-provider-youtube-music",
+    "ovos-media-provider-mass",
+    "ovos-media-provider-spotify",
+    "ovos-media-provider-news",
+    "ovos-media-provider-radio-spain",
+    "ovos-media-provider-radio-tuga",
 ]
 
 [project.urls]

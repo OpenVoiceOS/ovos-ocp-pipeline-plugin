@@ -3,7 +3,8 @@ from typing import Tuple, Optional
 
 from ovos_bus_client.message import Message, dig_for_message
 from ovos_bus_client.util import wait_for_reply
-from ovos_utils.ocp import MediaType, PlaybackType, MediaEntry
+from ovos_utils.ocp import PlaybackType, MediaEntry
+from mediavocab import MediaType
 
 
 class LegacyCommonPlay:
