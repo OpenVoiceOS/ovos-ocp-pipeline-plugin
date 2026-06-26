@@ -50,8 +50,8 @@ class TestOCPPipelineMatcher(unittest.TestCase):
         self.assertEqual(result.match_type, 'ocp:play')
 
     def test_match_medium_with_invalid_input(self):
-        # no media keyword present -> not an OCP query
-        result = self.ocp.match_medium(["i wanna hear metallica"], "en-US")
+        # a non-media assistant request -> not an OCP query
+        result = self.ocp.match_medium(["what time is it"], "en-US")
         self.assertIsNone(result)
 
     # ------------------------------------------------------------------ #
