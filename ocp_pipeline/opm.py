@@ -15,7 +15,7 @@ from ovos_config import Configuration
 from ovos_plugin_manager.ocp import available_extractors
 from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline, PipelinePlugin
 from ovos_utils.lang import get_language_dir
-from ovos_spec_tools import standardize_lang, closest_lang
+from ovos_spec_tools import standardize_lang, closest_lang, voc_match
 from ovos_utils.log import LOG, deprecated, log_deprecation
 from ovos_utils.fakebus import FakeBus
 from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
@@ -25,6 +25,11 @@ from ovos_utils.xdg_utils import xdg_data_home
 from ovos_config.meta import get_xdg_base
 from ahocorasick_ner import AhocorasickNER
 from ocp_pipeline.legacy import LegacyCommonPlay
+
+# .voc resources shipped with this plugin (locale/<lang>/<name>.voc).
+# Matched via ovos-spec-tools voc_match (OVOS-INTENT-2 §4.3 whole-word semantics)
+# instead of reaching into ovos-workshop's skill voc_match.
+LOCALE_DIR = join(dirname(__file__), "locale")
 
 
 @dataclass
@@ -319,9 +324,9 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         utterance = utterances[0].lower()
 
         # avoid common confusion with alerts and parrot skill
-        if (self.voc_match(utterance, "Alerts") or
-                self.voc_match(utterance, "SoundIntents") or
-                self.voc_match(utterance, "Parrot")):
+        if (voc_match(utterance, "Alerts", lang, locale=LOCALE_DIR) or
+                voc_match(utterance, "SoundIntents", lang, locale=LOCALE_DIR) or
+                voc_match(utterance, "Parrot", lang, locale=LOCALE_DIR)):
             return None
 
         self.bus.emit(Message("ovos.common_play.status"))  # sync
@@ -741,61 +746,61 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
         # simplistic approach via voc_match, works anywhere
         # and it's easy to localize, but isn't very accurate
-        if MediaType.DOCUMENTARY in valid_labels and self.voc_match(query, "DocumentaryKeyword", lang=lang):
+        if MediaType.DOCUMENTARY in valid_labels and voc_match(query, "DocumentaryKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.DOCUMENTARY, 0.6
-        elif MediaType.AUDIOBOOK in valid_labels and self.voc_match(query, "AudioBookKeyword", lang=lang):
+        elif MediaType.AUDIOBOOK in valid_labels and voc_match(query, "AudioBookKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.AUDIOBOOK, 0.6
-        elif MediaType.NEWS in valid_labels and self.voc_match(query, "NewsKeyword", lang=lang):
+        elif MediaType.NEWS in valid_labels and voc_match(query, "NewsKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.NEWS, 0.6
-        elif MediaType.ANIME in valid_labels and  self.voc_match(query, "AnimeKeyword", lang=lang):
+        elif MediaType.ANIME in valid_labels and  voc_match(query, "AnimeKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.ANIME, 0.6
-        elif MediaType.CARTOON in valid_labels and self.voc_match(query, "CartoonKeyword", lang=lang):
+        elif MediaType.CARTOON in valid_labels and voc_match(query, "CartoonKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.CARTOON, 0.6
-        elif MediaType.PODCAST in valid_labels and self.voc_match(query, "PodcastKeyword", lang=lang):
+        elif MediaType.PODCAST in valid_labels and voc_match(query, "PodcastKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.PODCAST, 0.6
-        elif MediaType.RADIO_THEATRE in valid_labels and self.voc_match(query, "AudioDramaKeyword", lang=lang):
+        elif MediaType.RADIO_THEATRE in valid_labels and voc_match(query, "AudioDramaKeyword", lang=lang, locale=LOCALE_DIR):
             # NOTE - before "radio" to allow "radio theatre"
             return MediaType.RADIO_THEATRE, 0.6
-        elif MediaType.RADIO in valid_labels and self.voc_match(query, "RadioKeyword", lang=lang):
+        elif MediaType.RADIO in valid_labels and voc_match(query, "RadioKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.RADIO, 0.6
-        elif MediaType.MUSIC in valid_labels and self.voc_match(query, "MusicKeyword", lang=lang):
+        elif MediaType.MUSIC in valid_labels and voc_match(query, "MusicKeyword", lang=lang, locale=LOCALE_DIR):
             # NOTE - before movie to handle "{movie_name} soundtrack"
             return MediaType.MUSIC, 0.6
-        elif MediaType.TV in valid_labels and self.voc_match(query, "TVKeyword", lang=lang):
+        elif MediaType.TV in valid_labels and voc_match(query, "TVKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.TV, 0.6
-        elif MediaType.VIDEO_EPISODES in valid_labels and self.voc_match(query, "SeriesKeyword", lang=lang):
+        elif MediaType.VIDEO_EPISODES in valid_labels and voc_match(query, "SeriesKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.VIDEO_EPISODES, 0.6
         elif any([s in valid_labels for s in [MediaType.MOVIE, MediaType.SHORT_FILM, MediaType.SILENT_MOVIE, MediaType.BLACK_WHITE_MOVIE]]) and \
-                self.voc_match(query, "MovieKeyword", lang=lang):
-            if MediaType.SHORT_FILM in valid_labels and self.voc_match(query, "ShortKeyword", lang=lang):
+                voc_match(query, "MovieKeyword", lang=lang, locale=LOCALE_DIR):
+            if MediaType.SHORT_FILM in valid_labels and voc_match(query, "ShortKeyword", lang=lang, locale=LOCALE_DIR):
                 return MediaType.SHORT_FILM, 0.7
-            elif MediaType.SILENT_MOVIE in valid_labels and self.voc_match(query, "SilentKeyword", lang=lang):
+            elif MediaType.SILENT_MOVIE in valid_labels and voc_match(query, "SilentKeyword", lang=lang, locale=LOCALE_DIR):
                 return MediaType.SILENT_MOVIE, 0.7
-            elif MediaType.BLACK_WHITE_MOVIE in valid_labels and self.voc_match(query, "BWKeyword", lang=lang):
+            elif MediaType.BLACK_WHITE_MOVIE in valid_labels and voc_match(query, "BWKeyword", lang=lang, locale=LOCALE_DIR):
                 return MediaType.BLACK_WHITE_MOVIE, 0.7
             return MediaType.MOVIE, 0.6
-        elif MediaType.VISUAL_STORY in valid_labels and self.voc_match(query, "ComicBookKeyword", lang=lang):
+        elif MediaType.VISUAL_STORY in valid_labels and voc_match(query, "ComicBookKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.VISUAL_STORY, 0.4
-        elif MediaType.GAME in valid_labels and self.voc_match(query, "GameKeyword", lang=lang):
+        elif MediaType.GAME in valid_labels and voc_match(query, "GameKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.GAME, 0.4
-        elif MediaType.AUDIO_DESCRIPTION in valid_labels and self.voc_match(query, "ADKeyword", lang=lang):
+        elif MediaType.AUDIO_DESCRIPTION in valid_labels and voc_match(query, "ADKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.AUDIO_DESCRIPTION, 0.4
-        elif MediaType.ASMR in valid_labels and self.voc_match(query, "ASMRKeyword", lang=lang):
+        elif MediaType.ASMR in valid_labels and voc_match(query, "ASMRKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.ASMR, 0.4
-        elif any([s in valid_labels for s in [MediaType.ADULT, MediaType.HENTAI, MediaType.ADULT_AUDIO]]) and self.voc_match(query, "AdultKeyword", lang=lang):
-            if MediaType.HENTAI in valid_labels and self.voc_match(query, "CartoonKeyword", lang=lang) or \
-                    self.voc_match(query, "AnimeKeyword", lang=lang) or \
-                    self.voc_match(query, "HentaiKeyword", lang=lang):
+        elif any([s in valid_labels for s in [MediaType.ADULT, MediaType.HENTAI, MediaType.ADULT_AUDIO]]) and voc_match(query, "AdultKeyword", lang=lang, locale=LOCALE_DIR):
+            if MediaType.HENTAI in valid_labels and voc_match(query, "CartoonKeyword", lang=lang, locale=LOCALE_DIR) or \
+                    voc_match(query, "AnimeKeyword", lang=lang, locale=LOCALE_DIR) or \
+                    voc_match(query, "HentaiKeyword", lang=lang, locale=LOCALE_DIR):
                 return MediaType.HENTAI, 0.4
-            elif MediaType.ADULT_AUDIO in valid_labels and  self.voc_match(query, "AudioKeyword", lang=lang) or \
-                    self.voc_match(query, "ASMRKeyword", lang=lang):
+            elif MediaType.ADULT_AUDIO in valid_labels and  voc_match(query, "AudioKeyword", lang=lang, locale=LOCALE_DIR) or \
+                    voc_match(query, "ASMRKeyword", lang=lang, locale=LOCALE_DIR):
                 return MediaType.ADULT_AUDIO, 0.4
             return MediaType.ADULT, 0.4
-        elif MediaType.HENTAI in valid_labels and self.voc_match(query, "HentaiKeyword", lang=lang):
+        elif MediaType.HENTAI in valid_labels and voc_match(query, "HentaiKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.HENTAI, 0.4
-        elif MediaType.VIDEO in valid_labels and self.voc_match(query, "VideoKeyword", lang=lang):
+        elif MediaType.VIDEO in valid_labels and voc_match(query, "VideoKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.VIDEO, 0.4
-        elif MediaType.AUDIO in valid_labels and self.voc_match(query, "AudioKeyword", lang=lang):
+        elif MediaType.AUDIO in valid_labels and voc_match(query, "AudioKeyword", lang=lang, locale=LOCALE_DIR):
             return MediaType.AUDIO, 0.4
         return MediaType.GENERIC, 0.0
 
@@ -826,8 +831,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         player = self.get_player(message)
         if player.player_state == PlayerState.PAUSED:
             if not phrase.strip() or \
-                    self.voc_match(phrase, "Resume", lang=lang, exact=True) or \
-                    self.voc_match(phrase, "Play", lang=lang, exact=True):
+                    voc_match(phrase, "Resume", lang=lang, exact=True, locale=LOCALE_DIR) or \
+                    voc_match(phrase, "Play", lang=lang, exact=True, locale=LOCALE_DIR):
                 return True
         return False
 
@@ -927,8 +932,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                           f"unavailable plugins: {plugs}")
 
         # filter by media type
-        audio_only = self.voc_match(phrase, "audio_only", lang=lang)
-        video_only = self.voc_match(phrase, "video_only", lang=lang)
+        audio_only = voc_match(phrase, "audio_only", lang=lang, locale=LOCALE_DIR)
+        video_only = voc_match(phrase, "video_only", lang=lang, locale=LOCALE_DIR)
         if self.config.get("playback_mode") == PlaybackMode.VIDEO_ONLY:
             # select only from VIDEO results if preference is set
             audio_only = True
