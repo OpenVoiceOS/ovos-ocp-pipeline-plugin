@@ -12,5 +12,5 @@ jobs:
     with:
       python_versions: '["3.10", "3.11", "3.12", "3.13", "3.14"]'
       system_deps: 'swig'
-      pre_install_pip: '-r test/requirements.txt git+https://github.com/OpenVoiceOS/ovos-spec-tools@feat/intent-primitives'
+      pre_install_pip: '-r test/requirements.txt'
       test_path: 'test'

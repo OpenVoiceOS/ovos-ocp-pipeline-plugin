@@ -13,6 +13,5 @@ jobs:
       python_version: '3.11'
       coverage_source: 'ocp_pipeline'
       test_path: 'test'
-      pre_install_pip: 'git+https://github.com/OpenVoiceOS/ovos-spec-tools@feat/intent-primitives'
       install_extras: '-r test/requirements.txt'
       min_coverage: 0
