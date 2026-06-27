@@ -20,16 +20,13 @@ from ovos_utils.log import LOG, deprecated, log_deprecation
 from ovos_utils.fakebus import FakeBus
 from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
     MediaEntry, Playlist, MediaState, TrackState, dict2entry, PluginStream
-from ovos_workshop.app import OVOSAbstractApplication
 from ovos_utils.xdg_utils import xdg_data_home
 from ovos_config.meta import get_xdg_base
 from ahocorasick_ner import AhocorasickNER
 from ocp_pipeline.legacy import LegacyCommonPlay
-
-# .voc resources shipped with this plugin (locale/<lang>/<name>.voc).
-# Matched via ovos-spec-tools voc_match (OVOS-INTENT-2 §4.3 whole-word semantics)
-# instead of reaching into ovos-workshop's skill voc_match.
-LOCALE_DIR = join(dirname(__file__), "locale")
+# Skill-framework conveniences (speak_dialog, get_response, add_event, ...) are
+# reconstructed here without ovos-workshop; see _skill_compat for details.
+from ocp_pipeline._skill_compat import SkillCompatMixin, LOCALE_DIR
 
 
 @dataclass
@@ -49,7 +46,7 @@ RawResultsList = List[Union[MediaEntry, Playlist, PluginStream, Dict[str, Any]]]
 NormalizedResultsList = List[Union[MediaEntry, Playlist, PluginStream]]
 
 
-class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
+class OCPPipelineMatcher(SkillCompatMixin, ConfidenceMatcherPipeline):
     intents = ["play.intent", "open.intent", "media_stop.intent",
                "next.intent", "prev.intent", "pause.intent",
                #  "play_favorites.intent", "like_song.intent",  # handled by ovos-media not ovos-audio, re-enable later
@@ -66,9 +63,9 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             bus (Optional[Union[MessageBusClient, FakeBus]]): The message bus for event communication. If not provided, a fake bus is used.
             config (Optional[Dict]): Optional configuration dictionary for pipeline and entity keyword setup.
         """
-        OVOSAbstractApplication.__init__(
-            self, bus=bus or FakeBus(), skill_id=OCP_ID, resources_dir=f"{dirname(__file__)}")
         ConfidenceMatcherPipeline.__init__(self, bus, config)
+        self.skill_id = OCP_ID
+        self._init_skill_compat()
 
         self.ocp_api = OCPInterface(self.bus)
         self.legacy_api = ClassicAudioServiceInterface(self.bus)
@@ -963,7 +960,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 skills: Optional[List[str]] = None,
                 message: Optional[Message] = None) -> list:
         self.bus.emit(message.reply("ovos.common_play.search.start"))
-        self.enclosure.mouth_think()  # animate mk1 mouth during search
+        self.mouth_think()  # animate mk1 mouth during search
 
         # Now we place a query on the messsagebus for anyone who wants to
         # attempt to service a 'play.request' message.
@@ -1182,12 +1179,12 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         return MycroftCPSLegacyPipeline(self.bus, self.config).match(utterances, lang, message)
 
 
-class MycroftCPSLegacyPipeline(PipelinePlugin, OVOSAbstractApplication):
+class MycroftCPSLegacyPipeline(SkillCompatMixin, PipelinePlugin):
     def __init__(self, bus: Optional[Union[MessageBusClient, FakeBus]] = None,
                  config: Optional[Dict] = None):
-        OVOSAbstractApplication.__init__(self, bus=bus or FakeBus(),
-                                         skill_id=OCP_ID, resources_dir=f"{dirname(__file__)}")
         PipelinePlugin.__init__(self, bus, config)
+        self.skill_id = OCP_ID
+        self._init_skill_compat()
         self.mycroft_cps = LegacyCommonPlay(self.bus)
         OCPPipelineMatcher.load_intent_files()
         self.add_event("ocp:legacy_cps", self.handle_legacy_cps, is_intent=True)
@@ -1246,4 +1243,5 @@ class MycroftCPSLegacyPipeline(PipelinePlugin, OVOSAbstractApplication):
                                       {"uri": "snd/error.mp3"}))
 
     def shutdown(self):
+        self.default_shutdown()  # remove events registered via self.add_event
         self.mycroft_cps.shutdown()

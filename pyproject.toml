@@ -25,12 +25,14 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
-    "ovos-workshop>=8.0.0,<10.0.0",
     "ovos-utils>=0.3.5,<1.0.0",
     "ovos-plugin-manager>=2.1.0,<3.0.0",
     "ahocorasick-ner>=0.1.1,<1.0.0",
     "langcodes",
-    "ovos-spec-tools>=0.14.0a1,<1.0.0"
+    "ovos-spec-tools>=0.14.0a1,<1.0.0",
+    # intent engine fallback; ovos-padatious is preferred when installed.
+    # (was previously pulled in transitively via ovos-workshop)
+    "padacioso>=1.0.0,<2.0.0"
 ]
 
 [project.optional-dependencies]
