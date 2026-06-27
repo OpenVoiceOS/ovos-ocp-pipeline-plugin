@@ -23,26 +23,16 @@ from ovos_utils.xdg_utils import xdg_data_home
 from ovos_config.meta import get_xdg_base
 from ahocorasick_ner import AhocorasickNER
 from ocp_pipeline.legacy import LegacyCommonPlay
-from ocp_pipeline.media_type_map import mv_to_legacy_candidates
+from ocp_pipeline.context_classify import (
+    ContextAwareClassifier,
+    build_ner_list,
+    build_player_status,
+)
 
 # .voc resources shipped with this plugin (locale/<lang>/<name>.voc).
 # Matched via ovos-spec-tools voc_match (OVOS-INTENT-2 §4.3 whole-word semantics)
 # instead of reaching into ovos-workshop's skill voc_match.
 LOCALE_DIR = join(dirname(__file__), "locale")
-
-# Lazily-built, process-wide keyword media classifier (the zero-dependency
-# backend of ``ovos-media-classifier``).  Built on first use so importing this
-# module stays cheap and free of ML deps.
-_MEDIA_CLASSIFIER = None
-
-
-def _get_media_classifier():
-    """Return the shared zero-dep ``KeywordMediaClassifier`` (built once)."""
-    global _MEDIA_CLASSIFIER
-    if _MEDIA_CLASSIFIER is None:
-        from ovos_media_classifier.keyword import KeywordMediaClassifier
-        _MEDIA_CLASSIFIER = KeywordMediaClassifier()
-    return _MEDIA_CLASSIFIER
 
 
 @dataclass
@@ -99,6 +89,13 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         }
         self.entity_csvs = self.config.get("entity_csvs", [])  # user defined keyword csv files
         self.ner = AhocorasickNER()
+
+        # Context-aware bridge to the standalone ovos-media-classifier: builds
+        # player_status (now-playing) + ner_list (registered skill keywords) and
+        # passes them to its classify_full contract. Defaults to the keyword
+        # backend; a config may select a richer opm.media.classifier plugin.
+        self.context_classifier = ContextAwareClassifier(
+            config=self.config.get("media_classifier", self.config))
 
         self.register_ocp_api_events()
         self.register_ocp_intents()
@@ -453,8 +450,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not is_ocp:
             return None
 
+        # content filter: blocked content (adult by default) never routes
+        blocked, reason = self.is_blocked_content(utterance, lang)
+        if blocked:
+            LOG.info(f"OCP query blocked by content filter ({reason})")
+            return None
+
         # classify the query media type
-        media_type, confidence = self.classify_media(utterance, lang)
+        media_type, confidence = self.classify_media(utterance, lang, message=message)
 
         # extract entities
         ents = self._extract_entities(utterance)
@@ -462,12 +465,17 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         # extract the query string
         query = self.remove_voc(utterance, "Play", lang).strip()
 
+        # rich provider-ready Signals (lossless multi-axis description) handed to
+        # the MediaProviders alongside the legacy media_type
+        signals = self.media_signals(query or utterance, lang)
+
         return IntentHandlerMatch(match_type="ocp:play",
                                   match_data={"media_type": media_type,
                                               "entities": ents,
                                               "query": query,
                                               "is_ocp_conf": bconf,
-                                              "conf": confidence},
+                                              "conf": confidence,
+                                              "signals": signals},
                                   skill_id=OCP_ID,
                                   utterance=utterance)
 
@@ -489,8 +497,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
         lang = standardize_lang(lang)
 
+        # content filter: blocked content (adult by default) never routes
+        blocked, reason = self.is_blocked_content(utterance, lang)
+        if blocked:
+            LOG.info(f"OCP query blocked by content filter ({reason})")
+            return None
+
         # classify the query media type
-        media_type, confidence = self.classify_media(utterance, lang)
+        media_type, confidence = self.classify_media(utterance, lang, message=message)
 
         if confidence < 0.3:
             return None
@@ -498,11 +512,15 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         # extract the query string
         query = self.remove_voc(utterance, "Play", lang).strip()
 
+        # rich provider-ready Signals handed to the MediaProviders
+        signals = self.media_signals(query or utterance, lang)
+
         return IntentHandlerMatch(match_type="ocp:play",
                                   match_data={"media_type": media_type,
                                               "entities": ents,
                                               "query": query,
-                                              "conf": float(confidence)},
+                                              "conf": float(confidence),
+                                              "signals": signals},
                                   skill_id=OCP_ID,
                                   utterance=utterance)
 
@@ -559,13 +577,16 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                     valid_labels.append(mtype)
 
         # classify the query media type
-        media_type, conf = self.classify_media(utterance, lang, valid_labels=valid_labels)
+        media_type, conf = self.classify_media(utterance, lang, valid_labels=valid_labels, message=message)
 
         # remove play verb from the query string
         query = self.remove_voc(query, "Play", lang).strip()
 
         # extract entities
         ents = self._extract_entities(utterance)
+
+        # rich provider-ready Signals handed to the MediaProviders
+        signals = self.media_signals(query or utterance, lang)
 
         return IntentHandlerMatch(match_type="ocp:play",
                                   match_data={"media_type": media_type,
@@ -574,6 +595,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                                               "skills": valid_skills,
                                               "conf": match["conf"],
                                               "media_conf": float(conf),
+                                              "signals": signals,
                                               # "results": results,
                                               "lang": lang},
                                   skill_id=OCP_ID,
@@ -591,7 +613,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
         lang = standardize_lang(lang)
         # classify the query media type
-        media_type, prob = self.classify_media(utterance, lang)
+        media_type, prob = self.classify_media(utterance, lang, message=message)
         # search common play skills
         results = self._search(phrase, media_type, lang, message=message)
         best = self.select_best(results, message)
@@ -768,16 +790,88 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             self.ocp_api.stop(source_message=message)
 
     # NLP
+    def _get_context_classifier(self) -> ContextAwareClassifier:
+        """Return the context-aware classifier, building it lazily if needed.
+
+        ``__init__`` wires ``self.context_classifier`` from the config; this
+        accessor also covers callers that construct the matcher without running
+        ``__init__`` (e.g. tests) — it keeps the keyword-backend floor available
+        everywhere without a hard dependency on init order.
+        """
+        clf = getattr(self, "context_classifier", None)
+        if clf is None:
+            cfg = getattr(self, "config", None) or {}
+            clf = ContextAwareClassifier(config=cfg.get("media_classifier", cfg))
+            self.context_classifier = clf
+        return clf
+
+    def _classifier_context(self, message: Optional[Message] = None):
+        """Build the classifier's (player_status, ner_list) context.
+
+        ``player_status`` (a mediavocab ``PlayerStatus``) comes from the per
+        -session now-playing proxy and ``ner_list`` (``{label: [entity]}``) from
+        the skill-registered keywords already in the NER — the two minimal
+        context inputs the standalone ``classify_full`` contract accepts.  These
+        let the classifier resolve relative control follow-ups ("next", "pause",
+        "something else") and route by entity.
+        """
+        try:
+            player = self.get_player(message, timeout=0)
+        except Exception:  # noqa: BLE001 - context is best-effort
+            player = None
+        return build_player_status(player), build_ner_list(self.ner)
+
+    def media_signals(self, query: str, lang: str) -> Optional[dict]:
+        """Build the provider-ready ``mediavocab.Signals`` for *query*.
+
+        Returns the classifier's lossless multi-axis description (medium /
+        playback_type / content_genres / content_form / programme_format /
+        variant_kind / accessibility / picture_format) as a plain dict to hand to
+        the MediaProviders alongside ``media_type``.  ``None`` on any failure so
+        the legacy ``(media_type, conf)`` path is never broken.
+        """
+        try:
+            signals = self._get_context_classifier().to_signals(query, lang)
+        except Exception as e:  # noqa: BLE001 - signals are additive, never fatal
+            LOG.debug(f"could not build media Signals: {e}")
+            return None
+        for dumper in ("model_dump", "dict"):
+            fn = getattr(signals, dumper, None)
+            if callable(fn):
+                try:
+                    return fn()
+                except Exception:  # noqa: BLE001
+                    pass
+        return None
+
+    def is_blocked_content(self, query: str, lang: str) -> Tuple[bool, str]:
+        """Apply the classifier's content filter → ``(blocked, reason)``.
+
+        Adult content is blocked by default; configurable via
+        ``allow_adult_content`` / ``media_content_filter``.  Blocked queries are
+        not routed to providers.
+        """
+        try:
+            return self._get_context_classifier().is_blocked(query, lang)
+        except Exception as e:  # noqa: BLE001 - filtering is best-effort, fail open
+            LOG.debug(f"content filter unavailable: {e}")
+            return False, ""
+
     def classify_media(self, query: str, lang: str,
-                       valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
+                       valid_labels: Optional[List[MediaType]] = None,
+                       message: Optional[Message] = None) -> Tuple[MediaType, float]:
         """Determine what (legacy) media type is being requested.
 
-        Backed by the standalone ``ovos-media-classifier`` zero-dependency
-        keyword backend.  The classifier speaks ``mediavocab``; this method
-        translates ``valid_labels`` into that vocabulary, runs the full
-        multi-axis classification (context-free — player/NER context is wired in
-        a later step), and folds the result back onto the legacy
+        Backed by the standalone ``ovos-media-classifier`` (the keyword backend
+        by default; a config may select a richer ``opm.media.classifier`` plugin
+        / ONNX / embedding-router backend — see :class:`ContextAwareClassifier`).
+        The classifier speaks ``mediavocab``; this method threads the per-session
+        player + NER context, runs the full multi-axis context-aware
+        classification, and folds the result back onto the legacy
         ``ovos_utils.ocp.MediaType`` the pipeline emits downstream.
+
+        The classifier abstains (GENERIC) when unsure, so non-media queries are
+        never hijacked; the abstain→GENERIC floor is preserved.
         """
         lang = standardize_lang(lang)
         valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
@@ -785,34 +879,28 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if len(valid_labels) == 1:
             return valid_labels[0], 1.0
 
-        clf = _get_media_classifier()
-        # context-free multi-axis classification (player/NER context is wired in
-        # a later step); fold the leaf + axes back onto the legacy MediaType.
-        classification = clf.classify_full(query, lang)
-        candidates = mv_to_legacy_candidates(
-            classification,
-            content_form=clf.classify_content_form(query, lang),
-            programme_format=clf.classify_programme_format(query, lang),
-            picture_format=clf.classify_picture_format(query, lang),
-            accessibility=clf.classify_accessibility(query, lang),
-        )
+        # Consult the standalone context-aware classifier: it sees the
+        # now-playing state (relative follow-ups) + the registered entities, runs
+        # the full multi-axis classification, and folds the leaf + axes back onto
+        # the legacy MediaType. It abstains (GENERIC) when unsure, so the
+        # abstain→GENERIC floor never hijacks a non-media query.
+        #
+        # ``valid_labels`` gating (with the axis-refined-leaf -> parent ->
+        # broad VIDEO/AUDIO fallback chain) happens inside
+        # ``ContextAwareClassifier.classify`` itself, via the shared
+        # ``mv_to_legacy_candidates`` — a skill that only registered the
+        # coarser parent stays reachable even when the classifier resolves a
+        # more specific leaf.
+        try:
+            player_status, ner_list = self._classifier_context(message)
+            media_type, confidence = self._get_context_classifier().classify(
+                query, lang, player_status=player_status, ner_list=ner_list,
+                valid_labels=valid_labels)
+        except Exception as e:  # noqa: BLE001 - never break matching on the bridge
+            LOG.debug(f"context classifier unavailable: {e}")
+            return MediaType.GENERIC, 0.0
 
-        # GENERIC carries no media signal — match the legacy (GENERIC, 0.0)
-        # contract.  Otherwise walk the candidates from most specific
-        # (axis-refined, e.g. TRAILER) to broadest (VIDEO/AUDIO) and pick the
-        # first one the caller actually registered a skill for; a skill that
-        # only declared the coarser parent stays reachable even when the
-        # classifier resolves a more specific leaf.  Falling back to a
-        # coarser candidate carries a small confidence penalty.
-        for i, media_type in enumerate(candidates):
-            if media_type == MediaType.GENERIC:
-                break
-            if media_type in valid_labels:
-                confidence = float(classification.confidence)
-                if i > 0:
-                    confidence *= 0.9
-                return media_type, confidence
-        return MediaType.GENERIC, 0.0
+        return media_type, float(confidence)
 
     def is_ocp_query(self, query: str, lang: str) -> Tuple[bool, float]:
         """Determine if a playback question is being asked.
