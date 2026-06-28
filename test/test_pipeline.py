@@ -153,7 +153,15 @@ class TestNormalizeResults(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
-# classify_media / voc_match_media
+# classify_media (backed by the ovos-media-classifier keyword backend)
+#
+# ``classify_media`` is now a thin adapter over the standalone classifier's
+# zero-dependency keyword backend (``classify_media`` translates ``valid_labels``
+# into mediavocab, runs ``classify_full`` + the axis heads, and folds the result
+# back onto the legacy ``ovos_utils.ocp.MediaType``).  These tests assert the
+# *behaviour-level* contract — the same legacy MediaType for the same utterance —
+# including the axis-folded members (DOCUMENTARY / TRAILER / SILENT_MOVIE / NEWS
+# / VISUAL_STORY / ANIME) that the legacy enum collapses onto a leaf.
 # ---------------------------------------------------------------------------
 
 class TestClassifyMedia(unittest.TestCase):
@@ -167,22 +175,17 @@ class TestClassifyMedia(unittest.TestCase):
         self.assertEqual(media, MediaType.MUSIC)
         self.assertEqual(conf, 1.0)
 
-    def test_no_voc_match_returns_generic(self):
+    def test_no_media_keyword_returns_generic(self):
         p = _make_pipeline()
-        # voc_match always returns False → no keyword hit → GENERIC
         p.media2skill = {m: ["skill-x"] for m in MediaType}
-        media, conf = p.classify_media("play something", "en-us")
+        # bare artist name, no media cue → GENERIC at 0.0
+        media, conf = p.classify_media("play metallica", "en-us")
         self.assertEqual(media, MediaType.GENERIC)
         self.assertEqual(conf, 0.0)
 
     def test_music_keyword_returns_music(self):
         p = _make_pipeline()
         p.media2skill = {m: ["skill-x"] for m in MediaType}
-
-        def _voc(phrase, vocab, **kw):
-            return vocab == "MusicKeyword"
-
-        p.voc_match = _voc
         media, conf = p.classify_media("play some music", "en-us")
         self.assertEqual(media, MediaType.MUSIC)
         self.assertGreater(conf, 0)
@@ -190,34 +193,72 @@ class TestClassifyMedia(unittest.TestCase):
     def test_podcast_keyword_returns_podcast(self):
         p = _make_pipeline()
         p.media2skill = {m: ["skill-x"] for m in MediaType}
-
-        def _voc(phrase, vocab, **kw):
-            return vocab == "PodcastKeyword"
-
-        p.voc_match = _voc
-        media, conf = p.classify_media("play a podcast", "en-us")
+        media, _ = p.classify_media("play a podcast", "en-us")
         self.assertEqual(media, MediaType.PODCAST)
 
     def test_radio_keyword_returns_radio(self):
         p = _make_pipeline()
         p.media2skill = {m: ["skill-x"] for m in MediaType}
-
-        def _voc(phrase, vocab, **kw):
-            return vocab == "RadioKeyword"
-
-        p.voc_match = _voc
-        media, conf = p.classify_media("play radio", "en-us")
+        media, _ = p.classify_media("play radio", "en-us")
         self.assertEqual(media, MediaType.RADIO)
 
-    def test_valid_labels_filter_limits_candidates(self):
-        """If valid_labels excludes a type, that type must not be returned."""
+    # --- axis-folded legacy members (documentary / trailer / silent / ...) ---
+
+    def test_documentary_programme_format_folds_to_documentary(self):
         p = _make_pipeline()
-        # Only PODCAST is a valid label
-        valid = [MediaType.PODCAST]
-        # voc_match returns True for everything
-        p.voc_match = MagicMock(return_value=True)
-        media, _ = p.classify_media("play music", "en-us", valid_labels=valid)
+        p.media2skill = {m: ["skill-x"] for m in MediaType}
+        media, _ = p.classify_media("watch a documentary about whales", "en-us")
+        self.assertEqual(media, MediaType.DOCUMENTARY)
+
+    def test_news_programme_format_folds_to_news(self):
+        p = _make_pipeline()
+        p.media2skill = {m: ["skill-x"] for m in MediaType}
+        media, _ = p.classify_media("the news", "en-us")
+        self.assertEqual(media, MediaType.NEWS)
+
+    def test_trailer_content_form_folds_to_trailer(self):
+        p = _make_pipeline()
+        p.media2skill = {m: ["skill-x"] for m in MediaType}
+        media, _ = p.classify_media("play the Dune trailer", "en-us")
+        self.assertEqual(media, MediaType.TRAILER)
+
+    def test_silent_picture_format_folds_to_silent_movie(self):
+        p = _make_pipeline()
+        p.media2skill = {m: ["skill-x"] for m in MediaType}
+        media, _ = p.classify_media("a silent movie", "en-us")
+        self.assertEqual(media, MediaType.SILENT_MOVIE)
+
+    def test_comic_leaf_folds_to_visual_story(self):
+        p = _make_pipeline()
+        p.media2skill = {m: ["skill-x"] for m in MediaType}
+        media, _ = p.classify_media("read a comic", "en-us")
+        self.assertEqual(media, MediaType.VISUAL_STORY)
+
+    def test_anime_genre_folds_to_anime(self):
+        p = _make_pipeline()
+        p.media2skill = {m: ["skill-x"] for m in MediaType}
+        media, _ = p.classify_media("play some anime", "en-us")
+        self.assertEqual(media, MediaType.ANIME)
+
+    def test_confidence_is_float(self):
+        p = _make_pipeline()
+        p.media2skill = {m: ["skill-x"] for m in MediaType}
+        _, conf = p.classify_media("play jazz", "en-us")
+        self.assertIsInstance(conf, float)
+
+    def test_valid_labels_filter_limits_candidates(self):
+        """A type the caller did not allow must not be returned (→ GENERIC).
+
+        Two+ labels are used so the single-label shortcut does not short-circuit.
+        """
+        p = _make_pipeline()
+        # "play some music" → MUSIC, but MUSIC is excluded from valid_labels
+        media, conf = p.classify_media("play some music", "en-us",
+                                       valid_labels=[MediaType.PODCAST,
+                                                     MediaType.RADIO])
         self.assertNotEqual(media, MediaType.MUSIC)
+        self.assertEqual(media, MediaType.GENERIC)
+        self.assertEqual(conf, 0.0)
 
 
 # ---------------------------------------------------------------------------
@@ -228,19 +269,13 @@ class TestIsOcpQuery(unittest.TestCase):
 
     def test_generic_result_means_not_ocp(self):
         p = _make_pipeline()
-        # no voc match → GENERIC → False
         p.media2skill = {m: ["skill-x"] for m in MediaType}
-        is_ocp, _ = p.is_ocp_query("hello world", "en-us")
+        is_ocp, _ = p.is_ocp_query("what time is it", "en-us")
         self.assertFalse(is_ocp)
 
     def test_specific_media_means_is_ocp(self):
         p = _make_pipeline()
         p.media2skill = {m: ["skill-x"] for m in MediaType}
-
-        def _voc(phrase, vocab, **kw):
-            return vocab == "MusicKeyword"
-
-        p.voc_match = _voc
         is_ocp, conf = p.is_ocp_query("play some music", "en-us")
         self.assertTrue(is_ocp)
         self.assertGreater(conf, 0)
