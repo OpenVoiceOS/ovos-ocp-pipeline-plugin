@@ -30,7 +30,7 @@ dependencies = [
     "ovos-plugin-manager>=2.1.0,<3.0.0",
     "ahocorasick-ner>=0.1.1,<1.0.0",
     "langcodes",
-    "ovos-spec-tools>=0.16.1a2,<1.0.0"
+    "ovos-spec-tools>=0.16.1a2"
 ]
 
 [project.optional-dependencies]
