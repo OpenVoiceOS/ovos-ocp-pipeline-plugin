@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.23a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.23a1) (2026-06-28)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.22a1...1.1.23a1)
+
+**Merged pull requests:**
+
+- fix: lift ovos-spec-tools upper bound \(spec-tools 1.x\) [\#144](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/144) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.22a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.22a1) (2026-06-27)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.21a6...1.1.22a1)
