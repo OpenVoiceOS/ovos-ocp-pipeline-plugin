@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.24a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.24a1) (2026-07-04)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.23a1...1.1.24a1)
+
+**Merged pull requests:**
+
+- fix: default config values [\#123](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/123) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.23a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.23a1) (2026-06-28)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.22a1...1.1.23a1)
