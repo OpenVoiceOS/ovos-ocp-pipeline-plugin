@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.25a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.25a1) (2026-07-14)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.24a1...1.1.25a1)
+
+**Merged pull requests:**
+
+- fix: deduplicate locale dirs to fix macOS wheel extraction [\#147](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/147) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.24a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.24a1) (2026-07-04)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.23a1...1.1.24a1)
