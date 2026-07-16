@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.26a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.26a1) (2026-07-16)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.25a1...1.1.26a1)
+
+**Merged pull requests:**
+
+- fix: restore {media} slot name in de-DE featured.intent [\#149](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/149) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.25a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.25a1) (2026-07-14)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.24a1...1.1.25a1)
