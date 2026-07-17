@@ -526,5 +526,78 @@ class TestUpdatePlayerSkillId(unittest.TestCase):
         self.assertEqual(result.skill_id, "original-skill")
 
 
+# ---------------------------------------------------------------------------
+# match_high control-intent gating — OCP-1 §4.3
+#
+# A control intent only matches when the player is in a state it can act on.
+# When it cannot act, the matcher must decline so the utterance falls through
+# the pipeline instead of matching here and dead-ending in a no-op handler.
+# ---------------------------------------------------------------------------
+
+class TestControlIntentGating(unittest.TestCase):
+
+    def _pipeline_with_player(self, intent_name, player_state):
+        from ocp_pipeline.opm import OCPPlayerProxy
+        p = _make_pipeline()
+        p.skill_aliases = {"ovos-skill-test": ["test"]}
+        # match_high routes on the intent name returned by the lang matcher;
+        # stub language resolution and the intent classifier so the state
+        # gate is what the test exercises.
+        p._get_closest_lang = MagicMock(return_value="en-US")
+        matcher = MagicMock()
+        matcher.calc_intent.return_value = {"name": intent_name, "conf": 1.0,
+                                            "entities": {}}
+        p.intent_matchers = {"en-US": matcher}
+        proxy = OCPPlayerProxy(session_id="default", available_extractors=[],
+                               ocp_available=True, player_state=player_state,
+                               media_type=MediaType.MUSIC)
+        p.ocp_sessions["default"] = proxy
+        return p
+
+    def _match(self, intent_name, player_state):
+        p = self._pipeline_with_player(intent_name, player_state)
+        msg = _make_message(session_id="default")
+        return p.match_high([intent_name], "en-US", msg)
+
+    def test_pause_declined_when_stopped(self):
+        """Nothing to pause: matcher declines, utterance falls through."""
+        self.assertIsNone(self._match("pause", PlayerState.STOPPED))
+
+    def test_pause_declined_when_already_paused(self):
+        """Pausing held media is a no-op, so the matcher declines."""
+        self.assertIsNone(self._match("pause", PlayerState.PAUSED))
+
+    def test_pause_matches_when_playing(self):
+        """Pause is actionable only while advancing: match ocp:pause."""
+        result = self._match("pause", PlayerState.PLAYING)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.match_type, "ocp:pause")
+
+    def test_resume_declined_when_stopped(self):
+        self.assertIsNone(self._match("resume", PlayerState.STOPPED))
+
+    def test_resume_declined_when_playing(self):
+        """Resuming advancing media is a no-op, so the matcher declines."""
+        self.assertIsNone(self._match("resume", PlayerState.PLAYING))
+
+    def test_resume_matches_when_paused(self):
+        result = self._match("resume", PlayerState.PAUSED)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.match_type, "ocp:resume")
+
+    def test_next_declined_when_stopped(self):
+        self.assertIsNone(self._match("next", PlayerState.STOPPED))
+
+    def test_next_matches_when_playing(self):
+        result = self._match("next", PlayerState.PLAYING)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.match_type, "ocp:next")
+
+    def test_next_matches_when_paused(self):
+        result = self._match("next", PlayerState.PAUSED)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.match_type, "ocp:next")
+
+
 if __name__ == "__main__":
     unittest.main()
