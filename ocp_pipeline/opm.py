@@ -384,11 +384,20 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             LOG.info(f'Ignoring OCP intent match {match["name"]}, OCP Virtual Player is not active')
             # next / previous / pause / resume not targeted
             # at OCP if playback is not happening / paused
-            if match["name"] == "resume":
-                # TODO - handle resume for last_played query, eg, previous day
-                return None
-            else:
-                return None
+            # TODO - handle resume for last_played query, eg, previous day
+            return None
+
+        # a control intent only matches when the player is in a state it can
+        # act on (OCP-1 §4.3): pausing requires advancing media, resuming
+        # requires held media. When the request could not change state, decline
+        # the match so the utterance falls through the pipeline instead of
+        # matching here and dead-ending in a no-op handler.
+        if match["name"] == "pause" and player.player_state != PlayerState.PLAYING:
+            LOG.info(f'Ignoring OCP pause match, nothing to pause (PlayerState: {player.player_state})')
+            return None
+        if match["name"] == "resume" and player.player_state != PlayerState.PAUSED:
+            LOG.info(f'Ignoring OCP resume match, nothing to resume (PlayerState: {player.player_state})')
+            return None
 
         return IntentHandlerMatch(match_type=f'ocp:{match["name"]}',
                                   match_data=match,
