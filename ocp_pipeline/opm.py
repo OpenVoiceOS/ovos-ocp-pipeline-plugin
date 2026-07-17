@@ -2,7 +2,7 @@ import os
 import random
 import threading
 from dataclasses import dataclass
-from os.path import join, dirname
+from os.path import join, dirname, isdir
 from threading import RLock
 from typing import Tuple, Optional, Dict, List, Union, Any
 
@@ -14,7 +14,6 @@ from ovos_bus_client.session import SessionManager
 from ovos_config import Configuration
 from ovos_plugin_manager.ocp import available_extractors
 from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline, PipelinePlugin
-from ovos_utils.lang import get_language_dir
 from ovos_spec_tools import standardize_lang, closest_lang, voc_match
 from ovos_utils.log import LOG, deprecated, log_deprecation
 from ovos_utils.fakebus import FakeBus
@@ -100,7 +99,10 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         for lang in langs:
             lang = standardize_lang(lang)
             intents[lang] = {}
-            locale_folder = get_language_dir(join(dirname(__file__), "locale"), lang)
+            locale_root = join(dirname(__file__), "locale")
+            match = closest_lang(lang, [d for d in os.listdir(locale_root)
+                                        if isdir(join(locale_root, d))])
+            locale_folder = join(locale_root, match) if match else None
             if locale_folder is not None:
                 for f in os.listdir(locale_folder):
                     path = join(locale_folder, f)
