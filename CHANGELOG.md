@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.27a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.27a1) (2026-07-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.26a1...1.1.27a1)
+
+**Merged pull requests:**
+
+- fix: resolve locale directories via closest\_lang [\#151](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/151) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.26a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.26a1) (2026-07-16)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.25a1...1.1.26a1)
