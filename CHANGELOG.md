@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.28a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.28a2) (2026-07-31)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.28a1...1.1.28a2)
+
+**Merged pull requests:**
+
+- docs: rewrite README in Simplified Technical English [\#154](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/154) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.28a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.28a1) (2026-07-17)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.27a1...1.1.28a1)
