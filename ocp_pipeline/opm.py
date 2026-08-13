@@ -1,5 +1,4 @@
 import os
-import random
 import threading
 from dataclasses import dataclass
 from os.path import join, dirname, isdir
@@ -308,7 +307,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             player.media_state = MediaState(mstate)
             LOG.debug(f"Session: {player.session_id} MediaState: {player.media_state}")
         if mtype is not None:
-            player.media_type = MediaType(pstate)
+            player.media_type = MediaType(mtype)
             LOG.debug(f"Session: {player.session_id} MediaType: {player.media_type}")
         player = self._update_player_skill_id(player, message)
         self.update_player_proxy(player)
@@ -1077,8 +1076,9 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 ties.append(res)
 
         if ties:
-            # select randomly
-            selected = random.choice(ties)
+            # deterministic tie-break: keep the first candidate encountered
+            # (previously used random.choice, which made results non-deterministic)
+            selected = ties[0]
             # TODO: Ask user to pick between ties or do it automagically
         else:
             selected = best
