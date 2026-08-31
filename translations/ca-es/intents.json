@@ -15,8 +15,7 @@
     "(reprodueix|reproduïx|posa) (el|la|es|sa|) següent",
     "següent",
     "(cançó|pista|peça|música|film|pel·li|pel·lícula|vídeo|emissora) següent",
-    "propera (cançó|pista|peça|música|film|pel·li|pel·lícula|vídeo|emissora)",
-    "(posa|reprodueix|reproduïx) (el|a|es|sa)( següent |) (cançó|peça|pista|música|pel·lícula|pel·li|film|vídeo)(| següent)"
+    "propera (cançó|pista|peça|música|film|pel·li|pel·lícula|vídeo|emissora)"
   ],
   "resume.intent": [
     "(deixa de pausar|reprèn|reprén|despausa|segueix)",
@@ -57,9 +56,7 @@
   "media_stop.intent": [
     "(para|atura)('t|)",
     "(atura|para) (la|el|sa|es|els|les|ses) (reproducció|reproduccions|multimèdia|mèdia|mèdies|reproducció multimèdia|reproduccións multimèdia|música|pel·lícula|pel·lícules|soroll|àudio|peça|pista)",
-    "(atura|para)(-ho) tot",
-    "calla",
-    "prou"
+    "(atura|para)(-ho) tot"
   ],
   "save_game.intent": [
     "(desa|guarda)",
