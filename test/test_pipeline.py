@@ -599,5 +599,97 @@ class TestControlIntentGating(unittest.TestCase):
         self.assertEqual(result.match_type, "ocp:next")
 
 
+# ---------------------------------------------------------------------------
+# handle_player_state_update -> match_high (media_type regression)
+#
+# handle_player_state_update previously built ``player.media_type`` from the
+# player_state ordinal instead of the media_type ordinal in the same status
+# message (MediaType(pstate) instead of MediaType(mtype)). Both bugs below
+# are only visible end-to-end: apply a real status update, then exercise the
+# intent gates in match_high that read player.media_type.
+# ---------------------------------------------------------------------------
+
+class TestMediaTypeFromStatusUpdate(unittest.TestCase):
+
+    def _pipeline_ready_for(self, intent_name):
+        from ocp_pipeline.opm import OCPPlayerProxy
+        p = _make_pipeline()
+        p.config = {"legacy": True}
+        p.skill_aliases = {"ovos-skill-test": ["test"]}
+        p._get_closest_lang = MagicMock(return_value="en-US")
+        matcher = MagicMock()
+        matcher.calc_intent.return_value = {"name": intent_name, "conf": 1.0,
+                                            "entities": {}}
+        p.intent_matchers = {"en-US": matcher}
+        proxy = OCPPlayerProxy(session_id="default", available_extractors=[],
+                               ocp_available=True)
+        p.ocp_sessions["default"] = proxy
+        return p
+
+    def test_like_song_reachable_while_music_playing(self):
+        """While a track is PLAYING (PlayerState.PLAYING == 1) with music
+        active, a status update reporting media_type MUSIC must make
+        like_song reachable, not gate it off because PlayerState.PLAYING's
+        ordinal (1) collides with MediaType.AUDIO's ordinal."""
+        p = self._pipeline_ready_for("like_song")
+        status = _make_message(session_id="default",
+                                data={"player_state": int(PlayerState.PLAYING),
+                                      "media_type": int(MediaType.MUSIC)})
+        p.handle_player_state_update(status)
+        self.assertEqual(p.ocp_sessions["default"].media_type, MediaType.MUSIC)
+
+        msg = _make_message(session_id="default")
+        result = p.match_high(["like_song"], "en-US", msg)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.match_type, "ocp:like_song")
+
+    def test_game_intents_reachable_while_game_active(self):
+        """MediaType.GAME (5) can never be produced from a PlayerState
+        ordinal (0/1/2 only), so save/load-game gating never engaged. A
+        status update reporting media_type GAME must make save_game
+        reachable."""
+        p = self._pipeline_ready_for("save_game")
+        status = _make_message(session_id="default",
+                                data={"player_state": int(PlayerState.PLAYING),
+                                      "media_type": int(MediaType.GAME)})
+        p.handle_player_state_update(status)
+        self.assertEqual(p.ocp_sessions["default"].media_type, MediaType.GAME)
+
+        msg = _make_message(session_id="default")
+        result = p.match_high(["save_game"], "en-US", msg)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.match_type, "ocp:save_game")
+
+
+# ---------------------------------------------------------------------------
+# select_best (non-determinism regression)
+# ---------------------------------------------------------------------------
+
+class TestSelectBestDeterministic(unittest.TestCase):
+
+    def test_tie_break_is_deterministic(self):
+        """Ties on match_confidence must always resolve to the same result
+        (previously used random.choice, which could pick a different
+        skill_id on each call)."""
+        from ocp_pipeline.opm import OCPPipelineMatcher
+
+        results = [
+            MediaEntry(uri=f"uri-{i}", title=f"title-{i}", skill_id=f"skill-{i}",
+                      match_confidence=90)
+            for i in range(5)
+        ]
+        msg = _make_message(session_id="default")
+        with patch("ocp_pipeline.opm.SessionManager") as mock_sm:
+            mock_sess = MagicMock()
+            mock_sess.blacklisted_skills = []
+            mock_sm.get.return_value = mock_sess
+
+            winners = {OCPPipelineMatcher.select_best(list(results), msg).skill_id
+                       for _ in range(50)}
+
+        self.assertEqual(len(winners), 1,
+                         f"select_best produced multiple distinct winners on ties: {winners}")
+
+
 if __name__ == "__main__":
     unittest.main()
