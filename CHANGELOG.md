@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.29a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.29a1) (2026-08-31)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.28a2...1.1.29a1)
+
+**Merged pull requests:**
+
+- fix: correct media\_type construction and remove non-deterministic tie-break in select\_best [\#157](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/157) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.28a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.28a2) (2026-07-31)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.28a1...1.1.28a2)
