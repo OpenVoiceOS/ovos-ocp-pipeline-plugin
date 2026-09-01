@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.30a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.30a1) (2026-09-01)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.29a1...1.1.30a1)
+
+**Merged pull requests:**
+
+- fix: remove duplicated and ambiguous locale templates [\#159](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/159) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.29a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.29a1) (2026-08-31)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.28a2...1.1.29a1)
