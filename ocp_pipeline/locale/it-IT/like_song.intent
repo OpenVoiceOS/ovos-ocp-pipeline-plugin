@@ -208,17 +208,14 @@ bella sto traccia bella
 bella sto traccia figa
 bella sto traccia gradevole
 bella sto traccia piacevole
-brano
 brano bella
 brano figa
 brano gradevole
 brano piacevole
-canzone
 canzone bella
 canzone figa
 canzone gradevole
 canzone piacevole
-concerto
 concerto bella
 concerto figa
 concerto gradevole
@@ -643,62 +640,50 @@ gradevole sto traccia bella
 gradevole sto traccia figa
 gradevole sto traccia gradevole
 gradevole sto traccia piacevole
-il brano
 il brano bella
 il brano figa
 il brano gradevole
 il brano piacevole
-il canzone
 il canzone bella
 il canzone figa
 il canzone gradevole
 il canzone piacevole
-il concerto
 il concerto bella
 il concerto figa
 il concerto gradevole
 il concerto piacevole
-il musica
 il musica bella
 il musica figa
 il musica gradevole
 il musica piacevole
-il suono
 il suono bella
 il suono figa
 il suono gradevole
 il suono piacevole
-il traccia
 il traccia bella
 il traccia figa
 il traccia gradevole
 il traccia piacevole
-la brano
 la brano bella
 la brano figa
 la brano gradevole
 la brano piacevole
-la canzone
 la canzone bella
 la canzone figa
 la canzone gradevole
 la canzone piacevole
-la concerto
 la concerto bella
 la concerto figa
 la concerto gradevole
 la concerto piacevole
-la musica
 la musica bella
 la musica figa
 la musica gradevole
 la musica piacevole
-la suono
 la suono bella
 la suono figa
 la suono gradevole
 la suono piacevole
-la traccia
 la traccia bella
 la traccia figa
 la traccia gradevole
@@ -746,7 +731,6 @@ mi piace sto concerto
 mi piace sto musica
 mi piace sto suono
 mi piace sto traccia
-musica
 musica bella
 musica figa
 musica gradevole
@@ -1681,12 +1665,10 @@ sto traccia bella
 sto traccia figa
 sto traccia gradevole
 sto traccia piacevole
-suono
 suono bella
 suono figa
 suono gradevole
 suono piacevole
-traccia
 traccia bella
 traccia figa
 traccia gradevole

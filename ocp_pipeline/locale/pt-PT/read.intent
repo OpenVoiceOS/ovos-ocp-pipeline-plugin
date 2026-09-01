@@ -1,8 +1,6 @@
 ler   audiolivro  {query}
-ler   audiolivro {query}
 ler  livro  {query}
 ler o  audiolivro  {query}
-ler o  audiolivro {query}
 ler o livro  {query}
 lê {query}
 lê {query} audiobook
