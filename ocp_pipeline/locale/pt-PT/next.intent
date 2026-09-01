@@ -15,8 +15,6 @@ ir para   música a seguir
 ir para   música seguinte
 ir para   vídeo  a seguir
 ir para   vídeo  seguinte
-ir para  música  a seguir
-ir para  música  seguinte
 ir para a  canção  a seguir
 ir para a  canção  seguinte
 ir para a  faixa  a seguir
@@ -27,8 +25,6 @@ ir para a  música a seguir
 ir para a  música seguinte
 ir para a  vídeo  a seguir
 ir para a  vídeo  seguinte
-ir para a música  a seguir
-ir para a música  seguinte
 passa
 passa a próxima
 passa canção
@@ -44,12 +40,7 @@ próxima  melodia
 próxima  música
 próxima  som
 próxima  vídeo
-próxima canção
-próxima faixa
-próxima melodia
 próxima multimédia
-próxima música
-próxima som
 próximo
 próximo  canção
 próximo  faixa
@@ -57,12 +48,7 @@ próximo  melodia
 próximo  música
 próximo  som
 próximo  vídeo
-próximo canção
-próximo faixa
-próximo melodia
 próximo multimédia
-próximo música
-próximo som
 põe a dar  a seguir canção
 põe a dar  a seguir faixa
 põe a dar  a seguir melodia
@@ -113,8 +99,6 @@ reproduzir    música a seguir
 reproduzir    música seguinte
 reproduzir    vídeo  a seguir
 reproduzir    vídeo  seguinte
-reproduzir   música  a seguir
-reproduzir   música  seguinte
 reproduzir  a  canção  a seguir
 reproduzir  a  canção  seguinte
 reproduzir  a  faixa  a seguir
@@ -125,15 +109,7 @@ reproduzir  a  música a seguir
 reproduzir  a  música seguinte
 reproduzir  a  vídeo  a seguir
 reproduzir  a  vídeo  seguinte
-reproduzir  a música  a seguir
-reproduzir  a música  seguinte
-seguinte
-seguinte canção
-seguinte faixa
-seguinte melodia
 seguinte multimédia
-seguinte música
-seguinte som
 toca  a seguir canção
 toca  a seguir faixa
 toca  a seguir melodia
