@@ -1,5 +1,7 @@
 import os
 import threading
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError, as_completed
+from urllib.parse import urlsplit, urlunsplit
 from dataclasses import dataclass
 from os.path import join, dirname, isdir
 from threading import RLock
@@ -24,6 +26,20 @@ from ovos_config.meta import get_xdg_base
 from ahocorasick_ner import AhocorasickNER
 from ocp_pipeline.legacy import LegacyCommonPlay
 from ocp_pipeline.media_type_map import mv_to_legacy_candidates
+
+try:
+    from ovos_plugin_manager.media_provider import load_media_providers
+    from ovos_plugin_manager.templates.media_provider import MediaProvider
+    from ocp_pipeline.bridge import media_type_to_signals, release_to_ocp_result
+    _HAS_MEDIA_PROVIDERS = True
+except ImportError:
+    # ovos-plugin-manager without the MediaProvider plugin type, and/or
+    # mediavocab missing. In-process provider dispatch silently degrades to
+    # the legacy bus-only OCP-skill path -- this is the back-compat guarantee.
+    load_media_providers = None
+    MediaProvider = None
+    media_type_to_signals = release_to_ocp_result = None
+    _HAS_MEDIA_PROVIDERS = False
 
 # .voc resources shipped with this plugin (locale/<lang>/<name>.voc).
 # Matched via ovos-spec-tools voc_match (OVOS-INTENT-2 §4.3 whole-word semantics)
@@ -99,6 +115,15 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         }
         self.entity_csvs = self.config.get("entity_csvs", [])  # user defined keyword csv files
         self.ner = AhocorasickNER()
+
+        # in-process MediaProvider plugins (opm.media.provider). These run
+        # ALONGSIDE the legacy bus-broadcast @ocp_search skill flow (not
+        # instead of it) -- both windows execute and their results are merged
+        # in `_search` via `_merge_provider_results`. When no providers are
+        # installed/loaded this dict stays empty and the pipeline behaves
+        # exactly like the pre-existing bus-only path (see `_search_providers`).
+        self.media_providers: Dict[str, "MediaProvider"] = {}
+        self._load_media_providers()
 
         self.register_ocp_api_events()
         self.register_ocp_intents()
@@ -190,6 +215,44 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         self.add_event("ocp:like_song", self.handle_like_intent, is_intent=True)
         self.add_event("ocp:save_game", self.handle_save_intent, is_intent=True)
         self.add_event("ocp:load_game", self.handle_load_intent, is_intent=True)
+
+    def _load_media_providers(self):
+        """Discover and instantiate installed ``opm.media.provider`` plugins.
+
+        ``load_media_providers`` instantiates every installed provider that is
+        not disabled by the per-provider ``enabled: false`` config gate.
+        Runtime availability (missing API key, no network, ...) is the
+        provider's own concern -- it simply returns ``[]`` from
+        :meth:`MediaProvider.search`. When the MediaProvider plugin type
+        (ovos-plugin-manager) or mediavocab is unavailable, or no providers
+        are installed/enabled, ``self.media_providers`` stays empty and
+        ``_search_providers`` is a guaranteed no-op: the pipeline behaves
+        exactly as the pre-existing bus-only OCP-skill path.
+
+        The whole in-process window has an explicit off-switch: setting
+        ``media_providers.enabled`` to ``false`` in the OCP pipeline config
+        skips loading entirely (default: enabled).
+        """
+        if not _HAS_MEDIA_PROVIDERS:
+            LOG.debug("MediaProvider plugin type unavailable; "
+                      "using bus-only OCP search")
+            return
+        cfg = self.config.get("media_providers", None)
+        if isinstance(cfg, dict) and cfg.get("enabled") is False:
+            # documented off-switch: `media_providers.enabled: false` in the
+            # OCP pipeline config disables the in-process window entirely and
+            # restores the pure legacy bus-only search.
+            LOG.info("in-process MediaProvider dispatch disabled by config "
+                     "(media_providers.enabled = false)")
+            return
+        try:
+            self.media_providers = load_media_providers(cfg) or {}
+            if self.media_providers:
+                LOG.info(f"Loaded {len(self.media_providers)} MediaProvider "
+                         f"plugins: {list(self.media_providers)}")
+        except Exception:
+            LOG.exception("failed to load MediaProvider plugins")
+            self.media_providers = {}
 
     def update_player_proxy(self, player: OCPPlayerProxy):
         """remember OCP session state"""
@@ -963,20 +1026,293 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
         return results
 
+    def _build_query_context(self, lang: str,
+                             message: Optional[Message] = None) -> dict:
+        """Build the request-context kwargs for the MediaProvider ``search``
+        contract, from the session/config.
+
+        The MediaProvider contract is a single ``search(signals, lang="en-us",
+        *, supported_playback_types, blocked_genres, region, session_id)``
+        call: there is no routing/gating API. The pipeline passes what it
+        knows about the request as explicit kwargs; each provider reads the
+        keys it cares about and self-filters (returning ``[]`` when it cannot
+        serve the query/context).
+
+        Returns the four context kwargs (all permissive by default):
+          * ``supported_playback_types`` -- e.g. ``{"audio", "video"}``;
+            empty => no device gate. Read from
+            ``media.supported_playback_types``.
+          * ``blocked_genres`` -- genre tags the content policy blocks, from
+            ``media_content_filter.blocked_genres`` plus
+            ``media_content_filter.allow_adult_content`` (default ``false``
+            => ``adult`` blocked).
+          * ``region`` -- ISO 3166-1 alpha-2 from
+            ``location.city.region.country.code``.
+          * ``session_id`` -- originating session id (from ``message`` when
+            given).
+
+        All four are **device/user** settings, not OCP pipeline settings:
+        they are read from the global :class:`ovos_config.Configuration`, not
+        from ``self.config`` (which is only the ``ocp`` pipeline sub-config
+        and never carries these keys).
+        """
+        config = Configuration()
+
+        media_cfg = config.get("media", {}) or {}
+        supported = set(media_cfg.get("supported_playback_types", []) or [])
+
+        cf = config.get("media_content_filter", {}) or {}
+        blocked = set(cf.get("blocked_genres", ["adult"]))
+        if config.get("allow_adult_content", cf.get("allow_adult_content", False)):
+            blocked.discard("adult")
+
+        region = None
+        loc = config.get("location", {}) or {}
+        code = (((loc.get("city") or {}).get("region") or {}).get("country") or {}).get("code")
+        if code:
+            region = str(code)
+
+        session_id = None
+        if message is not None:
+            try:
+                session_id = SessionManager.get(message).session_id
+            except Exception:
+                session_id = None
+
+        return {
+            "supported_playback_types": {str(p) for p in supported},
+            "blocked_genres": {str(g) for g in blocked},
+            "region": region,
+            "session_id": session_id,
+        }
+
+    @staticmethod
+    def _safe_search(provider, signals, lang, **context):
+        """Call ``provider.search`` so one provider raising cannot abort the
+        multi-provider search, and cannot empty out the legacy bus results it
+        runs alongside. Returns ``[]`` on any exception. ``**context`` carries
+        the explicit MediaProvider kwargs (``supported_playback_types``,
+        ``blocked_genres``, ``region``, ``session_id``)."""
+        try:
+            return provider.search(signals, lang=lang, **context) or []
+        except Exception:
+            LOG.exception(f"MediaProvider '{getattr(provider, 'name', provider)}' "
+                          f"search failed")
+            return []
+
+    def _search_providers(self, phrase: str, media_type: MediaType,
+                          lang: str,
+                          message: Optional[Message] = None) -> RawResultsList:
+        """Dispatch the query to in-process MediaProvider plugins.
+
+        This is the second window of the dual-window search: it runs
+        alongside (not instead of) the legacy bus @ocp_search flow in
+        :meth:`_execute_query`. Builds a :class:`mediavocab.Signals` from the
+        classified media type and query, then runs every loaded provider
+        concurrently through a thread pool calling :meth:`_safe_search`
+        (which never raises -- a provider exception is caught/logged and
+        contributes no results, it cannot empty out the legacy window). Each
+        provider receives the query ``Signals``, ``lang`` and the
+        request-context kwargs from :meth:`_build_query_context`; a provider
+        that cannot serve the query/context returns ``[]``. Each returned
+        ``mediavocab.Release`` is bridged to the OCP playback result dict and
+        added to the result pool by :meth:`_merge_provider_results`.
+
+        Providers blacklisted for the Session (``blacklisted_skills``) are
+        not dispatched to at all: a provider's registry name IS its
+        ``skill_id`` downstream, so the same Session gate that suppresses a
+        bus skill suppresses the provider of that name.
+
+        The whole dispatch is bounded by the pipeline's ``max_timeout``
+        (the same budget the legacy bus window uses): providers still running
+        when it expires are cancelled and contribute nothing, so one slow
+        provider cannot stall the search.
+
+        Returns an empty list (a guaranteed no-op) when no providers are
+        installed/enabled -- this is what keeps the zero-providers case
+        bit-identical to the legacy-only behaviour.
+        """
+        if not self.media_providers:
+            return []
+
+        targets = dict(self.media_providers)
+        if message is not None:
+            try:
+                sess = SessionManager.get(message)
+                blacklist = set(sess.blacklisted_skills or [])
+            except Exception:
+                blacklist = set()
+            if blacklist:
+                skipped = [n for n in targets if n in blacklist]
+                for n in skipped:
+                    targets.pop(n)
+                if skipped:
+                    LOG.debug(f"MediaProviders blacklisted by Session: {skipped}")
+        if not targets:
+            return []
+
+        # Build a minimal provider-ready Signals from the classified media
+        # type and the free-text query via the local bridge.
+        signals = media_type_to_signals(media_type, phrase)
+        context = self._build_query_context(lang, message=message)
+
+        LOG.debug(f"dispatching to {len(targets)} MediaProviders: {list(targets)}")
+        max_timeout = self.config.get("max_timeout", 15)
+
+        results: RawResultsList = []
+        executor = ThreadPoolExecutor(max_workers=len(targets))
+        try:
+            futures = {
+                executor.submit(self._safe_search, p, signals, lang, **context): name
+                for name, p in targets.items()
+            }
+            try:
+                for fut in as_completed(futures, timeout=max_timeout):
+                    name = futures[fut]
+                    try:
+                        releases = fut.result() or []
+                    except Exception:
+                        LOG.exception(f"MediaProvider '{name}' search failed")
+                        continue
+                    for release in releases:
+                        try:
+                            # media_type: stamp the QUERY's legacy media type,
+                            # not the fold of the Release's own -- the fold is
+                            # not injective (NEWS -> RADIO -> RADIO) and
+                            # filter_results would drop the result.
+                            results.append(release_to_ocp_result(
+                                release, name, media_type=media_type,
+                                signals=signals))
+                        except Exception:
+                            LOG.exception(f"failed to bridge result from '{name}'")
+            except FuturesTimeoutError:
+                pending = [n for f, n in futures.items() if not f.done()]
+                LOG.warning(f"MediaProvider search timed out after "
+                            f"{max_timeout}s, dropping: {pending}")
+        finally:
+            # do NOT use the `with` block: its __exit__ joins every worker
+            # thread, which would re-introduce the very stall the timeout
+            # exists to prevent.
+            executor.shutdown(wait=False, cancel_futures=True)
+        LOG.debug(f"MediaProviders returned {len(results)} results")
+        return results
+
+    @staticmethod
+    def _canonical_uri(uri) -> Optional[str]:
+        """Canonical form of a URI, for cross-window de-duplication only.
+
+        Normalizes away the differences that make the same stream look like
+        two: ``http`` vs ``https``, host case, and trailing slashes. Anything
+        else (query string, path case, port) is left alone -- it can select a
+        different resource.
+        """
+        if not uri:
+            return None
+        raw = str(uri).strip()
+        if not raw:
+            return None
+        try:
+            parts = urlsplit(raw)
+        except ValueError:
+            return raw.rstrip("/")
+        if not parts.scheme:
+            return raw.rstrip("/") or None
+        scheme = parts.scheme.lower()
+        if scheme == "https":
+            # http/https is not a different resource for de-dup purposes
+            scheme = "http"
+        return urlunsplit((scheme, parts.netloc.casefold(),
+                           parts.path.rstrip("/"), parts.query, parts.fragment))
+
+    @staticmethod
+    def _carries_playlist(item) -> bool:
+        """True when a result is (or carries) a playlist rather than a single
+        stream. Playlists are never de-duplicated: they aggregate tracks, so a
+        uri match says nothing about the entries being equivalent."""
+        if isinstance(item, Playlist):
+            return True
+        if isinstance(item, dict):
+            return bool(item.get("playlist") or item.get("tracks"))
+        return bool(getattr(item, "playlist", None) or getattr(item, "tracks", None))
+
+    @classmethod
+    def _merge_provider_results(cls, bus_results: list,
+                                provider_results: list) -> list:
+        """Add the in-process MediaProvider window to the legacy bus window.
+
+        Dual-window means BOTH windows contribute. A provider result is
+        **added** to the result pool; it never replaces or deletes a legacy
+        bus entry. The only de-duplication is in the provider -> pool
+        direction: a provider entry is dropped when a legacy entry already
+        covers the same canonical ``uri`` (see :meth:`_canonical_uri`).
+
+        There is deliberately **no** ``(title, artist)`` de-duplication tier:
+        real data falsifies it (a SomaFM bus skill answers artist ``SomaFM``
+        with a stream uri while the provider answers artist ``""`` with a
+        playlist uri -- nothing legitimately collapses), and distinct Releases
+        of one Work are meant to coexist. Entries carrying a playlist are
+        never de-duplicated at all.
+
+        Ranking between the surviving entries is NOT decided here: the
+        existing ``normalize_results`` -> ``filter_results`` -> ``select_best``
+        pipeline arbitrates provider and bus answers exactly as it already
+        arbitrates two competing skills.
+
+        When ``provider_results`` is empty this is a no-op returning
+        ``bus_results`` unchanged -- callers should skip calling it entirely
+        in that case (see :meth:`_search`), so the zero-providers path never
+        even constructs a new list.
+        """
+        def _get(item, key):
+            return item.get(key) if isinstance(item, dict) else getattr(item, key, None)
+
+        merged = list(bus_results)
+        legacy_uris = set()
+        for item in bus_results:
+            if cls._carries_playlist(item):
+                continue
+            canon = cls._canonical_uri(_get(item, "uri"))
+            if canon:
+                legacy_uris.add(canon)
+
+        for prov_item in provider_results:
+            if not cls._carries_playlist(prov_item):
+                canon = cls._canonical_uri(_get(prov_item, "uri"))
+                if canon and canon in legacy_uris:
+                    LOG.debug(f"dropping provider result already covered by a "
+                              f"legacy result: {canon}")
+                    continue
+            merged.append(prov_item)
+        return merged
+
     def _search(self, phrase: str, media_type: MediaType, lang: str,
                 skills: Optional[List[str]] = None,
                 message: Optional[Message] = None) -> list:
         self.bus.emit(message.reply("ovos.common_play.search.start"))
         self.enclosure.mouth_think()  # animate mk1 mouth during search
 
-        # Now we place a query on the messsagebus for anyone who wants to
-        # attempt to service a 'play.request' message.
+        # Legacy window: place a query on the messagebus for anyone who wants
+        # to attempt to service a 'play.request' message.
         results = []
         for r in self._execute_query(phrase,
                                      media_type=media_type,
                                      skills=skills,
                                      message=message):
             results += r["results"]
+
+        # In-process MediaProvider window: runs ALONGSIDE the legacy bus
+        # window above, never instead of it. Its results are ADDED to the
+        # pool -- a legacy result is never replaced or deleted. Skill-targeted
+        # searches (user named a specific OCP skill) stay bus-only. When no
+        # providers are installed/loaded, `_search_providers` is a guaranteed
+        # no-op and `_merge_provider_results` is skipped entirely -- `results`
+        # is exactly the legacy bus list, unmodified, so output is
+        # bit-identical to the pre-existing legacy-only behaviour.
+        if not skills:
+            provider_results = self._search_providers(phrase, media_type, lang,
+                                                      message=message)
+            if provider_results:
+                results = self._merge_provider_results(results, provider_results)
 
         results = self.normalize_results(results)
 
