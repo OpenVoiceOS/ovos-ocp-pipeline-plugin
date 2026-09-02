@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.2.0a1) (2026-09-02)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.30a1...1.2.0a1)
+
+**Merged pull requests:**
+
+- feat: adopt ovos-media-classifier keyword backend [\#143](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/143) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.1.30a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.30a1) (2026-09-01)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.29a1...1.1.30a1)
