@@ -27,7 +27,7 @@ classifiers = [
 dependencies = [
     "ovos-workshop>=8.0.0,<10.0.0",
     "ovos-utils>=0.3.5,<1.0.0",
-    "ovos-plugin-manager>=2.1.0,<3.0.0",
+    "ovos-plugin-manager>=2.8.0a1,<3.0.0",
     "ahocorasick-ner>=0.1.1,<1.0.0",
     "langcodes",
     "ovos-spec-tools>=0.16.1a2",
@@ -41,7 +41,35 @@ test = [
     "flake8>=3.7.9",
     "pytest>=5.2.4",
     "pytest-cov>=2.8.1",
-    "cov-core>=1.15.0"
+    "cov-core>=1.15.0",
+    # published providers whose catalog search runs without an API key, so
+    # test/test_real_providers.py can dispatch to real plugins instead of
+    # mocks. local and news are fully offline; only somafm's channel-list
+    # fetch is stubbed.
+    "ovos-media-provider-local>=0.0.1a4",
+    "ovos-media-provider-news>=0.0.1a4",
+    "ovos-media-provider-somafm>=0.0.1a4",
+    # for asserting emitted results against the media service's own decoder
+    "ovos-media>=2.1.1a1"
+]
+# every published MediaProvider plugin, for a batteries-included install.
+# These are ordinary `opm.media.provider` entry points: installing any of
+# them individually is equivalent, the extra just names the full set.
+# Several need credentials or a reachable server (spotify, mass, soundcloud)
+# and simply answer nothing until configured.
+providers = [
+    "ovos-media-provider-bandcamp>=0.0.1a4",
+    "ovos-media-provider-local>=0.0.1a4",
+    # music assistant client; the only provider that requires python 3.12+
+    "ovos-media-provider-mass>=0.0.1a4; python_version >= '3.12'",
+    "ovos-media-provider-news>=0.0.1a4",
+    "ovos-media-provider-pyradios>=0.0.1a4",
+    "ovos-media-provider-somafm>=0.0.1a4",
+    "ovos-media-provider-soundcloud>=0.0.1a4",
+    "ovos-media-provider-spotify>=0.0.1a4",
+    "ovos-media-provider-tunein>=0.0.1a4",
+    "ovos-media-provider-youtube>=0.0.1a4",
+    "ovos-media-provider-youtube-music>=0.0.1a3"
 ]
 
 [project.urls]
