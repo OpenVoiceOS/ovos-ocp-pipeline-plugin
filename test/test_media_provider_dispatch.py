@@ -443,5 +443,26 @@ class TestSomaFMCoexistence(unittest.TestCase):
         self.assertEqual(provider_results, [])
 
 
+# ---------------------------------------------------------------------------
+# 9. A single provider cannot flood the merged pool with unbounded results
+# ---------------------------------------------------------------------------
+
+class TestPerProviderResultCap(unittest.TestCase):
+    def test_provider_contribution_is_capped_at_max_provider_results(self):
+        from ocp_pipeline.opm import MAX_PROVIDER_RESULTS
+        releases = [_release(f"Track {i}", MVMediaType.MUSIC,
+                             f"http://flood/{i}", conf=0.9)
+                   for i in range(200)]
+        prov = _provider("flood.provider", releases=releases)
+        p = _make_pipeline(media_providers={"flood.provider": prov})
+        p.config = {}
+        results = p._search_providers("play anything", MediaType.MUSIC, "en-us")
+        self.assertEqual(len(results), MAX_PROVIDER_RESULTS)
+        # ordering is preserved: the first MAX_PROVIDER_RESULTS releases
+        # returned by the provider, not an arbitrary subset
+        self.assertEqual([r["title"] for r in results],
+                         [f"Track {i}" for i in range(MAX_PROVIDER_RESULTS)])
+
+
 if __name__ == "__main__":
     unittest.main()

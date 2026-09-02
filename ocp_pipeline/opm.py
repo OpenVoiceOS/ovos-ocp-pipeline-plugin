@@ -36,6 +36,11 @@ from ocp_pipeline.bridge import media_type_to_signals, release_to_ocp_result
 # instead of reaching into ovos-workshop's skill voc_match.
 LOCALE_DIR = join(dirname(__file__), "locale")
 
+# cap on how many releases a single MediaProvider can contribute per search,
+# applied after the provider returns -- a misbehaving/unbounded provider
+# (200-release repro) cannot flood the merged result pool
+MAX_PROVIDER_RESULTS = 50
+
 
 @dataclass
 class OCPPlayerProxy:
@@ -1127,6 +1132,16 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         Returns an empty list (a guaranteed no-op) when no providers are
         installed/enabled -- this is what keeps the zero-providers case
         bit-identical to the legacy-only behaviour.
+
+        Note: the timeout path calls ``executor.shutdown(wait=False,
+        cancel_futures=True)``, which cancels only futures that have not
+        started running. A provider thread already executing when the
+        timeout fires cannot be cancelled and keeps running to completion
+        (or forever, if it hangs) -- a genuinely hanging provider leaks one
+        worker thread per hung call for the life of the process. ``wait=False``
+        is still correct here: blocking on shutdown would re-join that same
+        stuck thread and stall every future search, which is strictly worse
+        than a bounded thread leak.
         """
         if not self.media_providers:
             return []
@@ -1170,6 +1185,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                     except Exception:
                         LOG.exception(f"MediaProvider '{name}' search failed")
                         continue
+                    if len(releases) > MAX_PROVIDER_RESULTS:
+                        LOG.debug(f"MediaProvider '{name}' returned "
+                                  f"{len(releases)} results, truncating to "
+                                  f"{MAX_PROVIDER_RESULTS}")
+                        releases = releases[:MAX_PROVIDER_RESULTS]
                     for release in releases:
                         try:
                             # media_type: stamp the QUERY's legacy media type,
