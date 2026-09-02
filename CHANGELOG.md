@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.3.0a1) (2026-09-02)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.2.0a1...1.3.0a1)
+
+**Merged pull requests:**
+
+- feat: resurrect in-process MediaProvider dispatch with dual-window merge [\#156](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/156) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.2.0a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.2.0a1) (2026-09-02)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.30a1...1.2.0a1)
