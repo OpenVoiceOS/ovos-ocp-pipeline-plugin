@@ -36,12 +36,8 @@ from ovos_utils.ocp import MediaType, PlaybackType
 
 from ocp_pipeline.opm import OCPPipelineMatcher
 
-try:
-    from ovos_plugin_manager.media_provider import (find_media_provider_plugins,
-                                                    load_media_providers)
-    HAS_OPM_PROVIDERS = True
-except ImportError:
-    HAS_OPM_PROVIDERS = False
+from ovos_plugin_manager.media_provider import (find_media_provider_plugins,
+                                                load_media_providers)
 
 try:
     from ovos_media_provider_local import LocalMediaProvider
@@ -125,7 +121,6 @@ def _assert_media_entry_shape(case, entry, skill_id):
     case.assertLessEqual(entry["match_confidence"], 100)
 
 
-@unittest.skipUnless(HAS_OPM_PROVIDERS, "MediaProvider plugin type unavailable")
 class TestPublishedProviderDiscovery(unittest.TestCase):
     """The pipeline needs no registration code of its own: providers are
     found through their ``opm.media.provider`` entry points."""

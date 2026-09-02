@@ -27,10 +27,11 @@ classifiers = [
 dependencies = [
     "ovos-workshop>=8.0.0,<10.0.0",
     "ovos-utils>=0.3.5,<1.0.0",
-    "ovos-plugin-manager>=2.1.0,<3.0.0",
+    "ovos-plugin-manager>=2.8.0a1,<3.0.0",
     "ahocorasick-ner>=0.1.1,<1.0.0",
     "langcodes",
-    "ovos-spec-tools>=0.16.1a2"
+    "ovos-spec-tools>=0.16.1a2",
+    "mediavocab>=1.1.0,<2.0.0"
 ]
 
 [project.optional-dependencies]
@@ -40,9 +41,6 @@ test = [
     "pytest>=5.2.4",
     "pytest-cov>=2.8.1",
     "cov-core>=1.15.0",
-    # exercise the in-process MediaProvider dispatch path in tests too
-    "mediavocab>=1.1.0,<2.0.0",
-    "ovos-plugin-manager>=2.11.1a2,<3.0.0",
     # published providers whose catalog search runs without an API key, so
     # test/test_real_providers.py can dispatch to real plugins instead of
     # mocks. local and news are fully offline; only somafm's channel-list
@@ -53,21 +51,12 @@ test = [
     # for asserting emitted results against the media service's own decoder
     "ovos-media>=2.1.1a1"
 ]
-# opt-in: in-process MediaProvider dispatch (opm.media.provider). Without this
-# extra installed, ocp_pipeline.bridge / the MediaProvider import both raise
-# ImportError and the pipeline transparently degrades to the legacy
-# bus-only @ocp_search flow -- this is the back-compat guarantee.
-media = [
-    "mediavocab>=1.1.0,<2.0.0",
-    "ovos-plugin-manager>=2.11.1a2,<3.0.0"
-]
 # every published MediaProvider plugin, for a batteries-included install.
 # These are ordinary `opm.media.provider` entry points: installing any of
 # them individually is equivalent, the extra just names the full set.
 # Several need credentials or a reachable server (spotify, mass, soundcloud)
 # and simply answer nothing until configured.
 providers = [
-    "ovos_ocp_pipeline_plugin[media]",
     "ovos-media-provider-bandcamp>=0.0.1a4",
     "ovos-media-provider-local>=0.0.1a4",
     # music assistant client; the only provider that requires python 3.12+

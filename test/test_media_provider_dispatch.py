@@ -32,11 +32,7 @@ from ovos_utils.ocp import MediaType, PlaybackType
 
 from ocp_pipeline.opm import OCPPipelineMatcher
 
-try:
-    from mediavocab import MediaType as MVMediaType, Release, Work
-    HAS_MEDIAVOCAB = True
-except ImportError:
-    HAS_MEDIAVOCAB = False
+from mediavocab import MediaType as MVMediaType, Release, Work
 
 
 def _make_pipeline(media_providers=None):
@@ -256,7 +252,6 @@ class TestProviderExceptionIsolation(unittest.TestCase):
 # 4. A slow provider cannot stall the search past max_timeout
 # ---------------------------------------------------------------------------
 
-@unittest.skipUnless(HAS_MEDIAVOCAB, "mediavocab not installed")
 class TestDispatchTimeout(unittest.TestCase):
     def test_slow_provider_is_dropped_at_max_timeout(self):
         fast = _provider("fast.provider",
@@ -329,7 +324,6 @@ class TestQueryContext(unittest.TestCase):
 # 6. MediaType round-trip: provider results carry the QUERY's media type
 # ---------------------------------------------------------------------------
 
-@unittest.skipUnless(HAS_MEDIAVOCAB, "mediavocab not installed")
 class TestMediaTypeRoundTrip(unittest.TestCase):
     def test_news_query_results_survive_filter_results(self):
         """legacy NEWS folds onto mediavocab RADIO, which folds back to legacy
@@ -386,7 +380,6 @@ class TestSessionBlacklist(unittest.TestCase):
 # 8. Real-shape coexistence, merged -> normalize -> filter -> select_best
 # ---------------------------------------------------------------------------
 
-@unittest.skipUnless(HAS_MEDIAVOCAB, "mediavocab not installed")
 class TestSomaFMCoexistence(unittest.TestCase):
     """Recorded shapes from the real ecosystem: the skill answers with a
     direct stream uri, artist "SomaFM", confidence 95; the provider answers
