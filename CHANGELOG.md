@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.0a1) (2026-09-02)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.4.0a1...1.5.0a1)
+
+**Merged pull requests:**
+
+- feat: bundle the published MediaProvider plugins and test real dispatch [\#161](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/161) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.4.0a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.4.0a1) (2026-09-02)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.3.0a1...1.4.0a1)
