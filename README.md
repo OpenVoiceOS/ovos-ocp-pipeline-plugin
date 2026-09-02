@@ -107,7 +107,7 @@ pip install ovos-media-provider-somafm ovos-media-provider-local
 
 Nothing else is needed to register them. Each plugin declares an `opm.media.provider` entry point, and the pipeline instantiates every installed provider at startup. A provider that needs credentials or a reachable server, such as Spotify or Music Assistant, loads anyway and answers nothing until you configure it.
 
-Per-provider settings live in `mycroft.conf` under a top-level `media_providers` block, keyed by the provider name as it appears in its entry point. Set `enabled` to `false` there to skip a provider entirely:
+Per-provider settings live in the OCP pipeline's own config block — `mycroft.conf` → `intents` → `ovos-ocp-pipeline-plugin` → `media_providers` — keyed by the provider name as it appears in its entry point. A top-level `media_providers` block is honoured only when the pipeline config carries no `media_providers` key at all, so keep the settings in the pipeline block. Set `enabled` to `false` on a provider to skip it entirely:
 
 ```json
 {
