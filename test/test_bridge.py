@@ -1,21 +1,13 @@
-"""Unit tests for ocp_pipeline.bridge (mediavocab <-> legacy ocp.MediaType).
-
-``mediavocab`` and the ``MediaProvider`` plugin type are optional deps: skip
-this whole module when unavailable rather than failing the suite.
-"""
+"""Unit tests for ocp_pipeline.bridge (mediavocab <-> legacy ocp.MediaType)."""
 import unittest
 
 from ovos_utils.ocp import MediaType as OCPMediaType
 from ovos_utils.ocp import PlaybackType as OCPPlaybackType
 
-try:
-    import mediavocab
-    from mediavocab import EntityKind, MediaType as MVMediaType, Release, Work
-    from mediavocab.models.entity import Credit, EntityRef
-    from mediavocab.taxonomy import PlaybackType as MVPlaybackType
-    HAS_MEDIAVOCAB = True
-except ImportError:
-    HAS_MEDIAVOCAB = False
+import mediavocab
+from mediavocab import EntityKind, MediaType as MVMediaType, Release, Work
+from mediavocab.models.entity import Credit, EntityRef
+from mediavocab.taxonomy import PlaybackType as MVPlaybackType
 
 from ocp_pipeline import bridge
 
@@ -30,7 +22,6 @@ def _make_release(title, media_type, uri, conf, artist="", runtime=0):
     return Release(work=work, uri=uri, image=f"{title}.png", match_confidence=conf)
 
 
-@unittest.skipUnless(HAS_MEDIAVOCAB, "mediavocab not installed")
 class TestBridge(unittest.TestCase):
     def test_release_to_ocp_result_fields(self):
         rel = _make_release("Black Album", MVMediaType.MUSIC,
