@@ -1,10 +1,9 @@
 """Integration tests for OCPPipelineMatcher using the real __init__.
 
-These exercise the full match_high / match_medium / match_low flow against the
-real (localized) .voc resource files. Media-type detection is done by
-``voc_match_media`` (keyword matching); the previous ovos-classifiers based
-predictor was removed (see #97), so detection only fires on explicit media
-keywords present in the .voc files, not on free-text artist/title guesses.
+These exercise the full match_high / match_medium / match_low flow. Media-type
+detection is delegated to the standalone ``ovos-media-classifier`` zero-dependency
+keyword backend (the pipeline's native voc chain was replaced by it); detection
+fires on the classifier's own media cues, not on free-text artist/title guesses.
 """
 import os.path
 import unittest
@@ -45,8 +44,8 @@ class TestOCPPipelineMatcher(unittest.TestCase):
         self.assertEqual(result.match_type, 'ocp:play')
 
     def test_match_medium_with_invalid_input(self):
-        # no media keyword present -> not an OCP query
-        result = self.ocp.match_medium(["i wanna hear metallica"], "en-US")
+        # no media cue present -> not an OCP query
+        result = self.ocp.match_medium(["what time is it"], "en-US")
         self.assertIsNone(result)
 
     # ------------------------------------------------------------------ #
@@ -91,7 +90,7 @@ class TestOCPPipelineMatcher(unittest.TestCase):
         self.assertFalse(self.ocp.is_ocp_query("you suck", "en-US")[0])
 
     # ------------------------------------------------------------------ #
-    # classify_media (voc_match_media)
+    # classify_media (ovos-media-classifier keyword backend)
     # ------------------------------------------------------------------ #
     def test_classify_media_by_keyword(self):
         self.assertEqual(

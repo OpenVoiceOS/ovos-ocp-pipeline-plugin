@@ -23,11 +23,26 @@ from ovos_utils.xdg_utils import xdg_data_home
 from ovos_config.meta import get_xdg_base
 from ahocorasick_ner import AhocorasickNER
 from ocp_pipeline.legacy import LegacyCommonPlay
+from ocp_pipeline.media_type_map import mv_to_legacy_candidates
 
 # .voc resources shipped with this plugin (locale/<lang>/<name>.voc).
 # Matched via ovos-spec-tools voc_match (OVOS-INTENT-2 §4.3 whole-word semantics)
 # instead of reaching into ovos-workshop's skill voc_match.
 LOCALE_DIR = join(dirname(__file__), "locale")
+
+# Lazily-built, process-wide keyword media classifier (the zero-dependency
+# backend of ``ovos-media-classifier``).  Built on first use so importing this
+# module stays cheap and free of ML deps.
+_MEDIA_CLASSIFIER = None
+
+
+def _get_media_classifier():
+    """Return the shared zero-dep ``KeywordMediaClassifier`` (built once)."""
+    global _MEDIA_CLASSIFIER
+    if _MEDIA_CLASSIFIER is None:
+        from ovos_media_classifier.keyword import KeywordMediaClassifier
+        _MEDIA_CLASSIFIER = KeywordMediaClassifier()
+    return _MEDIA_CLASSIFIER
 
 
 @dataclass
@@ -753,83 +768,60 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             self.ocp_api.stop(source_message=message)
 
     # NLP
-    def voc_match_media(self, query: str, lang: str, valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
-        lang = standardize_lang(lang)
-        valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
-        # simplistic approach via voc_match, works anywhere
-        # and it's easy to localize, but isn't very accurate
-        if MediaType.DOCUMENTARY in valid_labels and voc_match(query, "DocumentaryKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.DOCUMENTARY, 0.6
-        elif MediaType.AUDIOBOOK in valid_labels and voc_match(query, "AudioBookKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.AUDIOBOOK, 0.6
-        elif MediaType.NEWS in valid_labels and voc_match(query, "NewsKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.NEWS, 0.6
-        elif MediaType.ANIME in valid_labels and  voc_match(query, "AnimeKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.ANIME, 0.6
-        elif MediaType.CARTOON in valid_labels and voc_match(query, "CartoonKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.CARTOON, 0.6
-        elif MediaType.PODCAST in valid_labels and voc_match(query, "PodcastKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.PODCAST, 0.6
-        elif MediaType.RADIO_THEATRE in valid_labels and voc_match(query, "AudioDramaKeyword", lang=lang, locale=LOCALE_DIR):
-            # NOTE - before "radio" to allow "radio theatre"
-            return MediaType.RADIO_THEATRE, 0.6
-        elif MediaType.RADIO in valid_labels and voc_match(query, "RadioKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.RADIO, 0.6
-        elif MediaType.MUSIC in valid_labels and voc_match(query, "MusicKeyword", lang=lang, locale=LOCALE_DIR):
-            # NOTE - before movie to handle "{movie_name} soundtrack"
-            return MediaType.MUSIC, 0.6
-        elif MediaType.TV in valid_labels and voc_match(query, "TVKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.TV, 0.6
-        elif MediaType.VIDEO_EPISODES in valid_labels and voc_match(query, "SeriesKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.VIDEO_EPISODES, 0.6
-        elif any([s in valid_labels for s in [MediaType.MOVIE, MediaType.SHORT_FILM, MediaType.SILENT_MOVIE, MediaType.BLACK_WHITE_MOVIE]]) and \
-                voc_match(query, "MovieKeyword", lang=lang, locale=LOCALE_DIR):
-            if MediaType.SHORT_FILM in valid_labels and voc_match(query, "ShortKeyword", lang=lang, locale=LOCALE_DIR):
-                return MediaType.SHORT_FILM, 0.7
-            elif MediaType.SILENT_MOVIE in valid_labels and voc_match(query, "SilentKeyword", lang=lang, locale=LOCALE_DIR):
-                return MediaType.SILENT_MOVIE, 0.7
-            elif MediaType.BLACK_WHITE_MOVIE in valid_labels and voc_match(query, "BWKeyword", lang=lang, locale=LOCALE_DIR):
-                return MediaType.BLACK_WHITE_MOVIE, 0.7
-            return MediaType.MOVIE, 0.6
-        elif MediaType.VISUAL_STORY in valid_labels and voc_match(query, "ComicBookKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.VISUAL_STORY, 0.4
-        elif MediaType.GAME in valid_labels and voc_match(query, "GameKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.GAME, 0.4
-        elif MediaType.AUDIO_DESCRIPTION in valid_labels and voc_match(query, "ADKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.AUDIO_DESCRIPTION, 0.4
-        elif MediaType.ASMR in valid_labels and voc_match(query, "ASMRKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.ASMR, 0.4
-        elif any([s in valid_labels for s in [MediaType.ADULT, MediaType.HENTAI, MediaType.ADULT_AUDIO]]) and voc_match(query, "AdultKeyword", lang=lang, locale=LOCALE_DIR):
-            if MediaType.HENTAI in valid_labels and voc_match(query, "CartoonKeyword", lang=lang, locale=LOCALE_DIR) or \
-                    voc_match(query, "AnimeKeyword", lang=lang, locale=LOCALE_DIR) or \
-                    voc_match(query, "HentaiKeyword", lang=lang, locale=LOCALE_DIR):
-                return MediaType.HENTAI, 0.4
-            elif MediaType.ADULT_AUDIO in valid_labels and  voc_match(query, "AudioKeyword", lang=lang, locale=LOCALE_DIR) or \
-                    voc_match(query, "ASMRKeyword", lang=lang, locale=LOCALE_DIR):
-                return MediaType.ADULT_AUDIO, 0.4
-            return MediaType.ADULT, 0.4
-        elif MediaType.HENTAI in valid_labels and voc_match(query, "HentaiKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.HENTAI, 0.4
-        elif MediaType.VIDEO in valid_labels and voc_match(query, "VideoKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.VIDEO, 0.4
-        elif MediaType.AUDIO in valid_labels and voc_match(query, "AudioKeyword", lang=lang, locale=LOCALE_DIR):
-            return MediaType.AUDIO, 0.4
-        return MediaType.GENERIC, 0.0
+    def classify_media(self, query: str, lang: str,
+                       valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
+        """Determine what (legacy) media type is being requested.
 
-    def classify_media(self, query: str, lang: str, valid_labels: Optional[List[MediaType]] = None) -> Tuple[MediaType, float]:
-        """ determine what media type is being requested """
+        Backed by the standalone ``ovos-media-classifier`` zero-dependency
+        keyword backend.  The classifier speaks ``mediavocab``; this method
+        translates ``valid_labels`` into that vocabulary, runs the full
+        multi-axis classification (context-free — player/NER context is wired in
+        a later step), and folds the result back onto the legacy
+        ``ovos_utils.ocp.MediaType`` the pipeline emits downstream.
+        """
         lang = standardize_lang(lang)
         valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
         LOG.debug(f"valid media types: {valid_labels}")
         if len(valid_labels) == 1:
             return valid_labels[0], 1.0
 
-        return self.voc_match_media(query, lang, valid_labels)
+        clf = _get_media_classifier()
+        # context-free multi-axis classification (player/NER context is wired in
+        # a later step); fold the leaf + axes back onto the legacy MediaType.
+        classification = clf.classify_full(query, lang)
+        candidates = mv_to_legacy_candidates(
+            classification,
+            content_form=clf.classify_content_form(query, lang),
+            programme_format=clf.classify_programme_format(query, lang),
+            picture_format=clf.classify_picture_format(query, lang),
+            accessibility=clf.classify_accessibility(query, lang),
+        )
+
+        # GENERIC carries no media signal — match the legacy (GENERIC, 0.0)
+        # contract.  Otherwise walk the candidates from most specific
+        # (axis-refined, e.g. TRAILER) to broadest (VIDEO/AUDIO) and pick the
+        # first one the caller actually registered a skill for; a skill that
+        # only declared the coarser parent stays reachable even when the
+        # classifier resolves a more specific leaf.  Falling back to a
+        # coarser candidate carries a small confidence penalty.
+        for i, media_type in enumerate(candidates):
+            if media_type == MediaType.GENERIC:
+                break
+            if media_type in valid_labels:
+                confidence = float(classification.confidence)
+                if i > 0:
+                    confidence *= 0.9
+                return media_type, confidence
+        return MediaType.GENERIC, 0.0
 
     def is_ocp_query(self, query: str, lang: str) -> Tuple[bool, float]:
-        """ determine if a playback question is being asked"""
+        """Determine if a playback question is being asked.
+
+        Contract preserved: a non-GENERIC type from the classifier-backed
+        :meth:`classify_media` means this is an OCP query.
+        """
         lang = standardize_lang(lang)
-        m, p = self.voc_match_media(query, lang)
+        m, p = self.classify_media(query, lang)
         return m != MediaType.GENERIC, p
 
     def _should_resume(self, phrase: str, lang: str, message: Optional[Message] = None) -> bool:
