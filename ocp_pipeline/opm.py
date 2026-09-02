@@ -720,7 +720,9 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
     def handle_play_intent(self, message: Message):
 
-        if not len(self.skill_aliases):  # skill_id registered when skills load
+        if not len(self.skill_aliases) and not len(self.media_providers):
+            # skill_id registered when skills load, in-process MediaProviders
+            # live in self.media_providers instead
             self.speak_dialog("no.media.skills")
             return
 
