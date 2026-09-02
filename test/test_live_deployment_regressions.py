@@ -12,6 +12,11 @@ plugins and no legacy OCP search skills exposes:
    the confidence floor, instead of browsing their catalog.
 3. A tagged artist reached the pipeline as an empty string, and a search with
    no possible bus responder still waited out the legacy window.
+4. The two search windows ran one after the other, so a deployment with legacy
+   skills paid the bus window and the provider window in series (12-29s from
+   utterance to playback).
+5. A provider that declares no media types answered a MUSIC request with
+   confidence 100 and outranked the local music library.
 """
 import time
 import unittest
@@ -26,6 +31,51 @@ from mediavocab import MediaType as MVMediaType, Release, Work
 
 from ocp_pipeline.bridge import release_to_ocp_result
 from ocp_pipeline.opm import OCPPipelineMatcher
+
+
+class _AnsweringProvider:
+    """MediaProvider stand-in that answers with canned releases."""
+
+    def __init__(self, name, releases, served=None, delay=0.0):
+        self.name = name
+        if served is not None:
+            self.SERVED_MEDIA = served
+        self.releases = list(releases)
+        self.delay = delay
+        self.queries = []
+
+    def search(self, signals, lang="en-us", **kwargs):
+        self.queries.append(signals)
+        if self.delay:
+            time.sleep(self.delay)
+        return list(self.releases)
+
+
+def _release(title, media_type, uri, confidence):
+    return Release(work=Work(title=title, media_type=media_type), uri=uri,
+                   image="", match_confidence=confidence)
+
+
+def _wire_search(p, legacy_results=(), legacy_delay=0.0, config=None):
+    """Wire the collaborators `_search` needs around a fake legacy window."""
+    p.search_lock = MagicMock()
+    p._enclosure = MagicMock()
+    p.config = config if config is not None else {"min_score": 50,
+                                                  "filter_media": True,
+                                                  "filter_SEI": False,
+                                                  "max_timeout": 5}
+
+    def _legacy(*args, **kwargs):
+        if legacy_delay:
+            time.sleep(legacy_delay)
+        return [{"results": [dict(r) for r in legacy_results]}]
+
+    p._execute_query = MagicMock(side_effect=_legacy)
+    player = MagicMock()
+    player.available_extractors = []
+    player.ocp_available = True
+    p.get_player = MagicMock(return_value=player)
+    return p
 
 
 class _Provider:
@@ -185,6 +235,124 @@ class TestZeroSkillSearchIsFast(unittest.TestCase):
             opm.OCPQuery = real
         self.assertEqual(results, [])
         self.assertLess(time.monotonic() - start, 1)
+
+
+class TestSearchWindowsRunConcurrently(unittest.TestCase):
+    """The dual-window search merges two independent sources, so it must cost
+    the slower window, not the sum of both."""
+
+    LEGACY_DELAY = 2.0
+    PROVIDER_DELAY = 1.0
+
+    def _pipeline(self):
+        provider = _AnsweringProvider(
+            "local",
+            [_release("Ghost Track", MVMediaType.MUSIC,
+                      "file:///music/ghost.mp3", 0.9)],
+            served={MVMediaType.MUSIC}, delay=self.PROVIDER_DELAY)
+        p = _make_pipeline({"local": provider})
+        p.skill_aliases = {"bus.skill": ["bus skill"]}
+        return _wire_search(p, legacy_results=[
+            {"uri": "file:///music/bus.mp3", "title": "Bus Track",
+             "artist": "", "media_type": MediaType.MUSIC, "playback": 2,
+             "match_confidence": 60, "skill_id": "bus.skill"}],
+            legacy_delay=self.LEGACY_DELAY)
+
+    def test_wall_clock_is_the_slower_window_not_the_sum(self):
+        p = self._pipeline()
+        start = time.monotonic()
+        results = p._search("ghost track", MediaType.MUSIC, "en-us",
+                            message=Message("test"))
+        elapsed = time.monotonic() - start
+        self.assertTrue(results)
+        self.assertLess(elapsed, self.LEGACY_DELAY + self.PROVIDER_DELAY - 0.5,
+                        "the windows ran in series")
+
+    def test_merged_output_is_unchanged(self):
+        """Same inputs, same merged pool as the sequential search produced."""
+        p = self._pipeline()
+        concurrent = p._search("ghost track", MediaType.MUSIC, "en-us",
+                               message=Message("test"))
+
+        seq = self._pipeline()
+        sequential = seq._merge_provider_results(
+            [r for batch in seq._execute_query("ghost track",
+                                               media_type=MediaType.MUSIC,
+                                               message=Message("test"))
+             for r in batch["results"]],
+            seq._search_providers("ghost track", MediaType.MUSIC, "en-us"))
+        sequential = seq.filter_results(seq.normalize_results(sequential),
+                                        "ghost track", "en-us",
+                                        MediaType.MUSIC,
+                                        message=Message("test"))
+
+        self.assertEqual([(r.skill_id, r.uri, r.match_confidence)
+                          for r in concurrent],
+                         [(r.skill_id, r.uri, r.match_confidence)
+                          for r in sequential])
+
+
+class TestDeclaredProvidersRankFirst(unittest.TestCase):
+    """A provider that declares nothing may answer anything, but its answer is
+    not evidence that it fits a typed request."""
+
+    def _pipeline(self, providers):
+        p = _make_pipeline(providers)
+        p.skill_aliases = {}
+        return _wire_search(p)
+
+    @staticmethod
+    def _providers():
+        return {
+            "local": _AnsweringProvider(
+                "local", [_release("Some Music", MVMediaType.MUSIC,
+                                   "file:///music/browse.mp3", 0.5)],
+                served={MVMediaType.MUSIC}),
+            "news": _AnsweringProvider(
+                "news", [_release("NPR News Now", MVMediaType.RADIO,
+                                  "https://npr.example/news.mp3", 1.0)]),
+        }
+
+    def test_declared_provider_wins_a_typed_request(self):
+        p = self._pipeline(self._providers())
+        results = p._search("some music", MediaType.MUSIC, "en-us",
+                            message=Message("test"))
+        best = p.select_best(results, Message("test"))
+        self.assertEqual(best.skill_id, "local")
+
+    def test_undeclared_answer_is_dropped_when_a_declared_one_exists(self):
+        p = self._pipeline(self._providers())
+        results = p._search("some music", MediaType.MUSIC, "en-us",
+                            message=Message("test"))
+        self.assertEqual({"local"}, {r.skill_id for r in results})
+
+    def test_undeclared_provider_still_plays_when_it_is_the_only_answer(self):
+        providers = self._providers()
+        providers.pop("local")
+        p = self._pipeline(providers)
+        results = p._search("some music", MediaType.MUSIC, "en-us",
+                            message=Message("test"))
+        best = p.select_best(results, Message("test"))
+        self.assertEqual(best.skill_id, "news")
+        self.assertEqual(best.match_confidence, 50)
+
+    def test_declaring_provider_is_not_dispatched_off_its_types(self):
+        providers = self._providers()
+        p = self._pipeline(providers)
+        p._search("the news", MediaType.NEWS, "en-us", message=Message("test"))
+        self.assertEqual(providers["local"].queries, [],
+                         "a MUSIC-only provider was asked about NEWS")
+        self.assertTrue(providers["news"].queries)
+
+    def test_generic_request_caps_nothing(self):
+        """"play something" asks for no type, so no provider is off-topic and
+        the existing arbitration decides."""
+        p = self._pipeline(self._providers())
+        results = p._search("something", MediaType.GENERIC, "en-us",
+                            message=Message("test"))
+        best = p.select_best(results, Message("test"))
+        self.assertEqual(best.skill_id, "news")
+        self.assertEqual(best.match_confidence, 100)
 
 
 if __name__ == "__main__":

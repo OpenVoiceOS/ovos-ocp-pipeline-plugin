@@ -45,6 +45,13 @@ LOCALE_DIR = join(dirname(__file__), "locale")
 # (200-release repro) cannot flood the merged result pool
 MAX_PROVIDER_RESULTS = 50
 
+# ceiling for a result from a MediaProvider that never declared the concrete
+# media type the user asked for. It is the default `min_score` floor, so such
+# a result stays playable when it is the only answer; when some source that
+# does claim the type also answered, the undeclared result drops one point
+# below the floor instead (see `_demote_undeclared_providers`).
+UNDECLARED_PROVIDER_MAX_CONFIDENCE = 50
+
 
 @dataclass
 class OCPPlayerProxy:
@@ -260,17 +267,29 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         """
         labels = set()
         for name, provider in self.media_providers.items():
-            declared = None
-            for attr in ("SERVED_MEDIA", "media_types", "supported_media_types"):
-                declared = getattr(provider, attr, None)
-                if declared:
-                    break
-            if not declared:
+            declared = self._declared_media_types(provider)
+            if declared is None:
                 LOG.debug(f"MediaProvider '{name}' declares no media types, "
                           f"assuming it can serve any request")
                 return list(MediaType)
-            labels |= ocp_media_types_for(declared)
+            labels |= declared
         return [m for m in MediaType if m in labels]
+
+    @staticmethod
+    def _declared_media_types(provider) -> Optional[set]:
+        """Legacy MediaType labels ``provider`` declares it serves.
+
+        A provider declares them as a collection of mediavocab (or legacy)
+        media types under ``SERVED_MEDIA``/``media_types``/
+        ``supported_media_types``, whichever the plugin defines. Returns
+        ``None`` when it declares nothing: that provider does its own routing
+        and may answer anything.
+        """
+        for attr in ("SERVED_MEDIA", "media_types", "supported_media_types"):
+            declared = getattr(provider, attr, None)
+            if isinstance(declared, (set, frozenset, list, tuple)) and declared:
+                return ocp_media_types_for(declared)
+        return None
 
     def _default_valid_labels(self) -> List[MediaType]:
         """Media types this deployment can actually serve.
@@ -1342,6 +1361,21 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if not targets:
             return []
 
+        media_type = self._normalize_media_enum(media_type)
+        if media_type != MediaType.GENERIC:
+            # a provider that declared what it serves is only asked about the
+            # types it declared. A provider that declared nothing is still
+            # asked (it does its own routing), but its answers are ranked
+            # last -- see `_demote_undeclared_providers`.
+            for name, provider in list(targets.items()):
+                declared = self._declared_media_types(provider)
+                if declared is not None and media_type not in declared:
+                    LOG.debug(f"MediaProvider '{name}' does not serve "
+                              f"{media_type} queries, not dispatching")
+                    targets.pop(name)
+            if not targets:
+                return []
+
         # Build a minimal provider-ready Signals from the classified media
         # type and the free-text query via the local bridge.
         signals = self._provider_signals(phrase, media_type, lang)
@@ -1481,35 +1515,110 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             merged.append(prov_item)
         return merged
 
+    @staticmethod
+    def _result_field(item, key):
+        """Read ``key`` off a result that may be a dict or a MediaEntry."""
+        return item.get(key) if isinstance(item, dict) else getattr(item, key, None)
+
+    def _demote_undeclared_providers(self, results: list,
+                                     media_type: MediaType) -> list:
+        """Rank answers from providers that never declared the queried type last.
+
+        A MediaProvider that declares the media types it serves is only asked
+        about those types (see :meth:`_search_providers`). One that declares
+        nothing is still asked about everything, because the contract lets a
+        provider route for itself -- but "I route for myself" is not evidence
+        that its answer fits the request, and a provider is free to score its
+        own results 100. Live evidence: a news provider that declares nothing
+        answered a MUSIC request with confidence 100 and won over the local
+        music library.
+
+        So, for a request with a CONCRETE media type, a result from a provider
+        that did not declare that type is capped at
+        :data:`UNDECLARED_PROVIDER_MAX_CONFIDENCE` (the default ``min_score``
+        floor), and one point lower when some source that does claim the type
+        -- a legacy OCP skill or a declaring provider -- also answered at or
+        above that cap. The undeclared answer therefore still plays when it is
+        the only thing on offer, and never wins against an answer that claims
+        the type.
+
+        A GENERIC request ("play something") asks for no type at all, so no
+        provider can be off-topic for it and nothing is capped: the existing
+        arbitration decides, exactly as before.
+        """
+        media_type = self._normalize_media_enum(media_type)
+        if media_type == MediaType.GENERIC:
+            return results
+        undeclared = {name for name, provider in self.media_providers.items()
+                      if self._declared_media_types(provider) is None}
+        if not undeclared:
+            return results
+
+        cap = UNDECLARED_PROVIDER_MAX_CONFIDENCE
+        if any(self._result_field(r, "skill_id") not in undeclared and
+               (self._result_field(r, "match_confidence") or 0) >= cap
+               for r in results):
+            cap -= 1
+
+        for r in results:
+            if self._result_field(r, "skill_id") not in undeclared:
+                continue
+            if (self._result_field(r, "match_confidence") or 0) <= cap:
+                continue
+            LOG.debug(f"capping result from '{self._result_field(r, 'skill_id')}' "
+                      f"at {cap}: it does not declare {media_type}")
+            if isinstance(r, dict):
+                r["match_confidence"] = cap
+            else:
+                r.match_confidence = cap
+        return results
+
     def _search(self, phrase: str, media_type: MediaType, lang: str,
                 skills: Optional[List[str]] = None,
                 message: Optional[Message] = None) -> list:
         self.bus.emit(message.reply("ovos.common_play.search.start"))
         self.enclosure.mouth_think()  # animate mk1 mouth during search
 
+        # In-process MediaProvider window: runs ALONGSIDE the legacy bus
+        # window, never instead of it, and CONCURRENTLY with it -- the two
+        # windows are a merge of two independent sources, so the search costs
+        # the slower window, not the sum of both. It is started first and
+        # collected after the bus window; each window keeps its own timeout.
+        # Skill-targeted searches (user named a specific OCP skill) stay
+        # bus-only. When no providers are installed/loaded,
+        # `_search_providers` is a guaranteed no-op and
+        # `_merge_provider_results` is skipped entirely -- `results` is
+        # exactly the legacy bus list, unmodified, so output is bit-identical
+        # to the pre-existing legacy-only behaviour.
+        provider_window = None
+        if not skills:
+            provider_window = ThreadPoolExecutor(max_workers=1)
+            provider_future = provider_window.submit(
+                self._search_providers, phrase, media_type, lang,
+                message=message)
+
         # Legacy window: place a query on the messagebus for anyone who wants
         # to attempt to service a 'play.request' message.
         results = []
-        for r in self._execute_query(phrase,
-                                     media_type=media_type,
-                                     skills=skills,
-                                     message=message):
-            results += r["results"]
+        try:
+            for r in self._execute_query(phrase,
+                                         media_type=media_type,
+                                         skills=skills,
+                                         message=message):
+                results += r["results"]
 
-        # In-process MediaProvider window: runs ALONGSIDE the legacy bus
-        # window above, never instead of it. Its results are ADDED to the
-        # pool -- a legacy result is never replaced or deleted. Skill-targeted
-        # searches (user named a specific OCP skill) stay bus-only. When no
-        # providers are installed/loaded, `_search_providers` is a guaranteed
-        # no-op and `_merge_provider_results` is skipped entirely -- `results`
-        # is exactly the legacy bus list, unmodified, so output is
-        # bit-identical to the pre-existing legacy-only behaviour.
-        if not skills:
-            provider_results = self._search_providers(phrase, media_type, lang,
-                                                      message=message)
-            if provider_results:
-                results = self._merge_provider_results(results, provider_results)
+            # Merge, once both windows are done. Provider results are ADDED to
+            # the pool -- a legacy result is never replaced or deleted.
+            if provider_window is not None:
+                provider_results = provider_future.result()
+                if provider_results:
+                    results = self._merge_provider_results(results,
+                                                           provider_results)
+        finally:
+            if provider_window is not None:
+                provider_window.shutdown(wait=False)
 
+        results = self._demote_undeclared_providers(results, media_type)
         results = self.normalize_results(results)
 
         if not skills:

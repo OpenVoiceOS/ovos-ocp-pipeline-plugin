@@ -130,7 +130,9 @@ To turn the in-process search off altogether and go back to bus skills alone, se
 }
 ```
 
-Both searches run for every query that does not name a specific skill, and their results are pooled and ranked together. A provider answer never displaces a skill answer: the only thing dropped is a provider entry pointing at a URI a skill already offered.
+Both searches run for every query that does not name a specific skill, and they run at the same time, so a search costs the slower of the two rather than both added together. Their results are pooled and ranked together. A provider answer never displaces a skill answer: the only thing dropped is a provider entry pointing at a URI a skill already offered.
+
+A provider may declare the media types it serves. When a request names a type, only the providers that claim that type are asked, and a provider that claims nothing is asked but ranked last: its answer plays when nothing else answered, and never wins against a provider or skill that claims the type. A request that names no type asks everything and ranks everything on merit.
 
 ## Related projects
 
