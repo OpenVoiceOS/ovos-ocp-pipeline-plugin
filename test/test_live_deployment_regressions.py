@@ -99,6 +99,8 @@ def _make_pipeline(media_providers=None):
     p.config = {}
     p.media_providers = media_providers or {}
     p.provider_media_types = []
+    from ahocorasick_ner import AhocorasickNER
+    p.ner = AhocorasickNER()
     return p
 
 

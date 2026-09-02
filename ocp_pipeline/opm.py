@@ -997,8 +997,8 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             # the "no type" label; a deployment that only registered GENERIC
             # (ovos-media's favorites skill does exactly that) has said nothing
             # about routing. Classify against the full taxonomy instead and let
-            # voc_match_media fall back to GENERIC when no keyword matches.
-            return self.voc_match_media(query, lang, list(MediaType))
+            # the classifier abstain to GENERIC when nothing matches.
+            valid_labels = list(MediaType)
         if len(valid_labels) == 1:
             # only one thing can be served, no point classifying
             return valid_labels[0], 1.0
@@ -1187,10 +1187,15 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         if lang in cls._voc_cache:
             return cls._voc_cache[lang]
         words = set()
-        match = closest_lang(lang, [d for d in os.listdir(LOCALE_DIR)
-                                    if isdir(join(LOCALE_DIR, d))])
-        if match:
-            folder = join(LOCALE_DIR, match)
+        # media-type keywords live with ovos-media-classifier; the play verbs
+        # and fillers ship here
+        from ovos_media_classifier.keyword import _LOCALE_DIR as CLF_LOCALE_DIR
+        for root in (LOCALE_DIR, CLF_LOCALE_DIR):
+            match = closest_lang(lang, [d for d in os.listdir(root)
+                                        if isdir(join(root, d))])
+            if not match:
+                continue
+            folder = join(root, match)
             for f in os.listdir(folder):
                 if not (f.endswith("Keyword.voc") or f in ("Play.voc", "Filler.voc")):
                     continue
