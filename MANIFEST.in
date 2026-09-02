@@ -1,4 +1,0 @@
-README.md
-LICENSE.md
-requirements.txt
-recursive-include ocp_pipeline/ *

@@ -1,0 +1,93 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ovos_ocp_pipeline_plugin"
+dynamic = ["version"]
+description = "media intent parser for OVOS"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "JarbasAI", email = "jarbasai@mailfence.com"}
+]
+keywords = ["natural language processing"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Text Processing :: Linguistic",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
+dependencies = [
+    "ovos-workshop>=8.0.0,<10.0.0",
+    "ovos-utils>=0.3.5,<1.0.0",
+    "ovos-plugin-manager>=2.8.0a1,<3.0.0",
+    "ahocorasick-ner>=0.1.1,<1.0.0",
+    "langcodes",
+    "ovos-spec-tools>=0.16.1a2",
+    "ovos-media-classifier>=0.0.2a1,<1.0.0",
+    "mediavocab>=1.3.0a3,<2.0.0"
+]
+
+[project.optional-dependencies]
+test = [
+    "coveralls>=1.8.2",
+    "flake8>=3.7.9",
+    "pytest>=5.2.4",
+    "pytest-cov>=2.8.1",
+    "cov-core>=1.15.0",
+    # published providers whose catalog search runs without an API key, so
+    # test/test_real_providers.py can dispatch to real plugins instead of
+    # mocks. local and news are fully offline; only somafm's channel-list
+    # fetch is stubbed.
+    "ovos-media-provider-local>=0.0.1a4",
+    "ovos-media-provider-news>=0.0.1a4",
+    "ovos-media-provider-somafm>=0.0.1a4",
+    # for asserting emitted results against the media service's own decoder
+    "ovos-media>=2.1.1a1"
+]
+# every published MediaProvider plugin, for a batteries-included install.
+# These are ordinary `opm.media.provider` entry points: installing any of
+# them individually is equivalent, the extra just names the full set.
+# Several need credentials or a reachable server (spotify, mass, soundcloud)
+# and simply answer nothing until configured.
+providers = [
+    "ovos-media-provider-bandcamp>=0.0.1a4",
+    "ovos-media-provider-local>=0.0.1a4",
+    # music assistant client; the only provider that requires python 3.12+
+    "ovos-media-provider-mass>=0.0.1a4; python_version >= '3.12'",
+    "ovos-media-provider-news>=0.0.1a4",
+    "ovos-media-provider-pyradios>=0.0.1a4",
+    "ovos-media-provider-somafm>=0.0.1a4",
+    "ovos-media-provider-soundcloud>=0.0.1a4",
+    "ovos-media-provider-spotify>=0.0.1a4",
+    "ovos-media-provider-tunein>=0.0.1a4",
+    "ovos-media-provider-youtube>=0.0.1a4",
+    "ovos-media-provider-youtube-music>=0.0.1a3"
+]
+
+[project.urls]
+Homepage = "https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin"
+
+[project.entry-points."opm.pipeline"]
+"ovos-ocp-pipeline-plugin" = "ocp_pipeline.opm:OCPPipelineMatcher"
+"ovos-ocp-pipeline-plugin-legacy" = "ocp_pipeline.opm:MycroftCPSLegacyPipeline"
+
+[tool.setuptools.dynamic]
+version = {attr = "ocp_pipeline.version.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ocp_pipeline*"]
+
+[tool.setuptools.package-data]
+ocp_pipeline = [
+    "*.json",
+    "locale/**/*",
+]

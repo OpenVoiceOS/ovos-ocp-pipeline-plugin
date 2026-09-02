@@ -1,19 +1,20 @@
 {
   "cant.play.dialog": [
-    "Je ne sais pas comment jouer {phrase}",
-    "Désolé, je ne sais pas comment jouer {phrase}"
+    "Je ne sais pas encore lancer {phrase}.",
+    "Je n'arrive pas à lire {phrase}."
   ],
   "play.what.dialog": [
-    "Que dois-je jouer par la suite?"
+    "Que voulez-vous que je lance ?",
+    "Que souhaitez-vous écouter ou regarder ?"
   ],
   "no.media.skills.dialog": [
-    "Je suis désolé, je n'ai aucune compétence multimédia installée",
-    "Je dois installer certaines compétences multimédias avant de pouvoir lire des médias",
-    "Je ne peux pas lire de contenu multimédia tant que certaines compétences multimédias ne sont pas installées"
+    "Je n'ai aucune source multimédia disponible.",
+    "Il me faut une source multimédia pour lancer quelque chose.",
+    "Je ne peux rien lire sans source multimédia."
   ],
   "just.one.moment.dialog": [
-    "Accordez moi un instant",
-    "Donnez moi une seconde",
-    "Donnez moi un instant pendant que je recherche"
+    "Un instant.",
+    "Donnez-moi une seconde.",
+    "Un instant pendant que je cherche."
   ]
 }
