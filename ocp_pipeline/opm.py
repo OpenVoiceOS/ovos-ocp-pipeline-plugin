@@ -31,19 +31,9 @@ from ocp_pipeline.context_classify import (
     build_player_status,
 )
 
-try:
-    from ovos_plugin_manager.media_provider import load_media_providers
-    from ovos_plugin_manager.templates.media_provider import MediaProvider
-    from ocp_pipeline.bridge import media_type_to_signals, release_to_ocp_result
-    _HAS_MEDIA_PROVIDERS = True
-except ImportError:
-    # ovos-plugin-manager without the MediaProvider plugin type, and/or
-    # mediavocab missing. In-process provider dispatch silently degrades to
-    # the legacy bus-only OCP-skill path -- this is the back-compat guarantee.
-    load_media_providers = None
-    MediaProvider = None
-    media_type_to_signals = release_to_ocp_result = None
-    _HAS_MEDIA_PROVIDERS = False
+from ovos_plugin_manager.media_provider import load_media_providers
+from ovos_plugin_manager.templates.media_provider import MediaProvider
+from ocp_pipeline.bridge import media_type_to_signals, release_to_ocp_result
 
 # .voc resources shipped with this plugin (locale/<lang>/<name>.voc).
 # Matched via ovos-spec-tools voc_match (OVOS-INTENT-2 §4.3 whole-word semantics)
@@ -220,20 +210,15 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         not disabled by the per-provider ``enabled: false`` config gate.
         Runtime availability (missing API key, no network, ...) is the
         provider's own concern -- it simply returns ``[]`` from
-        :meth:`MediaProvider.search`. When the MediaProvider plugin type
-        (ovos-plugin-manager) or mediavocab is unavailable, or no providers
-        are installed/enabled, ``self.media_providers`` stays empty and
-        ``_search_providers`` is a guaranteed no-op: the pipeline behaves
-        exactly as the pre-existing bus-only OCP-skill path.
+        :meth:`MediaProvider.search`. When no providers are installed/enabled,
+        ``self.media_providers`` stays empty and ``_search_providers`` is a
+        guaranteed no-op: the pipeline behaves exactly as the pre-existing
+        bus-only OCP-skill path.
 
         The whole in-process window has an explicit off-switch: setting
         ``media_providers.enabled`` to ``false`` in the OCP pipeline config
         skips loading entirely (default: enabled).
         """
-        if not _HAS_MEDIA_PROVIDERS:
-            LOG.debug("MediaProvider plugin type unavailable; "
-                      "using bus-only OCP search")
-            return
         cfg = self.config.get("media_providers", None)
         if isinstance(cfg, dict) and cfg.get("enabled") is False:
             # documented off-switch: `media_providers.enabled: false` in the
