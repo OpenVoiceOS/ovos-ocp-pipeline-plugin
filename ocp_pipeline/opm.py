@@ -33,7 +33,7 @@ from ocp_pipeline.context_classify import (
 
 from ovos_plugin_manager.media_provider import load_media_providers
 from ovos_plugin_manager.templates.media_provider import MediaProvider
-from ocp_pipeline.bridge import media_type_to_signals, release_to_ocp_result
+from ocp_pipeline.bridge import media_type_to_signals, ocp_media_types_for, release_to_ocp_result
 
 # .voc resources shipped with this plugin (locale/<lang>/<name>.voc).
 # Matched via ovos-spec-tools voc_match (OVOS-INTENT-2 §4.3 whole-word semantics)
@@ -70,6 +70,10 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                "resume.intent", "save_game.intent", "load_game.intent"]
     intent_matchers = {}
     intent_cache = f"{xdg_data_home()}/{get_xdg_base()}/intent_cache"
+    _voc_cache: Dict[str, List[str]] = {}
+    # legacy MediaType labels the loaded in-process MediaProviders serve,
+    # the provider-side counterpart of media2skill
+    provider_media_types: List[MediaType] = []
 
     def __init__(self, bus: Optional[Union[MessageBusClient, FakeBus]] = None,
                  config: Optional[Dict] = None):
@@ -237,9 +241,47 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             if self.media_providers:
                 LOG.info(f"Loaded {len(self.media_providers)} MediaProvider "
                          f"plugins: {list(self.media_providers)}")
+                self.provider_media_types = self._collect_provider_media_types()
+                LOG.debug(f"MediaProvider media types: {self.provider_media_types}")
         except Exception:
             LOG.exception("failed to load MediaProvider plugins")
             self.media_providers = {}
+
+    def _collect_provider_media_types(self) -> List[MediaType]:
+        """Legacy MediaType labels the loaded providers can serve.
+
+        A provider declares what it serves with a class-level set of
+        mediavocab (or legacy) media types; the name is read from
+        ``SERVED_MEDIA``/``media_types``/``supported_media_types``, whichever
+        the plugin defines. Declaring nothing means the provider does its own
+        routing and may answer anything, so it contributes every label -- the
+        permissive reading the MediaProvider contract asks for ("a provider
+        that cannot serve the query just returns an empty list").
+        """
+        labels = set()
+        for name, provider in self.media_providers.items():
+            declared = None
+            for attr in ("SERVED_MEDIA", "media_types", "supported_media_types"):
+                declared = getattr(provider, attr, None)
+                if declared:
+                    break
+            if not declared:
+                LOG.debug(f"MediaProvider '{name}' declares no media types, "
+                          f"assuming it can serve any request")
+                return list(MediaType)
+            labels |= ocp_media_types_for(declared)
+        return [m for m in MediaType if m in labels]
+
+    def _default_valid_labels(self) -> List[MediaType]:
+        """Media types this deployment can actually serve.
+
+        The union of the types legacy OCP skills registered for and the types
+        the in-process MediaProviders declare. When neither side says
+        anything, nothing is known about routing and every type stays valid.
+        """
+        labels = [m for m, s in self.media2skill.items() if s]
+        labels += [m for m in self.provider_media_types if m not in labels]
+        return labels or list(MediaType)
 
     def update_player_proxy(self, player: OCPPlayerProxy):
         """remember OCP session state"""
@@ -929,9 +971,17 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         never hijacked; the abstain→GENERIC floor is preserved.
         """
         lang = standardize_lang(lang)
-        valid_labels = valid_labels or [m for m, s in self.media2skill.items() if s] or list(MediaType)
+        valid_labels = valid_labels or self._default_valid_labels()
         LOG.debug(f"valid media types: {valid_labels}")
+        if valid_labels == [MediaType.GENERIC]:
+            # GENERIC is not a media type a request can be classified as, it is
+            # the "no type" label; a deployment that only registered GENERIC
+            # (ovos-media's favorites skill does exactly that) has said nothing
+            # about routing. Classify against the full taxonomy instead and let
+            # voc_match_media fall back to GENERIC when no keyword matches.
+            return self.voc_match_media(query, lang, list(MediaType))
         if len(valid_labels) == 1:
+            # only one thing can be served, no point classifying
             return valid_labels[0], 1.0
 
         # Consult the standalone context-aware classifier: it sees the
@@ -1106,6 +1156,57 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
         return results
 
+    @classmethod
+    def _voc_words(cls, lang: str) -> List[str]:
+        """Every media-keyword and filler word shipped for ``lang``.
+
+        Read straight from the ``.voc`` resources this plugin classifies with,
+        longest first, so a phrase can be tested for carrying nothing but
+        vocabulary. Missing resources simply yield fewer words.
+        """
+        lang = standardize_lang(lang)
+        if lang in cls._voc_cache:
+            return cls._voc_cache[lang]
+        words = set()
+        match = closest_lang(lang, [d for d in os.listdir(LOCALE_DIR)
+                                    if isdir(join(LOCALE_DIR, d))])
+        if match:
+            folder = join(LOCALE_DIR, match)
+            for f in os.listdir(folder):
+                if not (f.endswith("Keyword.voc") or f in ("Play.voc", "Filler.voc")):
+                    continue
+                with open(join(folder, f)) as fi:
+                    words |= {l.strip().lower() for l in fi if l.strip()}
+        cls._voc_cache[lang] = sorted(words, key=len, reverse=True)
+        return cls._voc_cache[lang]
+
+    def _is_bare_media_request(self, phrase: str, lang: str) -> bool:
+        """True when ``phrase`` names a media type and nothing else.
+
+        "play some music" asks for music, it does not ask for a track called
+        "some music". Forwarding that as a title makes every provider fuzzy
+        match it against real titles and score too low to survive the
+        confidence floor, while the provider contract browses the catalog when
+        the title is empty. Detected conservatively: strip the media keywords
+        and fillers this plugin ships for the language and see if anything is
+        left. A real title always leaves a remainder.
+        """
+        residual = f" {(phrase or '').lower().strip()} "
+        if not residual.strip():
+            return True
+        for word in self._voc_words(lang):
+            residual = residual.replace(f" {word} ", " ")
+        return not residual.strip()
+
+    def _provider_signals(self, phrase: str, media_type: MediaType,
+                          lang: str):
+        """Provider-ready query ``Signals`` for a classified request."""
+        title = "" if self._is_bare_media_request(phrase, lang) else phrase
+        if not title and phrase:
+            LOG.debug(f"'{phrase}' is a bare {media_type} request, asking "
+                      f"MediaProviders to browse instead of match a title")
+        return media_type_to_signals(media_type, title)
+
     def _build_query_context(self, lang: str,
                              message: Optional[Message] = None) -> dict:
         """Build the request-context kwargs for the MediaProvider ``search``
@@ -1243,7 +1344,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
         # Build a minimal provider-ready Signals from the classified media
         # type and the free-text query via the local bridge.
-        signals = media_type_to_signals(media_type, phrase)
+        signals = self._provider_signals(phrase, media_type, lang)
         context = self._build_query_context(lang, message=message)
 
         LOG.debug(f"dispatching to {len(targets)} MediaProviders: {list(targets)}")
@@ -1429,6 +1530,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         """ actually send the search to OCP skills"""
         media_type = self._normalize_media_enum(media_type)
 
+        if not self.skill_aliases:
+            # No OCP skill ever registered, so the bus window has no possible
+            # responder and every query.wait() would burn the full search
+            # timeout as dead air before the provider window even starts.
+            LOG.debug("no OCP skills registered, skipping the legacy bus "
+                      "search window")
+            return []
+
         with self.search_lock:
             # stop any search still happening
             self.bus.emit(message.reply("ovos.common_play.search.stop"))
@@ -1447,9 +1556,10 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                     query.wait()
                     results += query.results
 
-            if not len(self.media2skill[media_type]):
-                LOG.info(f"No skills available to handle {media_type} queries, "
-                         f"forcing MediaType.GENERIC")
+            if not len(self.media2skill[media_type]) and \
+                    media_type not in self.provider_media_types:
+                LOG.info(f"No skills or MediaProviders available to handle "
+                         f"{media_type} queries, forcing MediaType.GENERIC")
                 media_type = MediaType.GENERIC
 
             # search all skills

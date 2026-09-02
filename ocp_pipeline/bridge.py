@@ -116,6 +116,26 @@ def mediavocab_playback_to_ocp(pb: "MVPlaybackType") -> OCPPlaybackType:
     ``ovos_utils.ocp.PlaybackType`` (``MediaEntry`` backend selector)."""
     return _MV_PLAYBACK_TO_OCP.get(pb, OCPPlaybackType.UNDEFINED)
 
+def ocp_media_types_for(mv_types) -> set:
+    """Legacy :class:`ovos_utils.ocp.MediaType` labels served by a set of
+    ``mediavocab.MediaType`` values.
+
+    The inverse of the :data:`_OCP_TO_MV` fold: a provider that declares it
+    serves mediavocab ``MUSIC`` serves every legacy type that folds onto
+    ``MUSIC``. Members that are already legacy types are kept as they are, so
+    a provider may declare either taxonomy.
+    """
+    wanted = set()
+    out = set()
+    for t in mv_types or ():
+        if isinstance(t, OCPMediaType):
+            out.add(t)
+        else:
+            wanted.add(t)
+    if wanted:
+        out.update(ocp for ocp, mv in _OCP_TO_MV.items() if mv in wanted)
+    return out
+
 def media_type_to_signals(media_type: OCPMediaType, query: str,
                           artist: Optional[str] = None) -> "Signals":
     """Build a query-role :class:`mediavocab.Signals` from the pipeline's
@@ -140,10 +160,17 @@ def _first_credit_name(release: "Release") -> str:
         credits = release.work.credits or []
         if credits:
             entity = credits[0].entity
-            return getattr(entity, "name", "") or ""
+            name = getattr(entity, "name", "") or ""
+            if name:
+                return name
     except Exception:
         pass
-    return ""
+    # a tagged artist string is not a full mediavocab Entity, so providers
+    # reading file/stream tags carry it on `Work.extra` instead of `credits`
+    try:
+        return (release.work.extra or {}).get("artist", "") or ""
+    except Exception:
+        return ""
 
 def fallback_confidence(release: "Release",
                         signals: Optional["Signals"] = None) -> float:
