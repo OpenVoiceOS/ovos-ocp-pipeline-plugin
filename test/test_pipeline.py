@@ -260,6 +260,64 @@ class TestClassifyMedia(unittest.TestCase):
         self.assertEqual(media, MediaType.GENERIC)
         self.assertEqual(conf, 0.0)
 
+    # --- fallback to the parent when the refined leaf is unregistered ------
+
+    def test_trailer_falls_back_to_movie_when_trailer_unregistered(self):
+        p = _make_pipeline()
+        p.media2skill = {MediaType.MOVIE: ["skill-x"], MediaType.TV: ["skill-y"]}
+        media, conf = p.classify_media("watch a movie trailer", "en-us")
+        self.assertEqual(media, MediaType.MOVIE)
+        self.assertGreater(conf, 0)
+
+    def test_tv_show_falls_back_to_tv_when_video_episodes_unregistered(self):
+        p = _make_pipeline()
+        p.media2skill = {MediaType.MOVIE: ["skill-x"], MediaType.TV: ["skill-y"]}
+        media, conf = p.classify_media("watch tv show breaking bad", "en-us")
+        self.assertEqual(media, MediaType.TV)
+        self.assertGreater(conf, 0)
+
+    def test_video_query_falls_back_to_broad_video(self):
+        """A skill only registered for the broad legacy VIDEO bucket must stay
+        reachable for a generic video query, even though the classifier
+        resolves a more specific leaf (movie/tv/etc)."""
+        p = _make_pipeline()
+        p.media2skill = {MediaType.VIDEO: ["skill-x"], MediaType.PODCAST: ["skill-y"]}
+        media, conf = p.classify_media("play a video", "en-us")
+        self.assertEqual(media, MediaType.VIDEO)
+        self.assertGreater(conf, 0)
+
+    def test_audio_query_falls_back_to_broad_audio(self):
+        p = _make_pipeline()
+        p.media2skill = {MediaType.AUDIO: ["skill-x"], MediaType.PODCAST: ["skill-y"]}
+        media, conf = p.classify_media("play an audio file", "en-us")
+        self.assertEqual(media, MediaType.AUDIO)
+        self.assertGreater(conf, 0)
+
+    def test_refined_type_still_wins_when_registered(self):
+        """When the axis-refined leaf IS a registered label, it must still be
+        preferred over its parent even though the parent is also registered."""
+        p = _make_pipeline()
+        p.media2skill = {MediaType.TRAILER: ["skill-x"], MediaType.MOVIE: ["skill-y"]}
+        media, conf = p.classify_media("watch a movie trailer", "en-us")
+        self.assertEqual(media, MediaType.TRAILER)
+
+    def test_fallback_confidence_is_penalized(self):
+        """Falling back to a coarser candidate carries a confidence penalty
+        relative to the refined classification's own confidence."""
+        p_refined = _make_pipeline()
+        p_refined.media2skill = {MediaType.TRAILER: ["skill-x"]}
+        _, refined_conf = p_refined.classify_media(
+            "watch a movie trailer", "en-us",
+            valid_labels=[MediaType.TRAILER, MediaType.MOVIE])
+
+        p_fallback = _make_pipeline()
+        p_fallback.media2skill = {MediaType.MOVIE: ["skill-x"]}
+        media, fallback_conf = p_fallback.classify_media(
+            "watch a movie trailer", "en-us",
+            valid_labels=[MediaType.MOVIE, MediaType.TV])
+        self.assertEqual(media, MediaType.MOVIE)
+        self.assertLess(fallback_conf, refined_conf)
+
 
 # ---------------------------------------------------------------------------
 # is_ocp_query

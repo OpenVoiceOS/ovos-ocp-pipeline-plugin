@@ -112,21 +112,78 @@ def legacy_to_mv(mt: Optional[LegacyMediaType]) -> Optional[MVMediaType]:
     return _LEGACY_TO_MV.get(mt, MVMediaType.GENERIC)
 
 
-def legacy_labels_to_mv(
-    labels: Optional[Sequence[LegacyMediaType]],
-) -> Optional[List[MVMediaType]]:
-    """Translate a list of legacy ``valid_labels`` to ``mediavocab`` labels.
+# ---------------------------------------------------------------------------
+# leaf mediavocab.MediaType -> the broad legacy VIDEO/AUDIO bucket it belongs
+# to.  This is the coarsest fallback: when neither the axis-refined member nor
+# the plain leaf mapping is a registered ``media2skill`` label, a skill that
+# only declared the legacy VIDEO or AUDIO bucket should still be reachable.
+# ---------------------------------------------------------------------------
+_LEGACY_PARENT = {
+    # ``EPISODIC_SERIES`` folds straight to ``VIDEO_EPISODES`` (its closest
+    # single legacy member — see ``_MV_LEAF_TO_LEGACY``), but ``VIDEO_EPISODES``
+    # is itself a refinement of the general ``TV`` bucket in the legacy
+    # taxonomy, same as ``TRAILER`` refines ``MOVIE``. A skill that only
+    # registered ``TV`` must stay reachable for "watch tv show ...".
+    LegacyMediaType.VIDEO_EPISODES: LegacyMediaType.TV,
+    LegacyMediaType.CARTOON: LegacyMediaType.TV,
+    LegacyMediaType.ANIME: LegacyMediaType.TV,
+    LegacyMediaType.HENTAI: LegacyMediaType.TV,
+}
 
-    De-duplicates while preserving order (several legacy members collapse onto
-    one mediavocab leaf).  ``None`` in -> ``None`` out (no gating).
+_MV_LEAF_TO_BROAD = {
+    MVMediaType.MOVIE: LegacyMediaType.VIDEO,
+    MVMediaType.TV: LegacyMediaType.VIDEO,
+    MVMediaType.EPISODIC_SERIES: LegacyMediaType.VIDEO,
+    MVMediaType.SHORT_FILM: LegacyMediaType.VIDEO,
+    MVMediaType.MUSIC_VIDEO: LegacyMediaType.VIDEO,
+    MVMediaType.COMIC: LegacyMediaType.VIDEO,
+    MVMediaType.MUSIC: LegacyMediaType.AUDIO,
+    MVMediaType.PLAYLIST: LegacyMediaType.AUDIO,
+    MVMediaType.PODCAST: LegacyMediaType.AUDIO,
+    MVMediaType.RADIO: LegacyMediaType.AUDIO,
+    MVMediaType.AUDIOBOOK: LegacyMediaType.AUDIO,
+    MVMediaType.BOOK: LegacyMediaType.AUDIO,
+    MVMediaType.AUDIO_DRAMA: LegacyMediaType.AUDIO,
+    MVMediaType.SOUND_EFFECT: LegacyMediaType.AUDIO,
+    MVMediaType.PROCEDURAL_AMBIENT: LegacyMediaType.AUDIO,
+}
+
+
+def mv_to_legacy_candidates(
+    classification,
+    content_form: Optional[ContentForm] = None,
+    programme_format: Optional[ProgrammeFormat] = None,
+    picture_format: Optional[Sequence[PictureFormat]] = None,
+    accessibility: Optional[Sequence[AccessibilityKind]] = None,
+) -> List[LegacyMediaType]:
+    """Preference-ordered legacy ``MediaType`` candidates for a classification.
+
+    Mirrors the fall-through the old native ``voc_match_media`` cascade did:
+    the most specific axis-refined member (e.g. ``TRAILER``) is tried first,
+    then its axis-blind parent leaf (``MOVIE``), then the broadest legacy
+    bucket the leaf belongs to (``VIDEO``/``AUDIO``).  Each entry's parent is
+    simply the fold of the same ``mediavocab`` leaf with one less axis
+    applied, so the chain is derived from :func:`mv_to_legacy`'s own fold
+    structure rather than hardcoded per-member.
+
+    De-duplicated, order preserved.  Callers pick the first candidate that is
+    a registered ``valid_labels`` member.
     """
-    if labels is None:
-        return None
-    out: List[MVMediaType] = []
-    for mt in labels:
-        mv = legacy_to_mv(mt)
-        if mv is not None and mv not in out:
-            out.append(mv)
+    refined = mv_to_legacy(
+        classification,
+        content_form=content_form,
+        programme_format=programme_format,
+        picture_format=picture_format,
+        accessibility=accessibility,
+    )
+    leaf = _MV_LEAF_TO_LEGACY.get(classification.media_type, LegacyMediaType.GENERIC)
+    parent = _LEGACY_PARENT.get(leaf)
+    broad = _MV_LEAF_TO_BROAD.get(classification.media_type)
+
+    out: List[LegacyMediaType] = []
+    for candidate in (refined, leaf, parent, broad):
+        if candidate is not None and candidate not in out:
+            out.append(candidate)
     return out
 
 

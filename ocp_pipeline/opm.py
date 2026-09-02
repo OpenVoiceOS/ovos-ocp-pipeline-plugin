@@ -23,7 +23,7 @@ from ovos_utils.xdg_utils import xdg_data_home
 from ovos_config.meta import get_xdg_base
 from ahocorasick_ner import AhocorasickNER
 from ocp_pipeline.legacy import LegacyCommonPlay
-from ocp_pipeline.media_type_map import mv_to_legacy
+from ocp_pipeline.media_type_map import mv_to_legacy_candidates
 
 # .voc resources shipped with this plugin (locale/<lang>/<name>.voc).
 # Matched via ovos-spec-tools voc_match (OVOS-INTENT-2 §4.3 whole-word semantics)
@@ -789,7 +789,7 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         # context-free multi-axis classification (player/NER context is wired in
         # a later step); fold the leaf + axes back onto the legacy MediaType.
         classification = clf.classify_full(query, lang)
-        media_type = mv_to_legacy(
+        candidates = mv_to_legacy_candidates(
             classification,
             content_form=clf.classify_content_form(query, lang),
             programme_format=clf.classify_programme_format(query, lang),
@@ -798,11 +798,21 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         )
 
         # GENERIC carries no media signal — match the legacy (GENERIC, 0.0)
-        # contract.  Also gate by valid_labels: a type the caller did not allow
-        # falls back to GENERIC.
-        if media_type == MediaType.GENERIC or media_type not in valid_labels:
-            return MediaType.GENERIC, 0.0
-        return media_type, float(classification.confidence)
+        # contract.  Otherwise walk the candidates from most specific
+        # (axis-refined, e.g. TRAILER) to broadest (VIDEO/AUDIO) and pick the
+        # first one the caller actually registered a skill for; a skill that
+        # only declared the coarser parent stays reachable even when the
+        # classifier resolves a more specific leaf.  Falling back to a
+        # coarser candidate carries a small confidence penalty.
+        for i, media_type in enumerate(candidates):
+            if media_type == MediaType.GENERIC:
+                break
+            if media_type in valid_labels:
+                confidence = float(classification.confidence)
+                if i > 0:
+                    confidence *= 0.9
+                return media_type, confidence
+        return MediaType.GENERIC, 0.0
 
     def is_ocp_query(self, query: str, lang: str) -> Tuple[bool, float]:
         """Determine if a playback question is being asked.
