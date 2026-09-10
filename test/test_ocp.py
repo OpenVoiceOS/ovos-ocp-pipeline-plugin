@@ -83,7 +83,11 @@ class TestOCPPipelineMatcher(unittest.TestCase):
         # explicit media keywords -> OCP query
         self.assertTrue(self.ocp.is_ocp_query("play a song", "en-US")[0])
         self.assertTrue(self.ocp.is_ocp_query("play a movie", "en-US")[0])
-        self.assertTrue(self.ocp.is_ocp_query("play a podcast", "en-US")[0])
+        self.assertTrue(self.ocp.is_ocp_query("play the news", "en-US")[0])
+        # a type nothing installed can serve is not claimed: the bundled
+        # providers (local/news/somafm) declare no podcast source, so the
+        # classifier abstains and the query is not an OCP query
+        self.assertFalse(self.ocp.is_ocp_query("play a podcast", "en-US")[0])
         # no media keyword -> not an OCP query
         self.assertFalse(self.ocp.is_ocp_query("tell me a joke", "en-US")[0])
         self.assertFalse(self.ocp.is_ocp_query("who are you", "en-US")[0])
@@ -100,8 +104,13 @@ class TestOCPPipelineMatcher(unittest.TestCase):
             self.ocp.classify_media("play a movie", "en-US")[0],
             MediaType.MOVIE)
         self.assertEqual(
+            self.ocp.classify_media("play the news", "en-US")[0],
+            MediaType.NEWS)
+        # unservable type -> abstain: no installed provider or registered
+        # skill declares PODCAST, so it is outside _default_valid_labels
+        self.assertEqual(
             self.ocp.classify_media("play a podcast", "en-US")[0],
-            MediaType.PODCAST)
+            MediaType.GENERIC)
         self.assertIsInstance(
             self.ocp.classify_media("play some music", "en-US")[1], float)
 
