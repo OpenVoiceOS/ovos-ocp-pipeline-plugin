@@ -13,4 +13,5 @@ jobs:
       python_versions: '["3.10", "3.11", "3.12", "3.13", "3.14"]'
       system_deps: 'swig'
       pre_install_pip: '-r test/requirements.txt'
+      install_extras: 'test'
       test_path: 'test'
