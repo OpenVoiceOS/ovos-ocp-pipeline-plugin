@@ -18,9 +18,11 @@ class TestOCPPipelineMatcher(unittest.TestCase):
 
     def setUp(self):
         self.ocp = OCPPipelineMatcher(config={})
-        # pretend a skill is loaded so media2skill is non-empty and all
-        # MediaType labels are considered valid during classification
         self.ocp.skill_aliases["test"] = ["Test Skill"]
+        # pretend the skill registered for every media type so all MediaType
+        # labels are valid during classification (media2skill is what
+        # _default_valid_labels reads; skill_aliases alone does not)
+        self.ocp.media2skill = {m: ["Test Skill"] for m in MediaType}
 
     # ------------------------------------------------------------------ #
     # match_high (padatious/padacioso intents)
