@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.0a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.0a2) (2026-09-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.5.0a1...1.5.0a2)
+
+**Merged pull requests:**
+
+- test: register every media type in the test fixture [\#168](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/168) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+- fix\(da-DK\): critical translation bugs, missing Filler.voc, several intent gaps [\#166](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/166) ([andlo](https://github.com/andlo))
+
 ## [1.5.0a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.0a1) (2026-09-02)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.4.0a1...1.5.0a1)
