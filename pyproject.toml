@@ -42,6 +42,11 @@ test = [
     "pytest>=5.2.4",
     "pytest-cov>=2.8.1",
     "cov-core>=1.15.0",
+    # The floor the suite runs under. It came from test/requirements.txt,
+    # which #168 deleted when it moved the jobs to this extra, and it was
+    # not carried across. It is above the runtime floor on line 33 because
+    # the tests read `ovos_spec_tools.expansion`.
+    "ovos-spec-tools>=1.5.0a1",
     # published providers whose catalog search runs without an API key, so
     # test/test_real_providers.py can dispatch to real plugins instead of
     # mocks. local and news are fully offline; only somafm's channel-list
