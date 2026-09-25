@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.2a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.2a1) (2026-09-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.5.1a1...1.5.2a1)
+
+**Merged pull requests:**
+
+- fix\(deps\): floor ovos-spec-tools at 1.13.0a2, runtime and test [\#173](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/173) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+
 ## [1.5.1a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.1a1) (2026-09-25)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.5.0a2...1.5.1a1)
