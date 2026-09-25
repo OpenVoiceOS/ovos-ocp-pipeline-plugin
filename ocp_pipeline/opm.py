@@ -53,6 +53,21 @@ MAX_PROVIDER_RESULTS = 50
 UNDECLARED_PROVIDER_MAX_CONFIDENCE = 50
 
 
+def _is_initialised(obj) -> bool:
+    """True when ``OVOSAbstractApplication.__init__`` ran on ``obj``.
+
+    ``OVOSSkill.__del__`` calls ``shutdown()`` and then ``default_shutdown()``,
+    and the garbage collector reaches it on instances whose ``__init__`` never
+    finished: this suite skips padatious training with a ``__new__`` bypass, and
+    a raise anywhere inside ``__init__`` leaves the same half-built object.
+    Both teardown paths then fail on ``intent_service``, and ``__del__``'s own
+    handler fails again on ``skill_id`` while logging the first, so nothing
+    readable is ever logged. There is nothing registered to remove in that
+    state, so the teardown is a no-op rather than a pair of AttributeErrors.
+    """
+    return hasattr(obj, "intent_service")
+
+
 @dataclass
 class OCPPlayerProxy:
     """proxy object tracking the state of connected player devices (Sessions)"""
@@ -1825,7 +1840,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         return None
 
     def shutdown(self):
+        if not _is_initialised(self):
+            return
         self.default_shutdown()  # remove events registered via self.add_event
+
+    def default_shutdown(self):
+        if not _is_initialised(self):
+            return
+        super().default_shutdown()
 
     # deprecated
     @property
@@ -1911,4 +1933,11 @@ class MycroftCPSLegacyPipeline(PipelinePlugin, OVOSAbstractApplication):
                                       {"uri": "snd/error.mp3"}))
 
     def shutdown(self):
+        if not _is_initialised(self):
+            return
         self.mycroft_cps.shutdown()
+
+    def default_shutdown(self):
+        if not _is_initialised(self):
+            return
+        super().default_shutdown()
