@@ -50,7 +50,10 @@ test = [
     "ovos-media-provider-news>=0.0.1a4",
     "ovos-media-provider-somafm>=0.0.1a4",
     # for asserting emitted results against the media service's own decoder
-    "ovos-media>=2.1.1a1"
+    "ovos-media>=2.1.1a1",
+    # test/test_locale_registration.py registers every shipped locale under
+    # padacioso, which expands a blank sample where padatious drops it.
+    "padacioso>=1.2.0"
 ]
 # every published MediaProvider plugin, for a batteries-included install.
 # These are ordinary `opm.media.provider` entry points: installing any of
