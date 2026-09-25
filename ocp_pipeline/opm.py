@@ -150,9 +150,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                     path = join(locale_folder, f)
                     if f in cls.intents:
                         with open(path) as intent:
-                            samples = intent.read().split("\n")
-                            for idx, s in enumerate(samples):
-                                samples[idx] = s.replace("{{", "{").replace("}}", "}")
+                            # a file that ends with a newline, or carries a
+                            # blank line, yields an empty sample here.
+                            # padatious drops it, but padacioso expands it and
+                            # ovos-spec-tools raises MalformedTemplate, which
+                            # aborts the matcher for the whole language.
+                            samples = [s.replace("{{", "{").replace("}}", "}")
+                                       for s in intent.read().split("\n")
+                                       if s.strip()]
                             intents[lang][f] = samples
         return intents
 
