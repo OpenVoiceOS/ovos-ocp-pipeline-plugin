@@ -119,3 +119,51 @@ class TestRepeatedKeyword(unittest.TestCase):
         # unchanged by the swap, so the assertion above is the only new claim
         self.assertTrue(bare(cls, "play", "en-US"))
         self.assertFalse(bare(cls, "play thriller", "en-US"))
+
+
+class TestTemplateExpansion(unittest.TestCase):
+    """OVOS-INTENT-2 section 5 step 4: a .voc line is a template.
+
+    ``read_resource_file`` returns template lines verbatim. Without the
+    INTENT-1 expander a line such as ``(play|start)`` becomes one literal
+    keyword that no utterance ever contains, so the alternatives it names are
+    silently absent from the word set.
+    """
+
+    def setUp(self):
+        import ovos_media_classifier.keyword as clf_keyword
+        import ocp_pipeline.opm as opm
+        self._locale = opm.LOCALE_DIR
+        self._clf_locale = clf_keyword._LOCALE_DIR
+        self._opm, self._clf = opm, clf_keyword
+        self._tmp = TemporaryDirectory()
+        self._empty = TemporaryDirectory()
+        folder = join(self._tmp.name, "xx-xx")
+        os.makedirs(folder)
+        os.makedirs(join(self._empty.name, "xx-xx"))
+        with open(join(folder, "Play.voc"), "w", encoding="utf-8") as f:
+            f.write("(play|start)\n")
+            f.write("[the] radio\n")
+        opm.LOCALE_DIR = self._tmp.name
+        clf_keyword._LOCALE_DIR = self._empty.name
+        OCPPipelineMatcher._voc_cache.clear()
+
+    def tearDown(self):
+        self._opm.LOCALE_DIR = self._locale
+        self._clf._LOCALE_DIR = self._clf_locale
+        OCPPipelineMatcher._voc_cache.clear()
+        self._tmp.cleanup()
+        self._empty.cleanup()
+
+    def test_a_template_line_becomes_its_samples(self):
+        words = set(OCPPipelineMatcher._voc_words("xx-xx"))
+        self.assertEqual({"play", "start", "the radio", "radio"}, words)
+        # the unexpanded literal must not be a keyword
+        self.assertNotIn("(play|start)", words)
+
+    def test_an_alternative_counts_as_vocabulary(self):
+        bare = OCPPipelineMatcher._is_bare_media_request
+        cls = OCPPipelineMatcher
+        self.assertTrue(bare(cls, "start", "xx-xx"))
+        self.assertTrue(bare(cls, "start the radio", "xx-xx"))
+        self.assertFalse(bare(cls, "start thriller", "xx-xx"))

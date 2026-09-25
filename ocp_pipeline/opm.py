@@ -16,7 +16,7 @@ from ovos_bus_client.session import SessionManager
 from ovos_config import Configuration
 from ovos_plugin_manager.ocp import available_extractors
 from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline, PipelinePlugin
-from ovos_spec_tools import standardize_lang, closest_lang, voc_match
+from ovos_spec_tools import standardize_lang, closest_lang, voc_match, expand
 from ovos_spec_tools.resources import read_resource_file, strip_samples
 from ovos_utils.log import LOG, deprecated, log_deprecation
 from ovos_utils.fakebus import FakeBus
@@ -1186,9 +1186,10 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     def _voc_words(cls, lang: str) -> List[str]:
         """Every media-keyword and filler word shipped for ``lang``.
 
-        Read through ``ovos_spec_tools``' OVOS-INTENT-2 common reader, longest
-        first, so a phrase can be tested for carrying nothing but vocabulary.
-        Missing resources simply yield fewer words.
+        Read through ``ovos_spec_tools``' OVOS-INTENT-2 common reader and
+        expanded to samples by its INTENT-1 expander, longest first, so a
+        phrase can be tested for carrying nothing but vocabulary. Missing
+        resources simply yield fewer words.
         """
         lang = standardize_lang(lang)
         if lang in cls._voc_cache:
@@ -1206,11 +1207,13 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             for f in os.listdir(folder):
                 if not (f.endswith("Keyword.voc") or f in ("Play.voc", "Filler.voc")):
                     continue
-                # the OVOS-INTENT-2 common reader, not a hand-rolled one:
-                # it discards a BOM, accepts CRLF, and drops blank and
-                # #-comment lines (section 3)
-                words |= {t.lower()
-                          for t in read_resource_file(Path(join(folder, f)))}
+                # section 3, the common reader: it discards a BOM, accepts
+                # CRLF, and drops blank and #-comment lines. Then section 5
+                # step 4: a .voc line is a template, not a literal, so
+                # "(play|start)" is two keywords and not one that never
+                # matches.
+                for t in read_resource_file(Path(join(folder, f))):
+                    words |= {sample.lower() for sample in expand(t)}
         cls._voc_cache[lang] = sorted(words, key=len, reverse=True)
         return cls._voc_cache[lang]
 
