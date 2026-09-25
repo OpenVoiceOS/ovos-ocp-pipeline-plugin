@@ -3,6 +3,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError, as_completed
 from urllib.parse import urlsplit, urlunsplit
 from dataclasses import dataclass
+from pathlib import Path
 from os.path import join, dirname, isdir
 from threading import RLock
 from typing import Tuple, Optional, Dict, List, Union, Any
@@ -16,6 +17,7 @@ from ovos_config import Configuration
 from ovos_plugin_manager.ocp import available_extractors
 from ovos_plugin_manager.templates.pipeline import IntentHandlerMatch, ConfidenceMatcherPipeline, PipelinePlugin
 from ovos_spec_tools import standardize_lang, closest_lang, voc_match
+from ovos_spec_tools.resources import read_resource_file, strip_samples
 from ovos_utils.log import LOG, deprecated, log_deprecation
 from ovos_utils.fakebus import FakeBus
 from ovos_utils.ocp import MediaType, PlaybackType, PlaybackMode, PlayerState, OCP_ID, \
@@ -1184,9 +1186,9 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     def _voc_words(cls, lang: str) -> List[str]:
         """Every media-keyword and filler word shipped for ``lang``.
 
-        Read straight from the ``.voc`` resources this plugin classifies with,
-        longest first, so a phrase can be tested for carrying nothing but
-        vocabulary. Missing resources simply yield fewer words.
+        Read through ``ovos_spec_tools``' OVOS-INTENT-2 common reader, longest
+        first, so a phrase can be tested for carrying nothing but vocabulary.
+        Missing resources simply yield fewer words.
         """
         lang = standardize_lang(lang)
         if lang in cls._voc_cache:
@@ -1204,8 +1206,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             for f in os.listdir(folder):
                 if not (f.endswith("Keyword.voc") or f in ("Play.voc", "Filler.voc")):
                     continue
-                with open(join(folder, f)) as fi:
-                    words |= {l.strip().lower() for l in fi if l.strip()}
+                # the OVOS-INTENT-2 common reader, not a hand-rolled one:
+                # it discards a BOM, accepts CRLF, and drops blank and
+                # #-comment lines (section 3)
+                words |= {t.lower()
+                          for t in read_resource_file(Path(join(folder, f)))}
         cls._voc_cache[lang] = sorted(words, key=len, reverse=True)
         return cls._voc_cache[lang]
 
@@ -1217,15 +1222,16 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         match it against real titles and score too low to survive the
         confidence floor, while the provider contract browses the catalog when
         the title is empty. Detected conservatively: strip the media keywords
-        and fillers this plugin ships for the language and see if anything is
-        left. A real title always leaves a remainder.
+        and fillers this plugin ships for the language, with the spec tools'
+        whole-word stripper, and see if anything is left. A real title always
+        leaves a remainder.
         """
-        residual = f" {(phrase or '').lower().strip()} "
-        if not residual.strip():
+        phrase = (phrase or "").strip()
+        if not phrase:
             return True
-        for word in self._voc_words(lang):
-            residual = residual.replace(f" {word} ", " ")
-        return not residual.strip()
+        # strip_samples anchors on whole words and removes the longest sample
+        # first, so "music" inside "music box" is not taken on its own
+        return not strip_samples(phrase, self._voc_words(lang)).strip()
 
     def _provider_signals(self, phrase: str, media_type: MediaType,
                           lang: str):
