@@ -1,8 +1,19 @@
 {
+  "Alerts.voc": [
+    "alarme",
+    "alarmes",
+    "alerte",
+    "alertes",
+    "minuteur",
+    "minuteurs",
+    "rappel",
+    "rappels",
+    "réveille-moi"
+  ],
   "video_only.voc": [
-    "ne pas diffuser en audio",
-    "ne pas diffuser en audio",
+    "pas d'audio",
     "pas de lecteur audio",
+    "sans audio",
     "uniquement la vidéo",
     "vidéo seulement"
   ],
@@ -21,42 +32,48 @@
     "cherche",
     "lis",
     "joue",
-    "démarre"
+    "démarre",
+    "lance"
   ],
   "audio_only.voc": [
     "audio seulement",
     "pas de vidéo",
-    "uniquement le son",
+    "uniquement l'audio",
     "uniquement le son",
     "son seulement"
   ],
   "NewsKeyword.voc": [
+    "actualités",
+    "infos",
     "nouvelles"
   ],
   "GameKeyword.voc": [
     "jeu"
   ],
   "ADKeyword.voc": [
-    "déscription du audio",
-    "description du film"
+    "audiodescription",
+    "description audio",
+    "description du film",
+    "version audio décrite"
   ],
   "TrailerKeyword.voc": [
     "bande-annonce"
   ],
   "MovieKeyword.voc": [
+    "cinéma",
     "film",
-    "film"
+    "long métrage"
   ],
   "CartoonKeyword.voc": [
     "dessin animé",
-    "les dessins animés"
+    "dessins animés"
   ],
   "VideoKeyword.voc": [
     "vidéo"
   ],
   "ASMRKeyword.voc": [
-    "ASMR",
-    "réponse du méridien sensorielle autonome"
+    "asmr",
+    "réponse autonome du méridien sensoriel"
   ],
   "DocumentaryKeyword.voc": [
     "documentaire",
@@ -64,56 +81,63 @@
   ],
   "SeriesKeyword.voc": [
     "série",
+    "séries",
     "émission de télévision",
     "épisode",
     "épisodes"
   ],
   "BWKeyword.voc": [
-    "noir et blanc",
-    "monochrome"
+    "monochrome",
+    "noir et blanc"
   ],
   "AdultKeyword.voc": [
-    "porno",
     "18 ans et plus",
+    "porno",
     "pornographie"
   ],
   "RadioKeyword.voc": [
     "radio",
-    "radio Internet"
+    "radio internet"
   ],
   "AudioDramaKeyword.voc": [
     "drame",
     "théâtre"
   ],
+  "Parrot.voc": [
+    "active le mode perroquet",
+    "mode perroquet",
+    "répète après moi"
+  ],
   "Resume.voc": [
-    "reprend",
-    "reprend"
+    "reprends",
+    "reprendre"
   ],
   "ComicBookKeyword.voc": [
-    "bande dessinée animée",
     "bande dessinée",
+    "bande dessinée animée",
     "histoire visuelle"
   ],
   "TVKeyword.voc": [
-    "TV",
+    "chaîne",
+    "télé",
     "télévision",
-    "chaîne"
+    "tv"
   ],
   "AnimeKeyword.voc": [
     "anime"
   ],
   "MusicKeyword.voc": [
-    "musique",
-    "chanson",
     "bande sonore",
-    "bande sonore"
+    "chanson",
+    "musique",
+    "piste sonore"
   ],
   "AudioBookKeyword.voc": [
     "livre",
-    "livres",
-    "lis",
     "livre audio",
+    "livres",
     "livres audio",
+    "lis",
     "narre"
   ],
   "SilentKeyword.voc": [
@@ -121,5 +145,20 @@
   ],
   "ShortKeyword.voc": [
     "court"
+  ],
+  "SoundIntents.voc": [
+    "capture de texte",
+    "code qr audio",
+    "codes qr audio",
+    "démarre la capture",
+    "démarre la dictée",
+    "démarre la notification",
+    "démarre les notifications",
+    "démarre l'enregistrement",
+    "démarre l'enregistrement audio",
+    "ggwave",
+    "lance ggwave",
+    "lance la dictée",
+    "lance l'enregistrement audio"
   ]
 }

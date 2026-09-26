@@ -1,4 +1,37 @@
 {
+  "SoundIntents.voc": [
+    "start notifikation",
+    "start notifikationer",
+    "starte tale",
+    "start lyd",
+    "startlyde",
+    "lyd qr-kode",
+    "lyd qr-koder",
+    "begynde diktat",
+    "start tekstoptagelse",
+    "begynd at optage",
+    "start lydoptagelse",
+    "start tekstoptagelse",
+    "begynd at fange",
+    "ggwave",
+    "start op"
+  ],
+  "Parrot.voc": [
+    "papegøjetilstand",
+    "begynde at tale"
+  ],
+  "Alerts.voc": [
+    "alert",
+    "alarmer",
+    "timer",
+    "timere",
+    "påmindelse",
+    "påmindelser",
+    "alarm",
+    "alarmer",
+    "væk mig",
+    "væk mig"
+  ],
   "video_only.voc": [
     "cast ikke til lyd",
     "cast ikke til lyd",
@@ -7,7 +40,7 @@
     "kun video"
   ],
   "AudioKeyword.voc": [
-    "lyd",
+    "audio",
     "lyd"
   ],
   "HentaiKeyword.voc": [
@@ -18,13 +51,13 @@
     "podcasts"
   ],
   "Play.voc": [
-    "søge",
-    "læse",
+    "søg",
+    "læs",
     "spil",
-    "starte"
+    "start"
   ],
   "audio_only.voc": [
-    "kun lyd",
+    "kun audio",
     "ingen video",
     "kun lyd",
     "kun lyd",
@@ -41,7 +74,7 @@
     "filmbeskrivelse"
   ],
   "TrailerKeyword.voc": [
-    "anhænger"
+    "trailer"
   ],
   "MovieKeyword.voc": [
     "film",
@@ -86,7 +119,7 @@
     "teater"
   ],
   "Resume.voc": [
-    "genoptage",
+    "genoptag",
     "pause"
   ],
   "ComicBookKeyword.voc": [
