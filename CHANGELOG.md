@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.5a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.5a1) (2026-09-26)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.5.4a1...1.5.5a1)
+
+**Merged pull requests:**
+
+- fix: shutdown on a matcher whose \_\_init\_\_ never finished [\#176](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/176) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+
 ## [1.5.4a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.4a1) (2026-09-25)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.5.3a1...1.5.4a1)
@@ -413,11 +421,6 @@
 ## [1.1.13a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.13a1) (2025-04-11)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.12...1.1.13a1)
-
-**Merged pull requests:**
-
-- Release 1.1.13a1 [\#74](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/74) ([github-actions[bot]](https://github.com/apps/github-actions))
-- fix: avoid false classifications / confusion with default skills [\#73](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/73) ([JarbasAl](https://github.com/JarbasAl))
 
 ## [1.1.12](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.12) (2025-04-03)
 
