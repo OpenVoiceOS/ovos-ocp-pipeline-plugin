@@ -208,7 +208,7 @@ class ContextAwareClassifier:
                                       ner_list=ner_list)
         return full.domain.value
 
-    def to_signals(self, query: str, lang: str = "en-us"):
+    def to_signals(self, query: str, lang: str):
         """Build the provider-ready :class:`mediavocab.Signals` for *query*.
 
         This is the classifier's primary, lossless output for the providers:
@@ -220,7 +220,7 @@ class ContextAwareClassifier:
         """
         return self.clf.to_signals(query, lang)
 
-    def is_blocked(self, query: str, lang: str = "en-us") -> Tuple[bool, str]:
+    def is_blocked(self, query: str, lang: str) -> Tuple[bool, str]:
         """Apply the content filter → ``(blocked, reason)``.
 
         Adult content is blocked by default; ``allow_adult_content`` and the

@@ -7,6 +7,7 @@ keywords) — and passes them to ``classify_full``.  These cover the bridge
 ``classify`` / ``domain_of``, rich ``to_signals``, the content filter) and the
 wiring into ``classify_media``.
 """
+import inspect
 import unittest
 
 from ovos_utils.ocp import MediaType, PlayerState
@@ -215,6 +216,26 @@ class TestClassifyMediaIntegration(unittest.TestCase):
     def test_is_blocked_content_blocks_adult_by_default(self):
         blocked, _reason = self.ocp.is_blocked_content("play some porn", "en-us")
         self.assertTrue(blocked)
+
+
+class TestLanguageIsRequired(unittest.TestCase):
+    """The classifier must never guess the language.
+
+    A caller that omits it should fail at the call site, not run an English
+    search on a box configured for another language.
+    """
+
+    def test_no_method_defaults_the_language(self):
+        for name in ("classify", "domain_of", "to_signals", "is_blocked"):
+            with self.subTest(method=name):
+                lang = inspect.signature(
+                    getattr(ContextAwareClassifier, name)).parameters["lang"]
+                self.assertIs(lang.default, inspect.Parameter.empty,
+                              f"{name} must not default lang")
+
+    def test_omitting_the_language_raises(self):
+        with self.assertRaises(TypeError):
+            ContextAwareClassifier.to_signals(object(), "play a movie")
 
 
 if __name__ == "__main__":
