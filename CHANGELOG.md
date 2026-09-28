@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.6a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.6a2) (2026-09-28)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.5.6a1...1.5.6a2)
+
+**Merged pull requests:**
+
+- refactor: require lang on to\_signals and is\_blocked [\#184](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/184) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+
 ## [1.5.6a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.6a1) (2026-09-28)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.5.5a1...1.5.6a1)
@@ -405,17 +413,9 @@
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.13a3...1.1.13)
 
-**Merged pull requests:**
-
-- Release 1.1.13a3 [\#78](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/78) ([github-actions[bot]](https://github.com/apps/github-actions))
-
 ## [1.1.13a3](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.13a3) (2025-04-21)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.13a2...1.1.13a3)
-
-**Merged pull requests:**
-
-- optimizing German translation for better usage [\#77](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/77) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
 
 ## [1.1.13a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.13a2) (2025-04-21)
 
