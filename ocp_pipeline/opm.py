@@ -196,7 +196,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         self.add_event("mycroft.audio.service.pause", self._handle_legacy_audio_pause)
         self.add_event("mycroft.audio.service.resume", self._handle_legacy_audio_resume)
         self.add_event("mycroft.audio.service.stop", self._handle_legacy_audio_stop)
-        self.bus.emit(Message("ovos.common_play.status"))  # sync player state on launch
+        # Launch-time sync: there is no caller and no session yet, so this one
+        # is deliberately context-free. A message with no session context
+        # resolves to the default session, which is the right session for a
+        # sync that belongs to the service rather than to any request.
+        self.bus.emit(Message("ovos.common_play.status"))
 
     @classmethod
     def load_intent_files(cls):
@@ -480,7 +484,15 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 voc_match(utterance, "Parrot", lang, locale=LOCALE_DIR)):
             return None
 
-        self.bus.emit(Message("ovos.common_play.status"))  # sync
+        # OVOS-SESSION: a derived Message carries the context of the message
+        # it was derived from. This fires on every media utterance, so a bare
+        # Message here would put a session-less message on the bus each time
+        # and resolve to the default session instead of the caller's.
+        # dig_for_message() is this module's own idiom for recovering the
+        # request when a caller did not pass it (see _get_player).
+        src = message or dig_for_message()
+        self.bus.emit(src.forward("ovos.common_play.status") if src
+                      else Message("ovos.common_play.status"))
 
         match = self.intent_matchers[lang].calc_intent(utterance)
 
