@@ -741,7 +741,10 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
     def handle_search_query(self, message: Message):
         utterance = message.data["utterance"].lower()
         phrase = message.data.get("query", "") or utterance
-        lang = message.data.get("lang") or message.context.get("session", {}).get("lang", "en-us")
+        # A message with no session context is not an English request: it is
+        # one that named no session, and OVOS-SESSION resolves it to the
+        # default session, which carries this box's configured language.
+        lang = message.data.get("lang") or SessionManager.get(message).lang
         LOG.debug(f"Handle {message.msg_type} request: {phrase}")
         num = message.data.get("number", "")
         if num:
