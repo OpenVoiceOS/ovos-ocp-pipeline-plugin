@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.6a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.6a1) (2026-09-28)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.5.5a1...1.5.6a1)
+
+**Merged pull requests:**
+
+- fix\(search\): take the query language from the session, not from en-us [\#182](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/182) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+
 ## [1.5.5a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.5a1) (2026-09-26)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.5.4a1...1.5.5a1)
@@ -412,11 +420,6 @@
 ## [1.1.13a2](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.13a2) (2025-04-21)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.13a1...1.1.13a2)
-
-**Merged pull requests:**
-
-- Release 1.1.13a2 [\#76](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/76) ([github-actions[bot]](https://github.com/apps/github-actions))
-- adding missing German translations [\#75](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/75) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
 
 ## [1.1.13a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.13a1) (2025-04-11)
 
