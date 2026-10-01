@@ -18,14 +18,30 @@
     "(jouer|aller à) [la] prochaine (chanson|morceau|musique|film|vidéo|air)"
   ],
   "resume.intent": [
-    "reprend",
-    "(reprendre|continuer|redémarrer) [la] (musique|chanson|piste|vidéo|média|lecture|jeu)",
-    "joue"
+    "reprends",
+    "reprends la lecture",
+    "reprends la musique",
+    "reprends la chanson",
+    "reprends la piste",
+    "reprends la vidéo",
+    "reprends la partie",
+    "continue la lecture",
+    "continue la musique",
+    "continue la chanson",
+    "continue la piste",
+    "continue la vidéo",
+    "continue la partie",
+    "redémarre la lecture",
+    "redémarre la musique",
+    "redémarre la chanson",
+    "redémarre la piste",
+    "redémarre la vidéo",
+    "redémarre la partie"
   ],
   "read.intent": [
-    "lire [le] (livre|livre audio|livre audio) {query}",
-    "lis {query}",
-    "lis {query} (le|) (livre|livre audio)"
+    "lis le livre {query}",
+    "lis le livre audio {query}",
+    "lance le livre audio {query}"
   ],
   "prev.intent": [
     "(musique | chanson | piste | vidéo | média) (précédente|précédent)",
@@ -50,21 +66,25 @@
     "(ouvre|affiche|affiche) (le|la) {media} en (vedette|tête d'affiche)"
   ],
   "play_favorites.intent": [
-    "(joue|démarre) (mon|ma|mes)  (piste|pistes|chanson|chansons|musique|musiques||son|sons) (favori|favoris|préféré|préféreś)",
-    "(joue|démarre) (mon|ma|mes)  (piste|pistes|chanson|chansons|musique|musiques||son|sons) (favori|favoris|préféré|préféreś)"
+    "(joue|démarre) mes favoris",
+    "(joue|démarre) mes chansons préférées",
+    "(joue|démarre) mes morceaux préférés",
+    "(joue|démarre) ma musique préférée"
   ],
   "media_stop.intent": [
-    "arrête",
-    "arrête (playback|media|media playback|music|movie|movies|noise)",
-    "arrête tout"
+    "arrête la musique",
+    "arrête la lecture",
+    "arrête la vidéo",
+    "arrête ce média",
+    "coupe la musique"
   ],
   "save_game.intent": [
-    "sauvegarder",
-    "sauvegarder [la] partie"
+    "sauvegarde la partie"
   ],
   "load_game.intent": [
-    "charger",
-    "charger [le] jeu",
-    "charger [la] (dernière|précédente) partie [sauvegardée]"
+    "charge le jeu",
+    "charge la dernière partie",
+    "charge la dernière partie sauvegardée",
+    "charge la partie précédente"
   ]
 }
