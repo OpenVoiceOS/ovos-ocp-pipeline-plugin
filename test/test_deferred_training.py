@@ -1,17 +1,27 @@
-"""Only the primary language trains while OCP loads; the rest wait for their
-first query or for ``mycroft.ready``."""
+"""Only the primary language trains while OCP loads; every other language
+trains on its first query."""
 import tempfile
 import unittest
 from unittest.mock import patch
 
-from ovos_utils.fakebus import FakeBus
-from ovos_bus_client.message import Message
-
 from ocp_pipeline.opm import OCPPipelineMatcher
+
+try:
+    import ovos_padatious  # noqa: F401
+    IS_PADATIOUS = True
+except ImportError:
+    IS_PADATIOUS = False
 
 CONFIG = {"lang": "en-US", "secondary_langs": ["fr-FR", "de-DE"]}
 
 
+def _load():
+    with patch("ocp_pipeline.opm.Configuration", return_value=CONFIG):
+        OCPPipelineMatcher.load_intent_files()
+    return OCPPipelineMatcher.intent_matchers
+
+
+@unittest.skipUnless(IS_PADATIOUS, "only a padatious container trains")
 class TestDeferredTraining(unittest.TestCase):
     def setUp(self):
         self.cache = tempfile.TemporaryDirectory()
@@ -20,50 +30,21 @@ class TestDeferredTraining(unittest.TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
         self.addCleanup(OCPPipelineMatcher.intent_matchers.clear)
-        with patch("ocp_pipeline.opm.Configuration", return_value=CONFIG):
-            OCPPipelineMatcher.load_intent_files()
-        self.matchers = OCPPipelineMatcher.intent_matchers
+        self.matchers = _load()
 
     def test_only_the_primary_language_trains_while_loading(self):
         self.assertFalse(self.matchers["en-US"].needs_compile)
         self.assertTrue(self.matchers["fr-FR"].needs_compile)
         self.assertTrue(self.matchers["de-DE"].needs_compile)
-        self.assertEqual(sorted(OCPPipelineMatcher.untrained_langs), ["de-DE", "fr-FR"])
 
     def test_an_untrained_language_still_matches_its_first_query(self):
         # a restart: the previous boot left every language's models cached
         for matcher in self.matchers.values():
             matcher.train()
-        with patch("ocp_pipeline.opm.Configuration", return_value=CONFIG):
-            OCPPipelineMatcher.load_intent_files()
-        fr = OCPPipelineMatcher.intent_matchers["fr-FR"]
+        fr = _load()["fr-FR"]
         self.assertTrue(fr.needs_compile)
         self.assertEqual(fr.calc_intent("mettre en pause la musique").name, "pause")
-
-    def test_ready_trains_the_rest_in_the_background(self):
-        trained = []
-        with patch("ocp_pipeline.opm.threading.Thread") as thread:
-            OCPPipelineMatcher.train_untrained_matchers(Message("mycroft.ready"))
-            target = thread.call_args.kwargs["target"]
-            self.assertTrue(thread.call_args.kwargs["daemon"])
-        self.assertEqual(OCPPipelineMatcher.untrained_langs, [])
-        target()
-        self.assertFalse(self.matchers["fr-FR"].needs_compile)
-        self.assertFalse(self.matchers["de-DE"].needs_compile)
-
-
-class TestReadyHook(unittest.TestCase):
-    def test_register_ocp_intents_trains_the_rest_on_ready(self):
-        bus = FakeBus()
-        with patch.object(OCPPipelineMatcher, "load_intent_files"), \
-                patch.object(OCPPipelineMatcher, "train_untrained_matchers") as train, \
-                patch.object(OCPPipelineMatcher, "add_event"):
-            matcher = OCPPipelineMatcher.__new__(OCPPipelineMatcher)
-            matcher.bus = bus
-            matcher.register_ocp_intents()
-            bus.emit(Message("mycroft.ready"))
-            bus.emit(Message("mycroft.ready"))
-        train.assert_called_once()
+        self.assertFalse(fr.needs_compile)
 
 
 if __name__ == "__main__":

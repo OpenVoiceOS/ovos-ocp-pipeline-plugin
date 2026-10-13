@@ -93,8 +93,6 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                #  "play_favorites.intent", "like_song.intent",  # handled by ovos-media not ovos-audio, re-enable later
                "resume.intent", "save_game.intent", "load_game.intent"]
     intent_matchers = {}
-    # padatious languages load_intent_files left untrained (see there)
-    untrained_langs: List[str] = []
     intent_cache = f"{xdg_data_home()}/{get_xdg_base()}/intent_cache"
     _voc_cache: Dict[str, List[str]] = {}
     # legacy MediaType labels the loaded in-process MediaProviders serve,
@@ -217,13 +215,12 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             LOG.warning("Padatious not available, using padacioso. intent matching will be orders of magnitude slower!")
 
         # Only the primary language trains here, on the path every boot
-        # waits for. A padatious IntentContainer trains itself on its first
-        # query and waits for that first compile, so the other languages
-        # match the same; ``train_untrained_matchers`` trains them in the
-        # background once the runtime is ready (each one compiled its padaos
-        # regexes for every OCP template, 0.1-0.5 s a language).
+        # waits for (each train compiles padaos regexes for every OCP
+        # template, 0.1-0.5 s a language). Every other language trains on its
+        # first query: a padatious IntentContainer starts its own training
+        # then and waits for that first compile, so it matches the same. A
+        # language nobody speaks to never compiles or loads its models.
         primary = standardize_lang(Configuration().get("lang", "en-US"))
-        cls.untrained_langs = []
         for lang, intent_data in intent_files.items():
             lang = standardize_lang(lang)
             if is_padatious:
@@ -237,29 +234,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                     LOG.debug(f"registering OCP intent: {intent_name}")
                     cls.intent_matchers[lang].add_intent(
                         intent_name.replace(".intent", ""), samples)
-            if is_padatious:
-                if lang == primary:
-                    cls.intent_matchers[lang].train()
-                else:
-                    cls.untrained_langs.append(lang)
-
-    @classmethod
-    def train_untrained_matchers(cls, message: Optional[Message] = None):
-        """``mycroft.ready``: train the languages ``load_intent_files`` left
-        for their first query, on a background thread."""
-        langs, cls.untrained_langs = cls.untrained_langs, []
-
-        def train():
-            for lang in langs:
-                matcher = cls.intent_matchers.get(lang)
-                if matcher is not None:
-                    matcher.train()
-
-        threading.Thread(target=train, name="ocp-intent-train", daemon=True).start()
+            if is_padatious and lang == primary:
+                cls.intent_matchers[lang].train()
 
     def register_ocp_intents(self):
         self.load_intent_files()
-        self.bus.once("mycroft.ready", self.train_untrained_matchers)
         self.add_event("ocp:play", self.handle_play_intent, is_intent=True)
         self.add_event("ocp:play_favorites", self.handle_play_favorites_intent, is_intent=True)
         self.add_event("ocp:open", self.handle_open_intent, is_intent=True)
