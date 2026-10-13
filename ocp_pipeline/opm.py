@@ -203,7 +203,13 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
         self.bus.emit(Message("ovos.common_play.status"))
 
     @classmethod
-    def load_intent_files(cls):
+    def load_intent_files(cls, eager_langs: Optional[List[str]] = None):
+        """Build one intent matcher per configured language.
+
+        ``eager_langs``: languages trained now besides the primary one (the
+        ``eager_langs`` pipeline setting); the others train on their first
+        query.
+        """
         intent_files = cls.load_resource_files()
 
         try:
@@ -214,13 +220,14 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
             is_padatious = False
             LOG.warning("Padatious not available, using padacioso. intent matching will be orders of magnitude slower!")
 
-        # Only the primary language trains here, on the path every boot
-        # waits for (each train compiles padaos regexes for every OCP
-        # template, 0.1-0.5 s a language). Every other language trains on its
+        # Only the primary language (and eager_langs) trains here, on the
+        # path every boot waits for (each train compiles padaos regexes for
+        # every OCP template, 0.1-0.5 s a language). Every other language trains on its
         # first query: a padatious IntentContainer starts its own training
         # then and waits for that first compile, so it matches the same. A
         # language nobody speaks to never compiles or loads its models.
-        primary = standardize_lang(Configuration().get("lang", "en-US"))
+        eager = {standardize_lang(Configuration().get("lang", "en-US"))} | \
+            {standardize_lang(lang) for lang in eager_langs or []}
         for lang, intent_data in intent_files.items():
             lang = standardize_lang(lang)
             if is_padatious:
@@ -234,11 +241,11 @@ class OCPPipelineMatcher(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                     LOG.debug(f"registering OCP intent: {intent_name}")
                     cls.intent_matchers[lang].add_intent(
                         intent_name.replace(".intent", ""), samples)
-            if is_padatious and lang == primary:
+            if is_padatious and lang in eager:
                 cls.intent_matchers[lang].train()
 
     def register_ocp_intents(self):
-        self.load_intent_files()
+        self.load_intent_files(self.config.get("eager_langs"))
         self.add_event("ocp:play", self.handle_play_intent, is_intent=True)
         self.add_event("ocp:play_favorites", self.handle_play_favorites_intent, is_intent=True)
         self.add_event("ocp:open", self.handle_open_intent, is_intent=True)

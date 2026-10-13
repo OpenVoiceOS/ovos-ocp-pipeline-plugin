@@ -15,9 +15,9 @@ except ImportError:
 CONFIG = {"lang": "en-US", "secondary_langs": ["fr-FR", "de-DE"]}
 
 
-def _load():
+def _load(eager_langs=None):
     with patch("ocp_pipeline.opm.Configuration", return_value=CONFIG):
-        OCPPipelineMatcher.load_intent_files()
+        OCPPipelineMatcher.load_intent_files(eager_langs)
     return OCPPipelineMatcher.intent_matchers
 
 
@@ -36,6 +36,11 @@ class TestDeferredTraining(unittest.TestCase):
         self.assertFalse(self.matchers["en-US"].needs_compile)
         self.assertTrue(self.matchers["fr-FR"].needs_compile)
         self.assertTrue(self.matchers["de-DE"].needs_compile)
+
+    def test_eager_languages_train_while_loading(self):
+        matchers = _load(["fr-fr"])
+        self.assertFalse(matchers["fr-FR"].needs_compile)
+        self.assertTrue(matchers["de-DE"].needs_compile)
 
     def test_an_untrained_language_still_matches_its_first_query(self):
         # a restart: the previous boot left every language's models cached
