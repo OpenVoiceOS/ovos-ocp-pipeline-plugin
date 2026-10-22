@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.8a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.8a1) (2026-10-22)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.5.7a1...1.5.8a1)
+
+**Merged pull requests:**
+
+- fix\(deps\): accept ovos-plugin-manager 3 [\#189](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/189) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+
 ## [1.5.7a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.5.7a1) (2026-10-01)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.5.6a2...1.5.7a1)
@@ -403,18 +411,9 @@
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.14a1...1.1.14a2)
 
-**Merged pull requests:**
-
-- Release 1.1.14a2 [\#86](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/86) ([github-actions[bot]](https://github.com/apps/github-actions))
-- gl/translate [\#85](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/85) ([gitlocalize-app[bot]](https://github.com/apps/gitlocalize-app))
-
 ## [1.1.14a1](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.14a1) (2025-06-04)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/compare/1.1.13...1.1.14a1)
-
-**Merged pull requests:**
-
-- Release 1.1.14a1 [\#84](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/pull/84) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [1.1.13](https://github.com/OpenVoiceOS/ovos-ocp-pipeline-plugin/tree/1.1.13) (2025-05-05)
 
